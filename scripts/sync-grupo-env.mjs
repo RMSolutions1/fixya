@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /**
- * Sincroniza credenciales Supabase de apps/web/.env.local → .env (raíz)
- * Uso: node scripts/sync-grupo-env.mjs
- * Requiere SUPABASE_DB_PASSWORD en apps/web/.env.local o como variable de entorno.
+ * Sincroniza DATABASE_URL / DIRECT_URL de apps/web/.env.local → .env (raíz)
+ * Soporta Neon (Vercel) o Supabase (legacy).
  */
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
@@ -35,38 +34,43 @@ if (!existsSync(webEnvPath)) {
 }
 
 const web = parseEnv(readFileSync(webEnvPath, 'utf8'));
-const supabaseUrl =
-  web.VITE_SUPABASE_URL || web.NEXT_PUBLIC_SUPABASE_URL || web.SUPABASE_URL || '';
-const ref = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
 
-if (!ref) {
-  console.error('No se encontró VITE_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL en .env.local');
-  process.exit(1);
+let poolerUrl =
+  web.POSTGRES_PRISMA_URL ||
+  web.DATABASE_URL ||
+  web.POSTGRES_URL ||
+  process.env.DATABASE_URL;
+let directUrl =
+  web.DIRECT_URL ||
+  web.DATABASE_URL_UNPOOLED ||
+  web.POSTGRES_URL_NON_POOLING ||
+  process.env.DIRECT_URL;
+
+// Legacy Supabase
+if (!poolerUrl || !directUrl) {
+  const supabaseUrl =
+    web.VITE_SUPABASE_URL || web.NEXT_PUBLIC_SUPABASE_URL || web.SUPABASE_URL || '';
+  const ref = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+  const dbPassword = web.SUPABASE_DB_PASSWORD || process.env.SUPABASE_DB_PASSWORD;
+  const region = web.SUPABASE_REGION || 'us-east-2';
+  const poolerPrefix = web.SUPABASE_POOLER_PREFIX || 'aws-1';
+  const poolerHost = `${poolerPrefix}-${region}.pooler.supabase.com`;
+
+  if (ref && dbPassword) {
+    poolerUrl =
+      poolerUrl ||
+      `postgresql://postgres.${ref}:${encodeURIComponent(dbPassword)}@${poolerHost}:6543/postgres?pgbouncer=true`;
+    directUrl =
+      directUrl ||
+      `postgresql://postgres.${ref}:${encodeURIComponent(dbPassword)}@${poolerHost}:5432/postgres`;
+  }
 }
 
-const dbPassword = web.SUPABASE_DB_PASSWORD || process.env.SUPABASE_DB_PASSWORD;
-const region = web.SUPABASE_REGION || process.env.SUPABASE_REGION || 'us-east-2';
-const poolerPrefix = web.SUPABASE_POOLER_PREFIX || process.env.SUPABASE_POOLER_PREFIX || 'aws-1';
-const poolerHost = `${poolerPrefix}-${region}.pooler.supabase.com`;
-
-let poolerUrl = web.DATABASE_URL || process.env.DATABASE_URL;
-let directUrl = web.DIRECT_URL || process.env.DIRECT_URL;
-
 if (!poolerUrl || !directUrl) {
-  if (!dbPassword) {
-    console.error(
-      'Falta SUPABASE_DB_PASSWORD en apps/web/.env.local\n' +
-        '  Supabase → Settings → Database → Database password\n' +
-        '  O pegá DATABASE_URL y DIRECT_URL completos desde el dashboard.',
-    );
-    process.exit(1);
-  }
-  poolerUrl =
-    poolerUrl ||
-    `postgresql://postgres.${ref}:${encodeURIComponent(dbPassword)}@${poolerHost}:6543/postgres?pgbouncer=true`;
-  directUrl =
-    directUrl ||
-    `postgresql://postgres.${ref}:${encodeURIComponent(dbPassword)}@${poolerHost}:5432/postgres`;
+  console.error(
+    'Falta DATABASE_URL y DIRECT_URL en apps/web/.env.local (Neon o Supabase).',
+  );
+  process.exit(1);
 }
 
 let rootEnv = existsSync(rootEnvPath) ? readFileSync(rootEnvPath, 'utf8') : '';
@@ -80,10 +84,13 @@ function setVar(content, key, value) {
 
 rootEnv = setVar(rootEnv, 'DATABASE_URL', poolerUrl);
 rootEnv = setVar(rootEnv, 'DIRECT_URL', directUrl);
-rootEnv = setVar(rootEnv, 'SUPABASE_URL', supabaseUrl);
+
+const supabaseUrl = web.NEXT_PUBLIC_SUPABASE_URL || web.SUPABASE_URL;
+if (supabaseUrl) rootEnv = setVar(rootEnv, 'SUPABASE_URL', supabaseUrl);
 if (web.SUPABASE_SERVICE_ROLE_KEY) {
   rootEnv = setVar(rootEnv, 'SUPABASE_SERVICE_ROLE_KEY', web.SUPABASE_SERVICE_ROLE_KEY);
 }
 
 writeFileSync(rootEnvPath, rootEnv);
-console.log('✓ .env actualizado con Supabase Grupo Emprenor (ref:', ref + ')');
+const host = poolerUrl.match(/@([^/]+)/)?.[1] ?? 'postgres';
+console.log('✓ .env actualizado →', host);

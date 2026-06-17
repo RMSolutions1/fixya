@@ -73,17 +73,25 @@ npm run vercel-build
 
 ---
 
-## 2. Supabase
+## 3. Base de datos (Neon / Vercel Postgres)
+
+En `apps/web/.env.local`:
+
+```env
+DATABASE_URL=postgres://...@...-pooler....neon.tech/neondb?sslmode=require
+DIRECT_URL=postgresql://...@....neon.tech/neondb?sslmode=require
+POSTGRES_PRISMA_URL=postgres://...@...-pooler....neon.tech/neondb?connect_timeout=15&sslmode=require
+```
 
 ```bash
-# apps/web/.env.local con SUPABASE_DB_PASSWORD
 npm run sync:grupo-env
+node scripts/ensure-fixya-db-schema.mjs
 npm run db:push
 npm run db:seed
 npm run db:seed:users
 ```
 
-Las tablas FixYa están en el schema **`fixya`** (DB compartida con grupo.emprenor.com).
+Las tablas FixYa usan el schema **`fixya`** en Neon.
 
 ---
 

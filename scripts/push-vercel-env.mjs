@@ -32,18 +32,25 @@ function parseEnv(content) {
   return vars;
 }
 
-const jwt = process.env.JWT_SECRET || randomBytes(48).toString('base64url');
+const jwt =
+  process.env.JWT_SECRET ||
+  rootEnv.JWT_SECRET ||
+  webEnv.JWT_SECRET ||
+  randomBytes(48).toString('base64url');
+
+const dbUrl = webEnv.POSTGRES_PRISMA_URL || webEnv.DATABASE_URL || rootEnv.DATABASE_URL;
+const directUrl = webEnv.DIRECT_URL || webEnv.DATABASE_URL_UNPOOLED || rootEnv.DIRECT_URL;
 
 const vars = {
   NODE_ENV: 'production',
   NEXT_PUBLIC_SITE_URL: 'https://fixya.emprenor.com',
   NEXT_PUBLIC_API_URL: '',
   NEXT_PUBLIC_ENABLE_SANDBOX_PAYMENTS: 'false',
-  NEXT_PUBLIC_SUPABASE_URL: webEnv.NEXT_PUBLIC_SUPABASE_URL || rootEnv.SUPABASE_URL,
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: webEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  NEXT_PUBLIC_SUPABASE_URL: webEnv.NEXT_PUBLIC_SUPABASE_URL || rootEnv.SUPABASE_URL || '',
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: webEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
   JWT_SECRET: jwt,
-  DATABASE_URL: rootEnv.DATABASE_URL,
-  DIRECT_URL: rootEnv.DIRECT_URL,
+  DATABASE_URL: dbUrl,
+  DIRECT_URL: directUrl,
   APP_PUBLIC_URL: 'https://fixya.emprenor.com',
   API_PUBLIC_URL: 'https://fixya.emprenor.com/api/v1',
   CORS_ORIGINS: 'https://fixya.emprenor.com,https://fixya-dun.vercel.app',
@@ -56,10 +63,8 @@ const vars = {
 };
 
 for (const [key, value] of Object.entries(vars)) {
-  if (!value && key !== 'NEXT_PUBLIC_API_URL') {
-    console.warn(`⚠ omitido ${key} (vacío)`);
-    continue;
-  }
+  if (value === undefined || value === null) continue;
+  if (!value && key !== 'NEXT_PUBLIC_API_URL' && !key.startsWith('NEXT_PUBLIC_SUPABASE')) continue;
   try {
     execSync(`npx vercel env rm ${key} production --yes`, { cwd: root, stdio: 'pipe' });
   } catch {
