@@ -1,6 +1,18 @@
 import { useAuthStore } from '@/stores/auth.store';
+import { SITE_URL } from '@/lib/site-url';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';
+function getApiUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/api/v1`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}/api/v1`;
+  }
+  return `${SITE_URL}/api/v1`;
+}
 
 export class ApiError extends Error {
   constructor(
@@ -26,7 +38,7 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!refreshToken) return null;
 
   try {
-    const response = await fetch(`${API_URL}/auth/refresh`, {
+    const response = await fetch(`${getApiUrl()}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
@@ -65,7 +77,7 @@ export async function apiRequest<T>(
   if (token) headers['Authorization'] = `Bearer ${token}`;
   if (tenantId) headers['X-Tenant-ID'] = tenantId;
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${getApiUrl()}${path}`, {
     ...rest,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -99,4 +111,6 @@ export async function apiRequest<T>(
   return data as T;
 }
 
-export { API_URL };
+export function getApiBaseUrl(): string {
+  return getApiUrl();
+}

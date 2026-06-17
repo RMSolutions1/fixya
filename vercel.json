@@ -1,8 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "npm ci",
-  "buildCommand": "npm run web:build",
+  "buildCommand": "npm run vercel-build",
   "devCommand": "npm run web:dev",
   "framework": "nextjs",
-  "regions": ["gru1"]
+  "outputDirectory": "apps/web/.next",
+  "regions": ["gru1"],
+  "functions": {
+    "api/[...path].ts": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  }
 }

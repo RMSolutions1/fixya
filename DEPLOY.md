@@ -1,140 +1,104 @@
-# Despliegue FixYa — Producción
+# Despliegue FixYa — Producción (Vercel full stack)
 
 FixYa es la **unidad digital de [Grupo Emprenor](https://grupo.emprenor.com)**.
 
-| Servicio | Dominio |
-|----------|---------|
-| **Web (Vercel)** | `https://fixya.emprenor.com` |
-| API (NestJS) | `https://api.fixya.emprenor.com` *(hosting aparte)* |
+| Servicio | URL |
+|----------|-----|
+| **Web + API** | `https://fixya.emprenor.com` |
+| API (mismo dominio) | `https://fixya.emprenor.com/api/v1` |
 | Grupo | `https://grupo.emprenor.com` |
-| Obra NOA | `https://www.emprenor.com` |
 
-## Requisitos
-
-- Node.js 20+
-- PostgreSQL 16 + PostGIS (Supabase Grupo Emprenor)
-- Cuenta Mercado Pago (token de producción)
-- Cuenta [Vercel](https://vercel.com) + acceso DNS `emprenor.com`
+**Web (Next.js)** y **API (NestJS)** se despliegan juntos en **un solo proyecto Vercel**. La API corre como función serverless en `/api/*`.
 
 ---
 
-## 1. Web en Vercel (`fixya.emprenor.com`)
+## 1. Vercel — un solo proyecto
 
 ### Conectar el repositorio
 
-1. [Vercel → New Project](https://vercel.com/new) → importar `RMSolutions1/fixya`
-2. **Root Directory:** `apps/web`
-3. Activar **Include source files outside of the Root Directory** (monorepo npm workspaces)
-4. Framework: **Next.js** (auto-detectado vía `apps/web/vercel.json`)
+1. [Vercel → New Project](https://vercel.com/new) → `RMSolutions1/fixya`
+2. **Root Directory:** vacío (raíz del repo) — usa `vercel.json`
+3. Framework: **Next.js** (detectado automáticamente)
+4. **Production Branch:** `main`
 
-### Build settings (Settings → General → Build & Development)
+### Build (automático vía `vercel.json`)
 
-Si el deploy falla con *"No Output Directory named public"*, el proyecto está mal configurado como sitio estático. Corregí:
+| Campo | Valor |
+|-------|-------|
+| Install | `npm ci` |
+| Build | `npm run vercel-build` (Prisma + API + Web) |
+| Output | `apps/web/.next` |
+| API serverless | `api/[...path].ts` → `/api/v1/*` |
 
-| Campo | Valor correcto |
-|-------|----------------|
-| **Framework Preset** | Next.js |
-| **Root Directory** | `apps/web` *(recomendado)* o vacío si usás `vercel.json` en la raíz |
-| **Build Command** | *Default* o `npm run web:build` — **no** `npm run build` (incluye API) |
-| **Output Directory** | *Default / vacío* — **no** `public` ni `apps/web/.next` |
-| **Install Command** | *Default* o `npm ci` (con *Include files outside root* si Root = `apps/web`) |
+> **No** configures Output Directory = `public`. **No** uses solo `npm run build` manual en el dashboard si no incluye `vercel-build`.
 
-> Vercel ejecuta `vercel-build` del `package.json` raíz si existe (`npm run web:build`). Solo compila el frontend Next.js.
+### Variables de entorno
 
-### Variables de entorno (Vercel → Settings → Environment Variables)
+Copiá `vercel.env.example` → Vercel → Settings → Environment Variables.
 
-| Variable | Valor producción |
-|----------|------------------|
+**Mínimas para que funcione:**
+
+| Variable | Valor |
+|----------|-------|
 | `NEXT_PUBLIC_SITE_URL` | `https://fixya.emprenor.com` |
-| `NEXT_PUBLIC_API_URL` | `https://api.fixya.emprenor.com/api/v1` |
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://qsowfnlmpwjfrqjemsnt.supabase.co` |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | *(anon key del dashboard Supabase)* |
-| `NEXT_PUBLIC_ENABLE_SANDBOX_PAYMENTS` | `false` |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon key |
+| `JWT_SECRET` | ≥32 caracteres |
+| `DATABASE_URL` | Pooler Supabase `:6543` |
+| `DIRECT_URL` | Pooler session `:5432` |
+| `APP_PUBLIC_URL` | `https://fixya.emprenor.com` |
+| `API_PUBLIC_URL` | `https://fixya.emprenor.com/api/v1` |
+| `CORS_ORIGINS` | `https://fixya.emprenor.com` |
+| `NODE_ENV` | `production` |
+| `ENABLE_SWAGGER` | `false` |
+| `MP_ACCESS_TOKEN` | token Mercado Pago |
 
-> La web en Vercel **no incluye la API NestJS**. El frontend llama a `NEXT_PUBLIC_API_URL`; la API debe desplegarse por separado (Railway, Render, Fly.io, VPS).
+`NEXT_PUBLIC_API_URL` puede quedar **vacío** — el frontend usa `/api/v1` en el mismo dominio.
 
-### Dominio personalizado
+### Dominio
 
-1. Vercel → Project → **Settings → Domains** → agregar `fixya.emprenor.com`
-2. En el DNS de `emprenor.com` (Cloudflare, etc.):
+1. Vercel → Domains → `fixya.emprenor.com`
+2. DNS: **CNAME** `fixya` → `cname.vercel-dns.com`
 
-   | Tipo | Nombre | Valor |
-   |------|--------|-------|
-   | CNAME | `fixya` | `cname.vercel-dns.com` |
-
-3. Esperar propagación (~5–30 min). Vercel emite HTTPS automáticamente.
-
-### Build local (smoke antes de deploy)
+### Build local
 
 ```bash
 npm ci
-npm run web:build
+npm run vercel-build
 ```
+
+### Health check
+
+`GET https://fixya.emprenor.com/api/v1/health`
 
 ---
 
-## 2. API NestJS (`api.fixya.emprenor.com`)
-
-La API **no va en Vercel** (NestJS + Prisma + WebSockets). Opciones: Railway, Render, Fly.io o VPS.
-
-Copiá `.env.example` a `.env` en el servidor de la API:
-
-| Variable | Producción |
-|----------|------------|
-| `NODE_ENV` | `production` |
-| `JWT_SECRET` | ≥32 caracteres, único |
-| `DATABASE_URL` | Pooler Supabase (6543) |
-| `DIRECT_URL` | Session pooler Supabase (5432) |
-| `MP_ACCESS_TOKEN` | Token producción MP |
-| `MP_SANDBOX` | `false` |
-| `ENABLE_SANDBOX_PAYMENTS` | `false` |
-| `ENABLE_SWAGGER` | `false` |
-| `SEED_DEMO_DATA` | `false` |
-| `APP_PUBLIC_URL` | `https://fixya.emprenor.com` |
-| `API_PUBLIC_URL` | `https://api.fixya.emprenor.com` |
-| `CORS_ORIGINS` | `https://fixya.emprenor.com` |
+## 2. Supabase
 
 ```bash
-npm run sync:grupo-env   # local: apps/web/.env.local → .env
-npm run db:generate
-npm run db:migrate:deploy
-npm run db:seed
-npm run api:build
-npm run api:start
-```
-
-Health check: `GET /api/v1/health` → `{ status: "ok", services: { database: "up" } }`
-
----
-
-## 3. Supabase (base de datos)
-
-1. Pegar `SUPABASE_DB_PASSWORD` en `apps/web/.env.local`
-2. Región detectada: `us-east-2`, pooler `aws-1-us-east-2`
-3. Ejecutar localmente:
-
-```bash
+# apps/web/.env.local con SUPABASE_DB_PASSWORD
 npm run sync:grupo-env
 npm run db:push
 npm run db:seed
 npm run db:seed:users
 ```
 
-4. En Supabase SQL Editor, habilitar extensiones si `db:push` lo pide: `postgis`, `pg_trgm`, `uuid-ossp`, `pgcrypto`.
+Las tablas FixYa están en el schema **`fixya`** (DB compartida con grupo.emprenor.com).
 
 ---
 
-## 4. Checklist pre-lanzamiento
+## 3. Checklist pre-lanzamiento
 
-- [ ] Supabase conectado y schema aplicado
-- [ ] API desplegada y `CORS_ORIGINS` incluye `https://fixya.emprenor.com`
-- [ ] `NEXT_PUBLIC_API_URL` apunta a la API en producción
-- [ ] `SEED_DEMO_DATA=false` y sin usuarios `@fixya.demo`
-- [ ] Mercado Pago en modo producción
-- [ ] DNS `fixya.emprenor.com` → Vercel (HTTPS verde)
-- [ ] Admin creado con contraseña segura
-- [ ] CI verde en GitHub Actions
+- [ ] Variables de `vercel.env.example` en Vercel
+- [ ] `/api/v1/health` responde OK
+- [ ] Login con `admin@fixya.test` / `FixYa2026!` (o admin real)
+- [ ] DNS `fixya.emprenor.com` activo
+- [ ] `ENABLE_SWAGGER=false` en producción
 
-## Datos corporativos
+## Limitaciones Vercel (API serverless)
 
-Fuente: `apps/web/src/lib/company-info.ts` — dominio web vía `NEXT_PUBLIC_SITE_URL` (default `fixya.emprenor.com`).
+- Cold start ~2–5 s en el primer request tras inactividad
+- Timeout máx. 30 s por request (configurado en `vercel.json`)
+- Sin WebSockets ni procesos en background (FixYa no los usa hoy)
+
+Para tráfico muy alto o jobs largos, migrar la API a Railway/Render más adelante.
