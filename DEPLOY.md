@@ -27,6 +27,20 @@ FixYa es la **unidad digital de [Grupo Emprenor](https://grupo.emprenor.com)**.
 3. Activar **Include source files outside of the Root Directory** (monorepo npm workspaces)
 4. Framework: **Next.js** (auto-detectado vía `apps/web/vercel.json`)
 
+### Build settings (Settings → General → Build & Development)
+
+Si el deploy falla con *"No Output Directory named public"*, el proyecto está mal configurado como sitio estático. Corregí:
+
+| Campo | Valor correcto |
+|-------|----------------|
+| **Framework Preset** | Next.js |
+| **Root Directory** | `apps/web` *(recomendado)* o vacío si usás `vercel.json` en la raíz |
+| **Build Command** | *Default* o `npm run web:build` — **no** `npm run build` (incluye API) |
+| **Output Directory** | *Default / vacío* — **no** `public` ni `apps/web/.next` |
+| **Install Command** | *Default* o `npm ci` (con *Include files outside root* si Root = `apps/web`) |
+
+> Vercel ejecuta `vercel-build` del `package.json` raíz si existe (`npm run web:build`). Solo compila el frontend Next.js.
+
 ### Variables de entorno (Vercel → Settings → Environment Variables)
 
 | Variable | Valor producción |

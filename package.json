@@ -22,6 +22,7 @@
     "api:start": "npm run start:prod -w @fixya/api",
     "web:dev": "npm run dev -w @fixya/web",
     "web:build": "npm run build -w @fixya/web",
+    "vercel-build": "npm run web:build",
     "build": "npm run db:generate && npm run api:build && npm run web:build",
     "test": "npm run test -w @fixya/api",
     "test:smoke": "node scripts/smoke-test.mjs",
