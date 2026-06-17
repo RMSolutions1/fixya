@@ -23,6 +23,7 @@ import { SectionHeading } from '@/components/marketing/section-heading';
 import { ContactCtaSection } from '@/components/marketing/contact-cta-section';
 import { ArgentinaStripes } from '@/components/brand/argentina-stripes';
 import { COMPANY, corporateOwnershipLine, ecosystemSummary } from '@/lib/company-info';
+import { GroupBusinessUnitsList } from '@/components/brand/group-business-units-list';
 
 const heroStats = [
   { value: '24', label: 'Provincias' },
@@ -370,13 +371,13 @@ export function NosotrosPage() {
               </ul>
             </div>
             <div className="card-argentina p-8">
-              <h3 className="text-lg font-semibold">Compromiso con el mercado local</h3>
+              <h3 className="text-lg font-semibold">Ecosistema {COMPANY.groupBrand}</h3>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                Entendemos la realidad de contratar un gasista en Rosario, un veterinario en el
-                interior o un equipo de mantenimiento para una empresa en CABA. Por eso priorizamos
-                pesos argentinos, Mercado Pago, facturación ARCA y un expediente que respalde cada
-                trabajo — sin atajos ni promesas vacías.
+                {ecosystemSummary()}
               </p>
+              <div className="mt-6 border-t border-primary/10 pt-6">
+                <GroupBusinessUnitsList excludeCurrent={false} />
+              </div>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Button size="sm" asChild>
                   <Link href="/prensa">Sala de prensa</Link>

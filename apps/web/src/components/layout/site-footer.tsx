@@ -3,15 +3,12 @@ import { MapPin } from 'lucide-react';
 import { Logo } from '@/components/layout/logo';
 import { ArgentinaStripes } from '@/components/brand/argentina-stripes';
 import { COMPANY, corporateOwnershipLine } from '@/lib/company-info';
+import { GroupBusinessUnitsList } from '@/components/brand/group-business-units-list';
+
 const platformLinks = [
   { href: '/servicios', label: 'Servicios' },
   { href: '/profesionales', label: 'Profesionales' },
   { href: '/para-quienes', label: '¿Para quiénes?' },
-];
-
-const groupLinks = [
-  { href: COMPANY.groupWebsite, label: COMPANY.groupBrand, external: true },
-  { href: COMPANY.emprenorWebsite, label: COMPANY.emprenorBrand, external: true },
 ];
 
 const legalLinks = [
@@ -75,21 +72,8 @@ export function SiteFooter() {
           </div>
 
           <div>
-            <h4 className="mb-3 text-sm font-semibold text-foreground">Grupo</h4>
-            <ul className="space-y-2">
-              {groupLinks.map(({ href, label }) => (
-                <li key={href}>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <h4 className="mb-3 text-sm font-semibold text-foreground">Grupo Emprenor</h4>
+            <GroupBusinessUnitsList compact />
           </div>
 
           <div>

@@ -5,39 +5,31 @@ alwaysApply: true
 
 # FixYa — Producto Grupo Emprenor
 
-FixYa es la **unidad de negocio digital** del ecosistema [Grupo Emprenor](https://grupo.emprenor.com). No es un proyecto aislado: es el marketplace/plataforma de servicios del grupo.
+FixYa es la **unidad de negocio digital** del ecosistema [Grupo Emprenor](https://grupo.emprenor.com).
 
-## Jerarquía corporativa
+## Unidades de negocio (ecosistema completo)
 
-| Nivel | Marca | URL | Rol |
-|-------|-------|-----|-----|
-| Holding | Grupo Emprenor | grupo.emprenor.com | Grupo corporativo |
-| Obra NOA | EMPRENOR C&S | emprenor.com | Construcción e instalaciones (desde 2018) |
-| Plataforma | FixYa | fixya.com.ar / app | Marketplace digital nacional |
-| Legal | RM International Group SAS | — | Entidad operadora |
+| Unidad | URL | Rol |
+|--------|-----|-----|
+| Grupo Emprenor | grupo.emprenor.com | Holding |
+| EMPRENOR C&S | emprenor.com | Obra e instalaciones NOA |
+| **FixYa** | fixya.emprenor.com | Marketplace servicios |
+| Emitia | emitia.com.ar | Facturación fiscal ARCA |
+| Gestión Emprenor | gestion.emprenor.com | Operaciones / back-office |
+| My Emprenor | myemprenor.online | Portal clientes y equipos |
 
-## Fuente de verdad
+Legal: RM International Group SAS · Datos en `apps/web/src/lib/company-info.ts`
 
-- Datos corporativos: `apps/web/src/lib/company-info.ts`
-- Copy institucional debe referenciar Grupo Emprenor cuando hable de pertenencia/ecosistema
-- FixYa hereda credibilidad de obra documentada de EMPRENOR; alcance FixYa = **24 provincias**
-
-## Stack y entorno local
+## Stack local
 
 - Web: `http://localhost:3000` — `npm run web:dev`
 - API: `http://localhost:4000/api/v1` — `npm run api:dev`
-- DB: Docker `fixya-postgres` puerto **5433**
-- Credenciales test: `*@fixya.test` / `FixYa2026!`
+- DB: Supabase Grupo Emprenor (`npm run sync:grupo-env`)
+- Tests: `npm run test:full`
 
-## Principios de producto
+## Principios
 
-1. Español rioplatense, tono profesional y confiable (celeste y blanco)
-2. Pagos Mercado Pago, cumplimiento ARCA, expediente digital — no prometer Emitia/CRM como live si están en roadmap
-3. Cambios mínimos y enfocados; respetar convenciones existentes
-4. Imágenes hero en `apps/web/public/images/hero/` (locales, no Unsplash en runtime)
-
-## Tests antes de release
-
-```bash
-npm run test:full
-```
+1. Español rioplatense; FixYa = capa digital del grupo, no producto aislado
+2. Emitia/gestión/myemprenor son unidades hermanas — enlazar cuando corresponda
+3. No prometer integraciones live (Emitia/CRM) si están en roadmap
+4. Imágenes hero en `apps/web/public/images/hero/`

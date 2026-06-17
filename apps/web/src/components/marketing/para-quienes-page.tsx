@@ -180,14 +180,13 @@ export function ParaQuienesPage() {
             </div>
             <div>
               <SectionHeading
-                eyebrow="Respaldo Emprenor"
-                title="Experiencia real en construcción y servicios del NOA"
-                description={`${COMPANY.emprenorBrand} opera desde ${COMPANY.foundedYear} en Salta, Jujuy, Tucumán y Formosa con obras documentadas, presupuestos por escrito y cumplimiento de plazos.`}
+                eyebrow="Ecosistema Grupo Emprenor"
+                title="Obra, gestión, fiscal y servicios digitales"
+                description={`${COMPANY.emprenorBrand} opera desde ${COMPANY.foundedYear} en el NOA. ${COMPANY.fixyaBrand} es la capa digital de servicios; ${COMPANY.emitiaBrand} la facturación fiscal; ${COMPANY.gestionBrand} y ${COMPANY.myEmprenorBrand} completan la operación.`}
               />
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                FixYa es la evolución digital de esa experiencia: la misma exigencia en calidad y
-                transparencia, aplicada a un marketplace nacional con tecnología, Mercado Pago y
-                expediente digital. Conocé el grupo en{' '}
+                FixYa hereda la exigencia de obra documentada y la aplica a un marketplace nacional
+                con Mercado Pago y expediente digital. Explorá todas las unidades en{' '}
                 <a
                   href={COMPANY.groupWebsite}
                   target="_blank"
@@ -195,15 +194,6 @@ export function ParaQuienesPage() {
                   className="font-medium text-primary hover:underline"
                 >
                   grupo.emprenor.com
-                </a>{' '}
-                y la obra en{' '}
-                <a
-                  href={COMPANY.emprenorWebsite}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-primary hover:underline"
-                >
-                  emprenor.com
                 </a>
                 .
               </p>

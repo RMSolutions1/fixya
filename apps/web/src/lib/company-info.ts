@@ -2,6 +2,59 @@
  * Fuente única de verdad corporativa — FixYa como unidad de negocio de Grupo Emprenor.
  * @see https://grupo.emprenor.com
  */
+
+import { SITE_HOST, SITE_URL } from './site-url';
+
+export interface GroupBusinessUnit {
+  id: string;
+  brand: string;
+  tagline: string;
+  website: string;
+  /** Unidad actual (FixYa) — resaltar en UI */
+  isCurrent?: boolean;
+}
+
+/** Unidades de negocio del Grupo Emprenor */
+export const GROUP_BUSINESS_UNITS: GroupBusinessUnit[] = [
+  {
+    id: 'grupo',
+    brand: 'Grupo Emprenor',
+    tagline: 'Holding corporativo',
+    website: 'https://grupo.emprenor.com',
+  },
+  {
+    id: 'emprenor',
+    brand: 'EMPRENOR C&S',
+    tagline: 'Construcciones y servicios · NOA',
+    website: 'https://www.emprenor.com',
+  },
+  {
+    id: 'fixya',
+    brand: 'FixYa',
+    tagline: 'Marketplace de servicios verificados',
+    website: SITE_URL,
+    isCurrent: true,
+  },
+  {
+    id: 'emitia',
+    brand: 'Emitia',
+    tagline: 'Facturación fiscal ARCA',
+    website: 'https://www.emitia.com.ar',
+  },
+  {
+    id: 'gestion',
+    brand: 'Gestión Emprenor',
+    tagline: 'Operaciones y back-office',
+    website: 'https://gestion.emprenor.com',
+  },
+  {
+    id: 'myemprenor',
+    brand: 'My Emprenor',
+    tagline: 'Portal de clientes y equipos',
+    website: 'https://myemprenor.online',
+  },
+];
+
 export const COMPANY = {
   /** Entidad legal operadora de FixYa */
   legalName: 'RM International Group SAS',
@@ -9,18 +62,32 @@ export const COMPANY = {
   /** Unidad de negocio digital — marketplace de servicios */
   fixyaBrand: 'FixYa',
   fixyaTagline: 'Servicios profesionales verificados',
-  fixyaDomain: 'fixya.com.ar',
+  fixyaDomain: SITE_HOST,
+  fixyaWebsite: SITE_URL,
 
   /** Holding / grupo corporativo */
   groupBrand: 'Grupo Emprenor',
   groupWebsite: 'https://grupo.emprenor.com',
-  groupTagline: 'Construcción, servicios y tecnología en Argentina',
+  groupTagline: 'Construcción, servicios, fiscal y tecnología en Argentina',
 
   /** Brazo de obra e instalaciones (NOA) */
   emprenorBrand: 'EMPRENOR C&S',
   emprenorTagline: 'Construcciones y Servicios',
   emprenorWebsite: 'https://www.emprenor.com',
   emprenorFoundedYear: 2018,
+
+  /** Facturación electrónica */
+  emitiaBrand: 'Emitia',
+  emitiaTagline: 'Facturación fiscal ARCA',
+  emitiaWebsite: 'https://www.emitia.com.ar',
+
+  /** Gestión operativa */
+  gestionBrand: 'Gestión Emprenor',
+  gestionWebsite: 'https://gestion.emprenor.com',
+
+  /** Portal clientes/equipos */
+  myEmprenorBrand: 'My Emprenor',
+  myEmprenorWebsite: 'https://myemprenor.online',
 
   rmFoundedYear: 2022,
   /** @deprecated Use emprenorFoundedYear or rmFoundedYear */
@@ -56,6 +123,11 @@ export const COMPANY = {
   website: 'https://www.emprenor.com',
 } as const;
 
+/** Unidades del grupo excepto FixYa (para footers y cross-links) */
+export function getSiblingBusinessUnits(): GroupBusinessUnit[] {
+  return GROUP_BUSINESS_UNITS.filter((u) => !u.isCurrent);
+}
+
 /** Línea corporativa estándar para footers y legal */
 export function corporateOwnershipLine(): string {
   return `${COMPANY.fixyaBrand} es una unidad de negocio de ${COMPANY.groupBrand}, operada por ${COMPANY.legalName}.`;
@@ -63,5 +135,14 @@ export function corporateOwnershipLine(): string {
 
 /** Descripción corta del ecosistema para páginas institucionales */
 export function ecosystemSummary(): string {
-  return `${COMPANY.groupBrand} integra ${COMPANY.emprenorBrand} (obra e instalaciones en el NOA desde ${COMPANY.emprenorFoundedYear}) y ${COMPANY.fixyaBrand} (plataforma digital de servicios en todo el país).`;
+  return (
+    `${COMPANY.groupBrand} integra obra (${COMPANY.emprenorBrand}), servicios digitales (${COMPANY.fixyaBrand}), ` +
+    `facturación fiscal (${COMPANY.emitiaBrand}), gestión operativa (${COMPANY.gestionBrand}) y portal ` +
+    `${COMPANY.myEmprenorBrand} — un ecosistema completo para construir, operar y facturar en Argentina.`
+  );
+}
+
+/** Hostname legible para links externos */
+export function formatWebsiteHost(url: string): string {
+  return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 }

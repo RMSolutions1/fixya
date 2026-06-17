@@ -66,12 +66,21 @@ export default function PrivacidadPage() {
         <>
           Para más información sobre el ecosistema corporativo, visitá{' '}
           <a
-            href={COMPANY.website}
+            href={COMPANY.groupWebsite}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary hover:underline"
           >
-            emprenor.com
+            grupo.emprenor.com
+          </a>{' '}
+          o{' '}
+          <a
+            href={COMPANY.emitiaWebsite}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            emitia.com.ar
           </a>
           .
         </>

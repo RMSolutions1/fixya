@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Source_Sans_3 } from 'next/font/google';
 import { QueryProvider } from '@/providers/query-provider';
+import { SITE_URL } from '@/lib/site-url';
 import './globals.css';
 
 const display = Plus_Jakarta_Sans({
@@ -16,9 +17,16 @@ const body = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: 'FixYa — Servicios profesionales en Argentina | Grupo Emprenor',
   description:
     'FixYa es la plataforma digital de servicios verificados del Grupo Emprenor. Mercado Pago, factura fiscal ARCA y expediente digital en las 24 provincias.',
+  openGraph: {
+    type: 'website',
+    locale: 'es_AR',
+    url: SITE_URL,
+    siteName: 'FixYa',
+  },
   keywords: [
     'FixYa',
     'Grupo Emprenor',

@@ -45,15 +45,29 @@ if (!ref) {
 }
 
 const dbPassword = web.SUPABASE_DB_PASSWORD || process.env.SUPABASE_DB_PASSWORD;
-if (!dbPassword) {
-  console.error(
-    'Falta SUPABASE_DB_PASSWORD en apps/web/.env.local (Supabase → Settings → Database → password)',
-  );
-  process.exit(1);
-}
+const region = web.SUPABASE_REGION || process.env.SUPABASE_REGION || 'us-east-2';
+const poolerPrefix = web.SUPABASE_POOLER_PREFIX || process.env.SUPABASE_POOLER_PREFIX || 'aws-1';
+const poolerHost = `${poolerPrefix}-${region}.pooler.supabase.com`;
 
-const poolerUrl = `postgresql://postgres.${ref}:${encodeURIComponent(dbPassword)}@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true`;
-const directUrl = `postgresql://postgres:${encodeURIComponent(dbPassword)}@db.${ref}.supabase.co:5432/postgres`;
+let poolerUrl = web.DATABASE_URL || process.env.DATABASE_URL;
+let directUrl = web.DIRECT_URL || process.env.DIRECT_URL;
+
+if (!poolerUrl || !directUrl) {
+  if (!dbPassword) {
+    console.error(
+      'Falta SUPABASE_DB_PASSWORD en apps/web/.env.local\n' +
+        '  Supabase → Settings → Database → Database password\n' +
+        '  O pegá DATABASE_URL y DIRECT_URL completos desde el dashboard.',
+    );
+    process.exit(1);
+  }
+  poolerUrl =
+    poolerUrl ||
+    `postgresql://postgres.${ref}:${encodeURIComponent(dbPassword)}@${poolerHost}:6543/postgres?pgbouncer=true`;
+  directUrl =
+    directUrl ||
+    `postgresql://postgres.${ref}:${encodeURIComponent(dbPassword)}@${poolerHost}:5432/postgres`;
+}
 
 let rootEnv = existsSync(rootEnvPath) ? readFileSync(rootEnvPath, 'utf8') : '';
 

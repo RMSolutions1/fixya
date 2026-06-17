@@ -1,12 +1,19 @@
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { COMPANY } from '@/lib/company-info';
+import {
+  COMPANY,
+  GROUP_BUSINESS_UNITS,
+  formatWebsiteHost,
+} from '@/lib/company-info';
 
 interface GroupBrandMarkProps {
   className?: string;
   variant?: 'light' | 'muted' | 'inline';
+  /** @deprecated Usar showEcosystem */
   showEmprenor?: boolean;
+  /** Muestra links compactos a otras unidades del grupo */
+  showEcosystem?: boolean;
 }
 
 /** Marca corporativa Grupo Emprenor — login, dashboard y footers */
@@ -14,6 +21,7 @@ export function GroupBrandMark({
   className,
   variant = 'muted',
   showEmprenor = false,
+  showEcosystem = false,
 }: GroupBrandMarkProps) {
   const linkClass = cn(
     'inline-flex items-center gap-1 font-medium transition-colors',
@@ -47,6 +55,13 @@ export function GroupBrandMark({
             {COMPANY.emprenorBrand}
           </a>
         </>
+      )}
+      {showEcosystem && (
+        <span className="mt-1 block text-[10px] leading-relaxed opacity-80">
+          {GROUP_BUSINESS_UNITS.filter((u) => !u.isCurrent)
+            .map((u) => formatWebsiteHost(u.website))
+            .join(' · ')}
+        </span>
       )}
     </p>
   );

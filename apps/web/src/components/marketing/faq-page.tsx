@@ -82,7 +82,7 @@ const faqGroups: { title: string; description: string; items: FaqItem[] }[] = [
       },
       {
         question: '¿Quién opera la plataforma?',
-        answer: `${COMPANY.legalName} opera FixYa como unidad de ${COMPANY.groupBrand}. ${COMPANY.emprenorBrand} (${COMPANY.emprenorTagline}) es el brazo de obra e instalaciones del mismo grupo, con sede en ${COMPANY.address.province}.`,
+        answer: `${COMPANY.legalName} opera FixYa como unidad de ${COMPANY.groupBrand}. El ecosistema incluye ${COMPANY.emprenorBrand} (obra), ${COMPANY.emitiaBrand} (fiscal), ${COMPANY.gestionBrand}, ${COMPANY.myEmprenorBrand} y ${COMPANY.fixyaBrand}, con sede en ${COMPANY.address.province}.`,
       },
       {
         question: '¿Dónde consulto términos y privacidad?',
