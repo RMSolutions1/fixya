@@ -23,7 +23,43 @@ import {
 } from '@/components/ui/select';
 import { Logo } from '@/components/layout/logo';
 import { cn } from '@/lib/utils';
-import { User, Wrench, Building2 } from 'lucide-react';
+import {
+  User,
+  Wrench,
+  Building2,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Lock,
+  ShieldCheck,
+  BadgeCheck,
+} from 'lucide-react';
+
+const trustSignals = [
+  { icon: Lock, label: 'Conexión cifrada' },
+  { icon: BadgeCheck, label: 'Profesionales verificados' },
+  { icon: ShieldCheck, label: 'Pagos protegidos' },
+];
+
+const strengthLabels = ['Muy débil', 'Débil', 'Aceptable', 'Buena', 'Fuerte'];
+const strengthColors = [
+  'bg-destructive',
+  'bg-destructive',
+  'bg-amber-500',
+  'bg-emprenor-accent',
+  'bg-emprenor-accent',
+];
+
+function passwordStrength(pw: string): number {
+  if (!pw) return 0;
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (pw.length >= 12) score++;
+  if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+  if (/\d/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  return Math.min(score, 4);
+}
 
 const roles = [
   {
@@ -81,6 +117,9 @@ export default function RegisterPageClient() {
   const mounted = useMounted();
   const { data: categories } = useCategories(mounted);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
+  const [accepted, setAccepted] = useState(false);
 
   const {
     register,
@@ -96,6 +135,12 @@ export default function RegisterPageClient() {
 
   const selectedRole = watch('role');
   const isProfessional = selectedRole === 'PROFESIONAL';
+  const passwordValue = watch('password') ?? '';
+  const strength = passwordStrength(passwordValue);
+
+  const checkCaps = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    setCapsLock(e.getModifierState?.('CapsLock') ?? false);
+  };
 
   useEffect(() => {
     if (roleParam === 'PROFESIONAL' || roleParam === 'CLIENTE' || roleParam === 'EMPRESA') {
@@ -108,11 +153,20 @@ export default function RegisterPageClient() {
 
   const onSubmit = async (data: RegisterForm) => {
     setError('');
+    if (!accepted) {
+      setError('Para continuar, aceptá los Términos y la Política de Privacidad.');
+      return;
+    }
     try {
       await registerUser(data);
       router.push('/dashboard');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Error al registrarse');
+      const message = e instanceof Error ? e.message : 'Error al registrarse';
+      setError(
+        /timeout|fetch|network|Failed/i.test(message)
+          ? 'No pudimos conectar con el servidor. Reintentá en unos segundos.'
+          : message,
+      );
     }
   };
 
@@ -174,14 +228,14 @@ export default function RegisterPageClient() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">Nombre</Label>
-                  <Input id="firstName" {...register('firstName')} />
+                  <Input id="firstName" autoComplete="given-name" autoFocus {...register('firstName')} />
                   {errors.firstName && (
                     <p className="text-sm text-destructive">{errors.firstName.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Apellido</Label>
-                  <Input id="lastName" {...register('lastName')} />
+                  <Input id="lastName" autoComplete="family-name" {...register('lastName')} />
                   {errors.lastName && (
                     <p className="text-sm text-destructive">{errors.lastName.message}</p>
                   )}
@@ -190,7 +244,15 @@ export default function RegisterPageClient() {
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" {...register('email')} />
+                <Input
+                  id="email"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  placeholder="tu@email.com"
+                  aria-invalid={!!errors.email}
+                  {...register('email')}
+                />
                 {errors.email && (
                   <p className="text-sm text-destructive">{errors.email.message}</p>
                 )}
@@ -198,7 +260,7 @@ export default function RegisterPageClient() {
 
               <div className="space-y-2">
                 <Label htmlFor="phone">Teléfono</Label>
-                <Input id="phone" placeholder="+54 9 ..." {...register('phone')} />
+                <Input id="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="+54 9 ..." {...register('phone')} />
                 {errors.phone && (
                   <p className="text-sm text-destructive">{errors.phone.message}</p>
                 )}
@@ -207,7 +269,7 @@ export default function RegisterPageClient() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="city">Ciudad</Label>
-                  <Input id="city" {...register('city')} />
+                  <Input id="city" autoComplete="address-level2" {...register('city')} />
                   {errors.city && (
                     <p className="text-sm text-destructive">{errors.city.message}</p>
                   )}
@@ -240,7 +302,7 @@ export default function RegisterPageClient() {
 
               <div className="space-y-2">
                 <Label htmlFor="address">Dirección (opcional)</Label>
-                <Input id="address" placeholder="Calle, número, barrio" {...register('address')} />
+                <Input id="address" autoComplete="street-address" placeholder="Calle, número, barrio" {...register('address')} />
               </div>
 
               {isProfessional && (
@@ -290,19 +352,110 @@ export default function RegisterPageClient() {
 
               <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
-                <Input id="password" type="password" {...register('password')} />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="new-password"
+                    className="pr-10"
+                    aria-invalid={!!errors.password}
+                    onKeyUp={checkCaps}
+                    onKeyDown={checkCaps}
+                    {...register('password')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    aria-pressed={showPassword}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {passwordValue.length > 0 && (
+                  <div className="space-y-1">
+                    <div className="flex gap-1" aria-hidden>
+                      {[0, 1, 2, 3].map((i) => (
+                        <span
+                          key={i}
+                          className={cn(
+                            'h-1 flex-1 rounded-full transition-colors',
+                            i < strength ? strengthColors[strength] : 'bg-border',
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Seguridad: {strengthLabels[strength]}
+                    </p>
+                  </div>
+                )}
+                {capsLock && <p className="text-xs text-amber-600">Bloq Mayús está activado.</p>}
                 {errors.password && (
                   <p className="text-sm text-destructive">{errors.password.message}</p>
                 )}
               </div>
 
-              {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" className="w-full shadow-celeste" disabled={isSubmitting}>
+              <label className="flex items-start gap-2 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={accepted}
+                  onChange={(e) => setAccepted(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-input accent-[hsl(var(--primary))]"
+                />
+                <span>
+                  Acepto los{' '}
+                  <Link href="/terminos" target="_blank" className="font-medium text-primary hover:underline">
+                    Términos y Condiciones
+                  </Link>{' '}
+                  y la{' '}
+                  <Link href="/privacidad" target="_blank" className="font-medium text-primary hover:underline">
+                    Política de Privacidad
+                  </Link>
+                  .
+                </span>
+              </label>
+
+              {error && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+                >
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+              <Button
+                type="submit"
+                className="w-full shadow-celeste"
+                disabled={isSubmitting || !accepted}
+              >
                 {isSubmitting
                   ? 'Creando cuenta...'
                   : `Crear cuenta como ${roles.find((r) => r.value === selectedRole)?.label}`}
               </Button>
             </form>
+
+            <p className="mt-4 text-center text-sm text-muted-foreground lg:hidden">
+              ¿Ya tenés cuenta?{' '}
+              <Link href="/login" className="font-medium text-primary hover:underline">
+                Iniciar sesión
+              </Link>
+            </p>
+
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t pt-4">
+              {trustSignals.map(({ icon: Icon, label }) => (
+                <span
+                  key={label}
+                  className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
+                >
+                  <Icon className="h-3.5 w-3.5 text-pampa" />
+                  {label}
+                </span>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
