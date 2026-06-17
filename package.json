@@ -1,0 +1,49 @@
+{
+  "name": "fixya",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FixYa — Sistema Operativo para Servicios",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:seed:demo": "tsx scripts/seed-demo.ts",
+    "db:seed:users": "tsx scripts/seed-test-users.ts",
+    "db:clean-demo": "tsx scripts/clean-demo-data.ts",
+    "api:dev": "npm run dev -w @fixya/api",
+    "api:build": "npm run build -w @fixya/api",
+    "api:start": "npm run start:prod -w @fixya/api",
+    "web:dev": "npm run dev -w @fixya/web",
+    "web:build": "npm run build -w @fixya/web",
+    "build": "npm run db:generate && npm run api:build && npm run web:build",
+    "test": "npm run test -w @fixya/api",
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "test:smoke:auth": "node scripts/smoke-auth.mjs",
+    "test:e2e": "node scripts/smoke-test.mjs && node scripts/smoke-auth.mjs",
+    "test:dashboard": "node scripts/e2e-dashboard.mjs",
+    "test:all": "node scripts/smoke-test.mjs && node scripts/smoke-auth.mjs && node scripts/e2e-dashboard.mjs",
+    "test:audit": "node scripts/audit-full.mjs",
+    "test:full": "node scripts/smoke-test.mjs && node scripts/smoke-auth.mjs && node scripts/e2e-dashboard.mjs && node scripts/audit-full.mjs",
+    "sync:grupo-env": "node scripts/sync-grupo-env.mjs",
+    "verify": "npm run test && npm run build"
+  },
+  "devDependencies": {
+    "prisma": "^6.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0",
+    "bcrypt": "^5.1.1"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

@@ -1,0 +1,148 @@
+'use client';
+
+import Link from 'next/link';
+import { useWalletBalance, useWalletLedger } from '@/hooks/use-marketplace';
+import { formatCurrency } from '@/lib/utils';
+import { DashboardPageHeader } from '@/components/layout/dashboard-page-header';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+
+export default function WalletPage() {
+  const { data, isLoading } = useWalletBalance();
+  const { data: ledger, isLoading: ledgerLoading } = useWalletLedger();
+
+  if (isLoading) return <p className="text-muted-foreground">Cargando wallet...</p>;
+
+  const summary = data?.summary ?? { held: 0, released: 0, commission: 0, warranty: 0 };
+  const accounts = data?.accounts ?? [];
+  const entries = ledger?.entries ?? [];
+
+  return (
+    <div className="space-y-6">
+      <DashboardPageHeader
+        title="Wallet contable"
+        description="Registro contable de operaciones — FixYa no custodia fondos"
+      />
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">Retenido</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{formatCurrency(summary.held)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">Liberado</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{formatCurrency(summary.released)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">Comisiones FixYa</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{formatCurrency(summary.commission)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm text-muted-foreground">Garantía retenida</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{formatCurrency(summary.warranty)}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Cuentas por contratación</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {accounts.length === 0 ? (
+            <p className="text-muted-foreground">No hay movimientos registrados aún</p>
+          ) : (
+            <div className="space-y-3">
+              {accounts.map((account) => (
+                <div
+                  key={account.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4"
+                >
+                  <div>
+                    <p className="font-medium">Contratación</p>
+                    <p className="text-xs text-muted-foreground">{account.engagementId}</p>
+                  </div>
+                  <Badge variant="outline">{account.status}</Badge>
+                  <div className="text-right text-sm">
+                    <p>Retenido: {formatCurrency(account.heldAmount)}</p>
+                    <p className="text-muted-foreground">
+                      Liberado: {formatCurrency(account.releasedAmount)}
+                    </p>
+                  </div>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/engagements/${account.engagementId}`}>Ver expediente</Link>
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Libro diario</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {ledgerLoading ? (
+            <p className="text-muted-foreground">Cargando asientos...</p>
+          ) : entries.length === 0 ? (
+            <p className="text-muted-foreground">Sin asientos contables registrados</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground">
+                    <th className="pb-2 pr-4">Fecha</th>
+                    <th className="pb-2 pr-4">Tipo</th>
+                    <th className="pb-2 pr-4">Descripción</th>
+                    <th className="pb-2">Líneas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {entries.map((entry) => (
+                    <tr key={entry.id} className="border-b last:border-0">
+                      <td className="py-3 pr-4 whitespace-nowrap">
+                        {new Date(entry.postedAt).toLocaleString('es-AR')}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <Badge variant="secondary">{entry.entryType}</Badge>
+                      </td>
+                      <td className="py-3 pr-4">{entry.description}</td>
+                      <td className="py-3">
+                        <ul className="space-y-1 text-xs text-muted-foreground">
+                          {entry.lines.map((line) => (
+                            <li key={line.id}>
+                              {line.accountCode}: D {formatCurrency(line.debit)} / C{' '}
+                              {formatCurrency(line.credit)}
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Environment (secretos — nunca commitear)
+.env
+.env.local
+.env.*.local
+apps/web/.env.local
+apps/api/.env
+
+# Build
+dist/
+apps/api/dist/
+apps/web/.next/
+out/
+*.tsbuildinfo
+
+# Logs & OS
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Test / cache
+coverage/
+.turbo/
+.vercel/
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# Docker volumes (local)
+fixya_pgdata/

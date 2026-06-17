@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4-alpine
+        env:
+          POSTGRES_USER: fixya
+          POSTGRES_PASSWORD: fixya
+          POSTGRES_DB: fixya
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U fixya -d fixya"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://fixya:fixya@localhost:5433/fixya?schema=public
+      DIRECT_URL: postgresql://fixya:fixya@localhost:5433/fixya?schema=public
+      JWT_SECRET: ci-jwt-secret-minimum-32-characters-long
+      MP_ACCESS_TOKEN: TEST-ci-token
+      NODE_ENV: development
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run db:generate
+
+      - name: Apply database schema
+        run: npm run db:push
+
+      - name: Seed reference data
+        run: npm run db:seed
+
+      - name: Seed test users (all roles)
+        run: npm run db:seed:users
+        env:
+          SEED_DEMO_PASSWORD: FixYa2026!
+
+      - name: API unit tests
+        run: npm run test -w @fixya/api
+
+      - name: Build API and Web
+        run: npm run build
+
+      - name: Start API
+        run: |
+          npm run api:start &
+          echo $! > api.pid
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4000/api/v1/health && break
+            sleep 2
+          done
+
+      - name: API smoke test
+        run: node scripts/smoke-test.mjs
+        env:
+          SMOKE_SKIP_WEB: 'true'
+
+      - name: API auth smoke test
+        run: node scripts/smoke-auth.mjs
+
+      - name: Dashboard E2E (all roles)
+        run: node scripts/e2e-dashboard.mjs
+        env:
+          SEED_DEMO_PASSWORD: FixYa2026!
+
+      - name: Stop API
+        if: always()
+        run: kill $(cat api.pid) 2>/dev/null || true

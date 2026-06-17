@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: fixya-postgres
+    environment:
+      POSTGRES_USER: fixya
+      POSTGRES_PASSWORD: fixya
+      POSTGRES_DB: fixya
+    ports:
+      - "5433:5432"
+    volumes:
+      - fixya_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fixya -d fixya"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  fixya_pgdata:
