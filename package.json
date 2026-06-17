@@ -19,6 +19,7 @@
     "db:clean-demo": "tsx scripts/clean-demo-data.ts",
     "api:dev": "npm run dev -w @fixya/api",
     "api:build": "npm run build -w @fixya/api",
+    "api:build:nest": "npx nest build --path apps/api",
     "api:start": "npm run start:prod -w @fixya/api",
     "web:dev": "npm run dev -w @fixya/web",
     "web:build": "npm run build -w @fixya/web",

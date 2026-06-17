@@ -1,0 +1,76 @@
+#!/usr/bin/env node
+/**
+ * Sube variables de entorno a Vercel (production).
+ * Lee apps/web/.env.local + .env raíz — no commitea secretos.
+ */
+import { readFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
+import { randomBytes } from 'crypto';
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const webEnv = parseEnv(readFileSync(join(root, 'apps/web/.env.local'), 'utf8'));
+const rootEnv = existsSync(join(root, '.env'))
+  ? parseEnv(readFileSync(join(root, '.env'), 'utf8'))
+  : {};
+
+function parseEnv(content) {
+  const vars = {};
+  for (const line of content.split('\n')) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const eq = t.indexOf('=');
+    if (eq === -1) continue;
+    const key = t.slice(0, eq).trim();
+    let val = t.slice(eq + 1).trim();
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+      val = val.slice(1, -1);
+    }
+    vars[key] = val;
+  }
+  return vars;
+}
+
+const jwt = process.env.JWT_SECRET || randomBytes(48).toString('base64url');
+
+const vars = {
+  NODE_ENV: 'production',
+  NEXT_PUBLIC_SITE_URL: 'https://fixya.emprenor.com',
+  NEXT_PUBLIC_API_URL: '',
+  NEXT_PUBLIC_ENABLE_SANDBOX_PAYMENTS: 'false',
+  NEXT_PUBLIC_SUPABASE_URL: webEnv.NEXT_PUBLIC_SUPABASE_URL || rootEnv.SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: webEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  JWT_SECRET: jwt,
+  DATABASE_URL: rootEnv.DATABASE_URL,
+  DIRECT_URL: rootEnv.DIRECT_URL,
+  APP_PUBLIC_URL: 'https://fixya.emprenor.com',
+  API_PUBLIC_URL: 'https://fixya.emprenor.com/api/v1',
+  CORS_ORIGINS: 'https://fixya.emprenor.com,https://fixya-dun.vercel.app',
+  ENABLE_SWAGGER: 'false',
+  ENABLE_SANDBOX_PAYMENTS: 'false',
+  MP_SANDBOX: 'false',
+  MP_ACCESS_TOKEN: process.env.MP_ACCESS_TOKEN || 'APP_USR-PLACEHOLDER-CONFIGURE-IN-MERCADOPAGO',
+  API_PREFIX: 'v1',
+  SEED_DEMO_DATA: 'false',
+};
+
+for (const [key, value] of Object.entries(vars)) {
+  if (!value && key !== 'NEXT_PUBLIC_API_URL') {
+    console.warn(`⚠ omitido ${key} (vacío)`);
+    continue;
+  }
+  try {
+    execSync(`npx vercel env rm ${key} production --yes`, { cwd: root, stdio: 'pipe' });
+  } catch {
+    /* no existía */
+  }
+  execSync(`npx vercel env add ${key} production`, {
+    cwd: root,
+    input: value,
+    stdio: ['pipe', 'inherit', 'inherit'],
+  });
+  console.log(`✓ ${key}`);
+}
+
+console.log('\nJWT_SECRET (guardá en gestor de secretos):', jwt);
