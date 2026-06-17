@@ -3,7 +3,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
+  previewFeatures = ["postgresqlExtensions", "multiSchema"]
 }
 
 // npm run db:seed
@@ -12,6 +12,7 @@ datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   directUrl  = env("DIRECT_URL")
+  schemas    = ["fixya"]
   extensions = [postgis, pg_trgm, uuid_ossp(map: "uuid-ossp"), pgcrypto]
 }
 
@@ -23,6 +24,7 @@ enum TenantType {
   PLATFORM
   EMPRESA
   PROFESIONAL
+  @@schema("fixya")
 }
 
 enum TenantStatus {
@@ -30,6 +32,7 @@ enum TenantStatus {
   ACTIVE
   SUSPENDED
   CLOSED
+  @@schema("fixya")
 }
 
 enum UserStatus {
@@ -37,6 +40,7 @@ enum UserStatus {
   ACTIVE
   SUSPENDED
   DELETED
+  @@schema("fixya")
 }
 
 enum MemberRole {
@@ -49,6 +53,7 @@ enum MemberRole {
   AUDITOR
   CONTADOR
   GESTOR_DOCUMENTAL
+  @@schema("fixya")
 }
 
 enum IvaCondition {
@@ -57,6 +62,7 @@ enum IvaCondition {
   EXENTO
   CONSUMIDOR_FINAL
   NO_CATEGORIZADO
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -69,6 +75,7 @@ enum ServiceRequestStatus {
   QUOTING
   CLOSED
   CANCELLED
+  @@schema("fixya")
 }
 
 enum QuotationStatus {
@@ -78,6 +85,7 @@ enum QuotationStatus {
   REJECTED
   EXPIRED
   WITHDRAWN
+  @@schema("fixya")
 }
 
 enum ServiceStatus {
@@ -85,6 +93,7 @@ enum ServiceStatus {
   ACTIVE
   PAUSED
   ARCHIVED
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -110,6 +119,7 @@ enum EngagementStatus {
   CLOSED
   CANCELLED
   DISPUTED
+  @@schema("fixya")
 }
 
 enum DisputeStatus {
@@ -119,6 +129,7 @@ enum DisputeStatus {
   RESOLVED_CLIENT_REFUND
   RESOLVED_PARTIAL
   CLOSED
+  @@schema("fixya")
 }
 
 enum DisputeResolution {
@@ -126,6 +137,7 @@ enum DisputeResolution {
   FULL_REFUND
   PARTIAL_REFUND
   MEDIATION
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -145,6 +157,7 @@ enum DocumentType {
   INFORME
   PLANTILLA
   OTRO
+  @@schema("fixya")
 }
 
 enum DocumentStatus {
@@ -155,6 +168,7 @@ enum DocumentStatus {
   PENDING_SIGNATURE
   SIGNED
   ARCHIVED
+  @@schema("fixya")
 }
 
 enum WorkflowStatus {
@@ -163,11 +177,13 @@ enum WorkflowStatus {
   APPROVED
   REJECTED
   CANCELLED
+  @@schema("fixya")
 }
 
 enum SignatureType {
   SIMPLE
   ADVANCED
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -182,6 +198,7 @@ enum PaymentStatus {
   PARTIALLY_REFUNDED
   CHARGEBACK
   IN_MEDIATION
+  @@schema("fixya")
 }
 
 enum PaymentMethod {
@@ -190,12 +207,14 @@ enum PaymentMethod {
   QR
   PAYMENT_LINK
   SUBSCRIPTION
+  @@schema("fixya")
 }
 
 enum WalletAccountStatus {
   ACTIVE
   FROZEN
   CLOSED
+  @@schema("fixya")
 }
 
 enum LedgerEntryType {
@@ -208,6 +227,7 @@ enum LedgerEntryType {
   ADJUSTMENT
   WARRANTY_HOLD
   WARRANTY_RELEASE
+  @@schema("fixya")
 }
 
 enum WalletEventType {
@@ -218,6 +238,7 @@ enum WalletEventType {
   ADJUSTMENT_APPLIED
   ACCOUNT_FROZEN
   ACCOUNT_UNFROZEN
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -235,6 +256,7 @@ enum FiscalDocType {
   NOTA_DEBITO_A
   NOTA_DEBITO_B
   NOTA_DEBITO_C
+  @@schema("fixya")
 }
 
 enum FiscalDocStatus {
@@ -243,11 +265,13 @@ enum FiscalDocStatus {
   REJECTED
   CANCELLED
   CONTINGENCY_CAEA
+  @@schema("fixya")
 }
 
 enum CaeType {
   CAE
   CAEA
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -261,6 +285,7 @@ enum ProjectStatus {
   COMPLETED
   APPROVED
   CLOSED
+  @@schema("fixya")
 }
 
 enum TaskStatus {
@@ -269,6 +294,7 @@ enum TaskStatus {
   BLOCKED
   DONE
   CANCELLED
+  @@schema("fixya")
 }
 
 enum TaskPriority {
@@ -276,6 +302,7 @@ enum TaskPriority {
   MEDIUM
   HIGH
   URGENT
+  @@schema("fixya")
 }
 
 enum MilestoneStatus {
@@ -283,6 +310,7 @@ enum MilestoneStatus {
   IN_PROGRESS
   COMPLETED
   DELAYED
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -296,6 +324,7 @@ enum LeadSource {
   WEB
   WHATSAPP
   OTHER
+  @@schema("fixya")
 }
 
 enum LeadStatus {
@@ -305,6 +334,7 @@ enum LeadStatus {
   UNQUALIFIED
   CONVERTED
   LOST
+  @@schema("fixya")
 }
 
 enum OpportunityStatus {
@@ -312,6 +342,7 @@ enum OpportunityStatus {
   WON
   LOST
   ON_HOLD
+  @@schema("fixya")
 }
 
 enum CrmActivityType {
@@ -321,6 +352,7 @@ enum CrmActivityType {
   WHATSAPP
   NOTE
   VISIT
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -336,6 +368,7 @@ enum ComplianceDocType {
   ESTATUTO
   PODER
   OTRO
+  @@schema("fixya")
 }
 
 enum ComplianceStatus {
@@ -344,6 +377,7 @@ enum ComplianceStatus {
   REJECTED
   EXPIRED
   EXPIRING_SOON
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -355,6 +389,7 @@ enum ChatConversationType {
   GROUP
   PROJECT
   DISPUTE
+  @@schema("fixya")
 }
 
 enum ChatMessageType {
@@ -364,6 +399,7 @@ enum ChatMessageType {
   AUDIO
   VIDEO
   SYSTEM
+  @@schema("fixya")
 }
 
 enum NotificationChannel {
@@ -371,6 +407,7 @@ enum NotificationChannel {
   PUSH
   WHATSAPP
   IN_APP
+  @@schema("fixya")
 }
 
 enum NotificationStatus {
@@ -379,6 +416,7 @@ enum NotificationStatus {
   DELIVERED
   FAILED
   READ
+  @@schema("fixya")
 }
 
 enum OutboxStatus {
@@ -386,6 +424,7 @@ enum OutboxStatus {
   PROCESSING
   PROCESSED
   FAILED
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -435,6 +474,7 @@ model Tenant {
   @@index([type, status])
   @@index([deletedAt])
   @@map("tenants")
+  @@schema("fixya")
 }
 
 model User {
@@ -478,6 +518,7 @@ model User {
   @@index([status])
   @@index([deletedAt])
   @@map("users")
+  @@schema("fixya")
 }
 
 model TenantMember {
@@ -499,6 +540,7 @@ model TenantMember {
   @@index([userId, isActive])
   @@index([tenantId, role])
   @@map("tenant_members")
+  @@schema("fixya")
 }
 
 model RefreshToken {
@@ -513,6 +555,7 @@ model RefreshToken {
 
   @@index([userId, expiresAt])
   @@map("refresh_tokens")
+  @@schema("fixya")
 }
 
 model UserSession {
@@ -528,6 +571,7 @@ model UserSession {
 
   @@index([userId])
   @@map("user_sessions")
+  @@schema("fixya")
 }
 
 model TenantFiscalProfile {
@@ -551,6 +595,7 @@ model TenantFiscalProfile {
   @@unique([tenantId, cuit])
   @@index([tenantId, isDefault])
   @@map("tenant_fiscal_profiles")
+  @@schema("fixya")
 }
 
 model PointOfSale {
@@ -566,6 +611,7 @@ model PointOfSale {
 
   @@unique([fiscalProfileId, number])
   @@map("points_of_sale")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -596,6 +642,7 @@ model ServiceCategory {
   @@unique([slug, tenantId])
   @@index([parentId, isActive])
   @@map("service_categories")
+  @@schema("fixya")
 }
 
 model Service {
@@ -631,6 +678,7 @@ model Service {
   @@index([categoryId, status])
   @@index([latitude, longitude])
   @@map("services")
+  @@schema("fixya")
 }
 
 model ServiceRequest {
@@ -668,6 +716,7 @@ model ServiceRequest {
   @@index([categoryId, status])
   @@index([latitude, longitude])
   @@map("service_requests")
+  @@schema("fixya")
 }
 
 model Quotation {
@@ -697,6 +746,7 @@ model Quotation {
   @@index([tenantId, professionalId])
   @@index([validUntil, status])
   @@map("quotations")
+  @@schema("fixya")
 }
 
 model QuotationItem {
@@ -712,6 +762,7 @@ model QuotationItem {
 
   @@index([quotationId])
   @@map("quotation_items")
+  @@schema("fixya")
 }
 
 model Favorite {
@@ -726,6 +777,7 @@ model Favorite {
 
   @@unique([userId, serviceId])
   @@map("favorites")
+  @@schema("fixya")
 }
 
 model ServiceReview {
@@ -745,6 +797,7 @@ model ServiceReview {
   @@unique([engagementId])
   @@index([serviceId, rating])
   @@map("service_reviews")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -789,6 +842,7 @@ model Engagement {
   @@index([professionalId, status])
   @@index([status])
   @@map("engagements")
+  @@schema("fixya")
 }
 
 model EngagementTimelineEvent {
@@ -805,6 +859,7 @@ model EngagementTimelineEvent {
   @@index([engagementId, createdAt(sort: Desc)])
   @@index([tenantId, eventType])
   @@map("engagement_timeline_events")
+  @@schema("fixya")
 }
 
 model Dispute {
@@ -826,6 +881,7 @@ model Dispute {
 
   @@index([tenantId, status])
   @@map("disputes")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -849,6 +905,7 @@ model DocumentTemplate {
 
   @@index([tenantId, documentType])
   @@map("document_templates")
+  @@schema("fixya")
 }
 
 model Document {
@@ -875,6 +932,7 @@ model Document {
   @@index([tenantId, documentType, status])
   @@index([engagementId])
   @@map("documents")
+  @@schema("fixya")
 }
 
 model DocumentVersion {
@@ -895,6 +953,7 @@ model DocumentVersion {
   @@unique([documentId, version])
   @@index([documentId, version(sort: Desc)])
   @@map("document_versions")
+  @@schema("fixya")
 }
 
 model DocumentWorkflow {
@@ -908,6 +967,7 @@ model DocumentWorkflow {
   steps    DocumentWorkflowStep[]
 
   @@map("document_workflows")
+  @@schema("fixya")
 }
 
 model DocumentWorkflowStep {
@@ -925,6 +985,7 @@ model DocumentWorkflowStep {
 
   @@unique([workflowId, stepOrder])
   @@map("document_workflow_steps")
+  @@schema("fixya")
 }
 
 model DocumentSignature {
@@ -941,6 +1002,7 @@ model DocumentSignature {
 
   @@unique([documentVersionId, signerId])
   @@map("document_signatures")
+  @@schema("fixya")
 }
 
 model Contract {
@@ -957,6 +1019,7 @@ model Contract {
 
   @@index([tenantId])
   @@map("contracts")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -990,6 +1053,7 @@ model Payment {
   @@index([tenantId, status])
   @@index([status, createdAt])
   @@map("payments")
+  @@schema("fixya")
 }
 
 model PaymentRefund {
@@ -1005,6 +1069,7 @@ model PaymentRefund {
 
   @@index([paymentId])
   @@map("payment_refunds")
+  @@schema("fixya")
 }
 
 model MpWebhookLog {
@@ -1025,6 +1090,7 @@ model MpWebhookLog {
   @@index([processed, createdAt])
   @@index([createdAt])
   @@map("mp_webhook_logs")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -1052,6 +1118,7 @@ model WalletAccount {
 
   @@index([tenantId, status])
   @@map("wallet_accounts")
+  @@schema("fixya")
 }
 
 model LedgerEntry {
@@ -1075,6 +1142,7 @@ model LedgerEntry {
   @@index([walletAccountId, postedAt])
   @@index([referenceType, referenceId])
   @@map("ledger_entries")
+  @@schema("fixya")
 }
 
 model LedgerLine {
@@ -1090,6 +1158,7 @@ model LedgerLine {
   @@index([ledgerEntryId])
   @@index([accountCode])
   @@map("ledger_lines")
+  @@schema("fixya")
 }
 
 model WalletEvent {
@@ -1106,6 +1175,7 @@ model WalletEvent {
   @@unique([walletAccountId, sequence])
   @@index([tenantId, createdAt])
   @@map("wallet_events")
+  @@schema("fixya")
 }
 
 model CommissionRule {
@@ -1125,6 +1195,7 @@ model CommissionRule {
 
   @@index([tenantId, isActive])
   @@map("commission_rules")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -1169,6 +1240,7 @@ model FiscalDocument {
   @@index([cae])
   @@index([status])
   @@map("fiscal_documents")
+  @@schema("fixya")
 }
 
 model FiscalDocumentItem {
@@ -1186,6 +1258,7 @@ model FiscalDocumentItem {
 
   @@index([fiscalDocumentId])
   @@map("fiscal_document_items")
+  @@schema("fixya")
 }
 
 model EmitiaAuditLog {
@@ -1203,6 +1276,7 @@ model EmitiaAuditLog {
   @@index([fiscalDocumentId])
   @@index([createdAt])
   @@map("emitia_audit_logs")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -1232,6 +1306,7 @@ model Project {
 
   @@index([tenantId, status])
   @@map("projects")
+  @@schema("fixya")
 }
 
 model Task {
@@ -1261,6 +1336,7 @@ model Task {
   @@index([assigneeId, status])
   @@index([parentId])
   @@map("tasks")
+  @@schema("fixya")
 }
 
 model TaskComment {
@@ -1276,6 +1352,7 @@ model TaskComment {
 
   @@index([taskId, createdAt])
   @@map("task_comments")
+  @@schema("fixya")
 }
 
 model Milestone {
@@ -1294,6 +1371,7 @@ model Milestone {
 
   @@index([projectId, status])
   @@map("milestones")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -1316,6 +1394,7 @@ model CrmPipelineStage {
 
   @@unique([tenantId, sortOrder])
   @@map("crm_pipeline_stages")
+  @@schema("fixya")
 }
 
 model CrmClient {
@@ -1346,6 +1425,7 @@ model CrmClient {
   @@index([tenantId, email])
   @@index([tenantId, cuit])
   @@map("crm_clients")
+  @@schema("fixya")
 }
 
 model CrmContact {
@@ -1365,6 +1445,7 @@ model CrmContact {
 
   @@index([clientId])
   @@map("crm_contacts")
+  @@schema("fixya")
 }
 
 model CrmLead {
@@ -1387,6 +1468,7 @@ model CrmLead {
   @@index([tenantId, status])
   @@index([tenantId, score(sort: Desc)])
   @@map("crm_leads")
+  @@schema("fixya")
 }
 
 model CrmOpportunity {
@@ -1412,6 +1494,7 @@ model CrmOpportunity {
   @@index([tenantId, status])
   @@index([stageId])
   @@map("crm_opportunities")
+  @@schema("fixya")
 }
 
 model CrmActivity {
@@ -1433,6 +1516,7 @@ model CrmActivity {
   @@index([tenantId, clientId])
   @@index([userId, scheduledAt])
   @@map("crm_activities")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -1463,6 +1547,7 @@ model ComplianceDocument {
   @@index([expiresAt, status])
   @@index([tenantId, status])
   @@map("compliance_documents")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -1486,6 +1571,7 @@ model ChatConversation {
   @@index([tenantId, engagementId])
   @@index([updatedAt(sort: Desc)])
   @@map("chat_conversations")
+  @@schema("fixya")
 }
 
 model ChatParticipant {
@@ -1500,6 +1586,7 @@ model ChatParticipant {
 
   @@unique([conversationId, userId])
   @@map("chat_participants")
+  @@schema("fixya")
 }
 
 model ChatMessage {
@@ -1519,6 +1606,7 @@ model ChatMessage {
 
   @@index([conversationId, createdAt(sort: Desc)])
   @@map("chat_messages")
+  @@schema("fixya")
 }
 
 model ChatReadReceipt {
@@ -1531,6 +1619,7 @@ model ChatReadReceipt {
 
   @@unique([messageId, userId])
   @@map("chat_read_receipts")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -1556,6 +1645,7 @@ model Notification {
   @@index([userId, status, createdAt(sort: Desc)])
   @@index([tenantId, channel, status])
   @@map("notifications")
+  @@schema("fixya")
 }
 
 model NotificationPreference {
@@ -1571,6 +1661,7 @@ model NotificationPreference {
 
   @@unique([userId, eventType, channel])
   @@map("notification_preferences")
+  @@schema("fixya")
 }
 
 // =============================================================================
@@ -1596,6 +1687,7 @@ model AuditLog {
   @@index([userId, createdAt(sort: Desc)])
   @@index([createdAt])
   @@map("audit_logs")
+  @@schema("fixya")
 }
 
 model OutboxEvent {
@@ -1616,6 +1708,7 @@ model OutboxEvent {
   @@index([status, createdAt])
   @@index([tenantId, eventType])
   @@map("outbox_events")
+  @@schema("fixya")
 }
 
 model IdempotencyKey {
@@ -1628,4 +1721,5 @@ model IdempotencyKey {
 
   @@index([expiresAt])
   @@map("idempotency_keys")
+  @@schema("fixya")
 }
