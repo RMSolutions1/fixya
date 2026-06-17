@@ -58,7 +58,7 @@ const defaultSlides: HeroSlide[] = [
     subtitle:
       'Plomeros, cerrajeros, limpieza y mudanzas. Profesionales verificados a un toque en toda la Argentina.',
     image: HERO_SLIDE_IMAGES.ciudad,
-    imageAlt: 'Avenida urbana en una ciudad argentina',
+    imageAlt: 'Profesional de limpieza trabajando en un hogar',
     overlay: 'ciudad',
     primaryCta: { label: 'Encontrar profesional', href: '/profesionales' },
     secondaryCta: { label: 'Cómo funciona', href: '/para-quienes' },
@@ -69,7 +69,7 @@ const defaultSlides: HeroSlide[] = [
     title: 'Celeste y blanco,',
     highlight: 'confianza real',
     subtitle:
-      'Pagos con Mercado Pago, factura fiscal ARCA y expediente digital. La plataforma de servicios que Argentina merece.',
+      'Pagos con Mercado Pago, expediente digital y trazabilidad de cada servicio. La plataforma que Argentina merece.',
     image: HERO_SLIDE_IMAGES.celeste,
     imageAlt: 'Paisaje con cielo celeste y montañas',
     overlay: 'celeste',
@@ -177,7 +177,7 @@ export function HeroBannerSlider({
             {slide.badge}
           </span>
 
-          <h1 className="mt-6 text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
+          <h1 className="mt-6 text-4xl font-bold leading-[1.1] tracking-tight text-white drop-shadow-sm sm:text-5xl lg:text-6xl xl:text-7xl">
             {slide.title}{' '}
             <span className="text-sol">{slide.highlight}</span>
           </h1>
@@ -187,7 +187,7 @@ export function HeroBannerSlider({
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" className="bg-sol text-foreground shadow-sol hover:bg-sol/90" asChild>
+            <Button size="lg" variant="emprenor" asChild>
               <Link href={slide.primaryCta.href}>
                 {slide.primaryCta.label}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -214,7 +214,7 @@ export function HeroBannerSlider({
             { value: stats?.completedRequests ?? '—', label: 'Servicios' },
           ].map(({ value, label }) => (
             <div key={label} className="text-center sm:text-left">
-              <p className="text-3xl font-bold tabular-nums text-sol">{value}</p>
+              <p className="text-3xl font-bold tabular-nums text-white">{value}</p>
               <p className="text-xs font-medium uppercase tracking-widest text-white/60">{label}</p>
             </div>
           ))}

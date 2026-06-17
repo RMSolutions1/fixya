@@ -52,7 +52,7 @@ const facts = [
   { label: 'Sede', value: COMPANY.address.short },
   { label: 'Cobertura FixYa', value: '24 provincias · Argentina' },
   { label: 'Pagos', value: 'Mercado Pago integrado' },
-  { label: 'Fiscal', value: 'ARCA · integración Emitia' },
+  { label: 'Fiscal', value: 'Integración Emitia (en desarrollo)' },
 ];
 
 export function PrensaPage() {

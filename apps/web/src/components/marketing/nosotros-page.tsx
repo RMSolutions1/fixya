@@ -28,7 +28,7 @@ import { GroupBusinessUnitsList } from '@/components/brand/group-business-units-
 const heroStats = [
   { value: '24', label: 'Provincias' },
   { value: 'MP', label: 'Mercado Pago' },
-  { value: 'ARCA', label: 'Facturación fiscal' },
+  { value: 'Emitia', label: 'Fiscal (roadmap)' },
   { value: '100%', label: 'Expediente digital' },
 ];
 
@@ -49,7 +49,7 @@ const values = [
     icon: Scale,
     title: 'Cumplimiento',
     description:
-      'Facturación fiscal argentina, normativa ARCA e integración con Emitia para operaciones en regla.',
+      'Operamos conforme a la legislación argentina. La facturación fiscal ARCA, vía integración con Emitia, está en desarrollo dentro del ecosistema Grupo Emprenor.',
   },
   {
     icon: Star,
@@ -117,7 +117,7 @@ const platformCapabilities = [
   {
     icon: Landmark,
     title: 'Compliance fiscal',
-    description: 'Comprobantes legales, ARCA y camino a integración Emitia para facturación electrónica.',
+    description: 'Comprobantes por operación hoy; facturación electrónica ARCA vía integración Emitia en desarrollo.',
   },
   {
     icon: Building2,

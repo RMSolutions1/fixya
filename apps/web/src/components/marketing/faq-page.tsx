@@ -41,7 +41,7 @@ const faqGroups: { title: string; description: string; items: FaqItem[] }[] = [
       {
         question: '¿Emiten factura?',
         answer:
-          'Sí. FixYa integra emisión fiscal conforme normativa ARCA, con camino a integración Emitia para comprobantes válidos en cada contratación.',
+          'Cada operación genera un comprobante dentro de tu expediente digital. La emisión de factura fiscal conforme normativa ARCA está en desarrollo, mediante la integración con Emitia (unidad fiscal del Grupo Emprenor). Mientras tanto, el profesional es responsable de emitir su comprobante fiscal según su condición ante ARCA.',
       },
       {
         question: '¿Hay comisión por usar FixYa?',

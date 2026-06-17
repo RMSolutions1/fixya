@@ -23,9 +23,9 @@ const reasons = [
   },
   {
     icon: FileCheck,
-    title: 'Factura fiscal ARCA',
+    title: 'Comprobantes y expediente',
     description:
-      'Comprobantes legales e integración Emitia. Cumplimiento impositivo para hogares, PyMEs y empresas.',
+      'Cada operación queda registrada en tu expediente digital. Facturación fiscal ARCA en integración con Emitia (roadmap).',
   },
   {
     icon: Clock,

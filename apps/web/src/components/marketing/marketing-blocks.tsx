@@ -149,7 +149,7 @@ export function HowItWorks() {
     {
       step: '05',
       title: 'Entrega y garantía',
-      description: 'Liberación de fondos, factura fiscal y reseña verificada. Trazabilidad completa.',
+      description: 'Liberación de fondos, comprobante de la operación y reseña verificada. Trazabilidad completa.',
     },
   ];
 
@@ -194,7 +194,7 @@ export function ProCta() {
           cobros seguros y herramientas profesionales.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
-          <Button size="lg" asChild className="btn-emprenor">
+          <Button size="lg" variant="emprenor" asChild>
             <Link href="/register?role=PROFESIONAL">Registrarme como profesional</Link>
           </Button>
           <Button size="lg" variant="outlineOnDark" asChild>

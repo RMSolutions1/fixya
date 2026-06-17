@@ -4,38 +4,44 @@
 
 @layer base {
   :root {
-    /* Grupo Emprenor — navy corporativo + acento obra (alineado grupo/emprenor.com) */
-    --background: 210 33% 98%;
-    --foreground: 212 55% 14%;
+    /* Grupo Emprenor — sistema corporativo: neutros stone, marca índigo, acción verde.
+       Alineado con emprenor.com (#fafaf9 / #1c1917 / #16a34a / #2E2A6E). */
+    --background: 60 9% 98%;
+    --foreground: 24 10% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 212 55% 14%;
-    --primary: 212 55% 18%;
+    --card-foreground: 24 10% 10%;
+    /* Marca corporativa índigo (#2E2A6E) — enlaces, iconos, foco, títulos */
+    --primary: 243 45% 30%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 28% 94%;
-    --secondary-foreground: 212 55% 22%;
-    --muted: 210 25% 96%;
-    --muted-foreground: 215 16% 42%;
-    --accent: 32 94% 48%;
-    --accent-foreground: 0 0% 100%;
+    --secondary: 40 12% 95%;
+    --secondary-foreground: 243 45% 24%;
+    --muted: 40 12% 95%;
+    --muted-foreground: 25 6% 40%;
+    --accent: 40 12% 93%;
+    --accent-foreground: 243 45% 24%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 22% 90%;
-    --input: 210 22% 90%;
-    --ring: 212 55% 18%;
-    --radius: 0.75rem;
+    --border: 30 8% 89%;
+    --input: 30 8% 89%;
+    --ring: 243 45% 30%;
+    --radius: 0.625rem;
+
+    /* Título / tinta corporativa — índigo profundo (alineado a headings emprenor.com) */
+    --ink: 230 42% 14%;
 
     /* FixYa + Grupo Emprenor */
     --celeste: 201 62% 48%;
     --celeste-light: 201 70% 92%;
-    --celeste-dark: 212 55% 18%;
-    --emprenor-accent: 32 94% 48%;
-    --emprenor-accent-hover: 32 94% 42%;
+    --celeste-dark: 230 45% 16%;
+    /* Acción primaria corporativa — verde #16a34a (CTAs marketing, igual emprenor.com) */
+    --emprenor-accent: 142 71% 36%;
+    --emprenor-accent-hover: 142 72% 30%;
     --sol: 38 92% 50%;
     --sol-glow: 43 100% 70%;
     --pampa: 142 35% 45%;
-    --hero-from: 212 60% 10%;
-    --hero-mid: 212 55% 16%;
-    --hero-to: 201 50% 32%;
+    --hero-from: 230 48% 9%;
+    --hero-mid: 230 44% 15%;
+    --hero-to: 243 40% 26%;
   }
 
   * {
@@ -48,7 +54,12 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-semibold tracking-tight text-foreground;
+    @apply font-display font-bold text-[hsl(var(--ink))];
+  }
+
+  /* En secciones oscuras (texto blanco) los títulos heredan el color claro */
+  .text-white :where(h1, h2, h3, h4, h5, h6) {
+    color: inherit;
   }
 
   p {

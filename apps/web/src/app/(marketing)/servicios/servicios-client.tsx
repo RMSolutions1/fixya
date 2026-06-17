@@ -115,7 +115,7 @@ export default function ServiciosPageClient() {
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
             Registrate gratis y empezá a recibir solicitudes en tu zona.
           </p>
-          <Button className="mt-6 btn-emprenor" asChild>
+          <Button variant="emprenor" className="mt-6" asChild>
             <Link href="/login">Ingresar como profesional</Link>
           </Button>
         </div>

@@ -51,7 +51,7 @@ export function ContactCtaSection() {
               Un solo acceso para clientes y profesionales. Sin costo de registro.
             </p>
             <div className="mt-6">
-              <Button size="lg" className="btn-emprenor w-full sm:w-auto" asChild>
+              <Button size="lg" variant="emprenor" className="w-full sm:w-auto" asChild>
                 <Link href="/login">
                   Ingresar a FixYa
                   <ArrowRight className="ml-2 h-4 w-4" />

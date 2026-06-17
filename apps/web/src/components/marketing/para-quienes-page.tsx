@@ -76,10 +76,10 @@ const audiences = [
     icon: Store,
     title: 'PyMEs y comercios',
     description:
-      'Contratá servicios para tu local con factura fiscal, plazos definidos y un único punto de contacto para todas tus necesidades operativas.',
+      'Contratá servicios para tu local con presupuestos comparables, plazos definidos y un único punto de contacto para todas tus necesidades operativas.',
     benefits: [
       'Un solo panel para múltiples rubros',
-      'Factura y comprobantes centralizados',
+      'Comprobantes centralizados por operación',
       'Profesionales con experiencia comercial',
       'Soporte y mediación FixYa',
     ],

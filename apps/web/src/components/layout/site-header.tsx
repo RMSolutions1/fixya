@@ -77,7 +77,7 @@ export function SiteHeader({
               <Link href="/dashboard">Mi panel</Link>
             </Button>
           ) : (
-            <Button size="sm" className="btn-emprenor shadow-md" asChild>
+            <Button size="sm" variant="emprenor" className="shadow-md" asChild>
               <Link href="/login">Ingresar</Link>
             </Button>
           )}
