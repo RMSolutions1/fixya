@@ -1,0 +1,23 @@
+/** Rubros de referencia cuando la API no está disponible (marketing / Vercel sin backend). */
+export const FALLBACK_CATEGORIES = [
+  { slug: 'electricidad', name: 'Electricista' },
+  { slug: 'plomeria', name: 'Plomero' },
+  { slug: 'gas', name: 'Gasista' },
+  { slug: 'aire-acondicionado', name: 'Refrigeración' },
+  { slug: 'seguridad', name: 'Seguridad' },
+  { slug: 'cerrajeria', name: 'Cerrajero' },
+  { slug: 'mecanica', name: 'Mecánico' },
+  { slug: 'pintura', name: 'Pintor' },
+  { slug: 'mudanza', name: 'Mudanza' },
+  { slug: 'flete', name: 'Flete' },
+  { slug: 'limpieza', name: 'Limpieza' },
+  { slug: 'jardineria', name: 'Jardinería' },
+  { slug: 'peluqueria', name: 'Peluquería' },
+  { slug: 'veterinaria', name: 'Veterinario' },
+  { slug: 'ninera', name: 'Niñera' },
+  { slug: 'cuidador-adultos', name: 'Cuidador Adultos' },
+  { slug: 'albanileria', name: 'Albañil' },
+  { slug: 'carpinteria', name: 'Carpintero' },
+  { slug: 'tecnico-pc', name: 'Técnico PC' },
+  { slug: 'profesor-particular', name: 'Profesor Particular' },
+] as const;

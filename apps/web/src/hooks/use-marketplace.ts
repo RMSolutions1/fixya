@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/api';
+import { FALLBACK_CATEGORIES } from '@/lib/fallback-categories';
 import { useApiAuth } from '@/hooks/use-auth';
 
 export interface ServiceCategory {
@@ -77,10 +78,24 @@ export interface MarketplaceStats {
   completedRequests: number;
 }
 
+const fallbackCategories: ServiceCategory[] = FALLBACK_CATEGORIES.map((c) => ({
+  id: c.slug,
+  name: c.name,
+  slug: c.slug,
+}));
+
 export function useCategories(enabled = true) {
   return useQuery({
     queryKey: ['categories'],
-    queryFn: () => apiRequest<ServiceCategory[]>('/marketplace/categories'),
+    queryFn: async () => {
+      try {
+        const data = await apiRequest<ServiceCategory[]>('/marketplace/categories');
+        return data?.length ? data : fallbackCategories;
+      } catch {
+        return fallbackCategories;
+      }
+    },
+    placeholderData: fallbackCategories,
     enabled,
   });
 }
@@ -319,7 +334,22 @@ export function useWalletLedger(page = 1, limit = 20) {
 export function useMarketplaceStats(enabled = true) {
   return useQuery({
     queryKey: ['marketplace-stats'],
-    queryFn: () => apiRequest<MarketplaceStats>('/marketplace/stats'),
+    queryFn: async () => {
+      try {
+        return await apiRequest<MarketplaceStats>('/marketplace/stats');
+      } catch {
+        return {
+          categoriesCount: fallbackCategories.length,
+          professionalsCount: 0,
+          completedRequests: 0,
+        };
+      }
+    },
+    placeholderData: {
+      categoriesCount: fallbackCategories.length,
+      professionalsCount: 0,
+      completedRequests: 0,
+    },
     enabled,
     staleTime: 60_000,
   });

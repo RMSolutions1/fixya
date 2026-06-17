@@ -31,7 +31,7 @@ export function HomePage() {
   const { data: stats } = useMarketplaceStats(mounted);
 
   const professionals = (professionalsData?.items ?? []).slice(0, 6);
-  const topCategories = categories?.slice(0, 16) ?? [];
+  const topCategories = (categories ?? []).slice(0, 16);
 
   return (
     <div className="flex min-h-screen flex-col">
