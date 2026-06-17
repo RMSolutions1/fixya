@@ -47,8 +47,8 @@ const defaultSlides: HeroSlide[] = [
     image: HERO_SLIDE_IMAGES.industria,
     imageAlt: 'Trabajadores en obra de construcción industrial',
     overlay: 'industria',
-    primaryCta: { label: 'Solicitar servicio', href: '/register' },
-    secondaryCta: { label: 'Ser profesional', href: '/register?role=PROFESIONAL' },
+    primaryCta: { label: 'Ingresar', href: '/login' },
+    secondaryCta: { label: 'Cómo funciona', href: '/para-quienes' },
   },
   {
     id: 'ciudad',
@@ -73,7 +73,7 @@ const defaultSlides: HeroSlide[] = [
     image: HERO_SLIDE_IMAGES.celeste,
     imageAlt: 'Paisaje con cielo celeste y montañas',
     overlay: 'celeste',
-    primaryCta: { label: 'Crear cuenta gratis', href: '/register' },
+    primaryCta: { label: 'Ingresar', href: '/login' },
     secondaryCta: { label: 'Conocé FixYa', href: '/nosotros' },
   },
 ];
@@ -98,7 +98,7 @@ const overlayClasses: Record<NonNullable<HeroSlide['overlay']>, string> = {
 
 interface HeroBannerSliderProps {
   slides?: HeroSlide[];
-  stats?: { professionalsCount: number; categoriesCount: number };
+  stats?: { professionalsCount: number; categoriesCount: number; verifiedProfessionalsCount?: number; completedRequests?: number };
   showSearch?: boolean;
 }
 
@@ -209,9 +209,9 @@ export function HeroBannerSlider({
         <div className="mt-auto grid max-w-3xl grid-cols-2 gap-4 border-t border-white/20 pt-8 sm:grid-cols-4">
           {[
             { value: stats?.categoriesCount ?? '20', label: 'Rubros' },
-            { value: stats?.professionalsCount ?? '—', label: 'Profesionales' },
+            { value: stats?.verifiedProfessionalsCount ?? stats?.professionalsCount ?? '—', label: 'Verificados' },
             { value: '24', label: 'Provincias' },
-            { value: '100%', label: 'Verificados' },
+            { value: stats?.completedRequests ?? '—', label: 'Servicios' },
           ].map(({ value, label }) => (
             <div key={label} className="text-center sm:text-left">
               <p className="text-3xl font-bold tabular-nums text-sol">{value}</p>

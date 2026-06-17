@@ -4,22 +4,22 @@ const badges = [
   {
     icon: CreditCard,
     title: 'Mercado Pago',
-    description: 'Pagos en pesos argentinos, seguros y familiares',
+    description: 'Pagos en pesos, fondos retenidos hasta tu conformidad',
   },
   {
     icon: FileCheck,
-    title: 'Factura fiscal',
-    description: 'Cumplimiento ARCA e integración Emitia',
+    title: 'Expediente digital',
+    description: 'Trazabilidad de cada servicio. Factura fiscal en roadmap con Emitia',
   },
   {
     icon: Shield,
     title: 'Profesionales verificados',
-    description: 'Matrículas, identidad y reputación real',
+    description: 'Identidad y documentación revisadas antes de operar',
   },
   {
     icon: MapPin,
     title: 'Cobertura nacional',
-    description: 'De Ushuaia a La Quiaca, tu zona incluida',
+    description: '24 provincias — del NOA a la Patagonia',
   },
 ];
 
@@ -30,7 +30,7 @@ export function TrustBadges() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {badges.map(({ icon: Icon, title, description }) => (
             <div key={title} className="flex gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Icon className="h-5 w-5" />
               </div>
               <div>

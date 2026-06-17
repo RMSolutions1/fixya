@@ -200,6 +200,48 @@ export default function ProfesionalDetailPage({
               </CardContent>
             </Card>
           )}
+
+          {(() => {
+            const reviews = pro.services
+              .flatMap((s) => s.reviews ?? [])
+              .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
+            if (reviews.length === 0) return null;
+            return (
+              <Card className="mt-4">
+                <CardHeader>
+                  <CardTitle>Reseñas de clientes ({pro.ratingCount})</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {reviews.map((r) => (
+                    <div key={r.id} className="border-b pb-4 last:border-0">
+                      <div className="flex items-center gap-2">
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((n) => (
+                            <Star
+                              key={n}
+                              className={
+                                r.rating >= n
+                                  ? 'h-4 w-4 fill-sol text-sol'
+                                  : 'h-4 w-4 text-muted-foreground/30'
+                              }
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm font-medium">
+                          {r.reviewer
+                            ? `${r.reviewer.firstName} ${r.reviewer.lastName[0]}.`
+                            : 'Cliente'}
+                        </span>
+                      </div>
+                      {r.comment && (
+                        <p className="mt-2 text-sm text-muted-foreground">{r.comment}</p>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
 
         <div>

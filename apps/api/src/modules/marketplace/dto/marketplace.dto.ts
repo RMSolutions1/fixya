@@ -7,11 +7,12 @@ import {
   IsEnum,
   MaxLength,
   Min,
+  Max,
   IsArray,
   ValidateNested,
   ArrayMinSize,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { ServiceRequestStatus } from '@fixya/database';
 
 export class CreateServiceRequestDto {
@@ -117,6 +118,25 @@ export class SubmitQuotationDto {
   items!: QuotationItemDto[];
 }
 
+export class CreateReviewDto {
+  @ApiProperty({ description: 'ID de la contratación (engagement) a reseñar' })
+  @IsUUID()
+  engagementId!: string;
+
+  @ApiProperty({ minimum: 1, maximum: 5 })
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  @Type(() => Number)
+  rating!: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  comment?: string;
+}
+
 export class SearchServicesQueryDto {
   @ApiPropertyOptional()
   @IsOptional()
@@ -217,4 +237,9 @@ export class ListProfessionalsQueryDto {
   @IsOptional()
   @Type(() => Number)
   limit?: number = 20;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  includePending?: boolean;
 }

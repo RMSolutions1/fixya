@@ -71,6 +71,14 @@ export default function LoginPageClient() {
                 )}
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
+              <div className="flex justify-end">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
               <Button type="submit" className="w-full shadow-celeste" disabled={isSubmitting}>
                 {isSubmitting ? 'Ingresando...' : 'Ingresar'}
               </Button>

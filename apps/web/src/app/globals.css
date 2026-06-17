@@ -4,36 +4,38 @@
 
 @layer base {
   :root {
-    /* Argentina — celeste bandera, blanco, Sol de Mayo */
-    --background: 210 40% 98%;
+    /* Grupo Emprenor — navy corporativo + acento obra (alineado grupo/emprenor.com) */
+    --background: 210 33% 98%;
     --foreground: 212 55% 14%;
     --card: 0 0% 100%;
     --card-foreground: 212 55% 14%;
-    --primary: 201 62% 48%;
+    --primary: 212 55% 18%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 201 45% 94%;
-    --secondary-foreground: 208 65% 28%;
-    --muted: 210 35% 96%;
-    --muted-foreground: 215 18% 42%;
-    --accent: 43 96% 56%;
-    --accent-foreground: 212 55% 14%;
+    --secondary: 210 28% 94%;
+    --secondary-foreground: 212 55% 22%;
+    --muted: 210 25% 96%;
+    --muted-foreground: 215 16% 42%;
+    --accent: 32 94% 48%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 30% 90%;
-    --input: 210 30% 90%;
-    --ring: 201 62% 48%;
-    --radius: 0.875rem;
+    --border: 210 22% 90%;
+    --input: 210 22% 90%;
+    --ring: 212 55% 18%;
+    --radius: 0.75rem;
 
-    /* Brand tokens */
+    /* FixYa + Grupo Emprenor */
     --celeste: 201 62% 48%;
     --celeste-light: 201 70% 92%;
-    --celeste-dark: 208 65% 28%;
-    --sol: 43 96% 56%;
+    --celeste-dark: 212 55% 18%;
+    --emprenor-accent: 32 94% 48%;
+    --emprenor-accent-hover: 32 94% 42%;
+    --sol: 38 92% 50%;
     --sol-glow: 43 100% 70%;
     --pampa: 142 35% 45%;
-    --hero-from: 208 72% 22%;
-    --hero-mid: 201 62% 38%;
-    --hero-to: 201 55% 52%;
+    --hero-from: 212 60% 10%;
+    --hero-mid: 212 55% 16%;
+    --hero-to: 201 50% 32%;
   }
 
   * {
@@ -41,12 +43,16 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background font-body text-foreground antialiased;
     font-feature-settings: 'ss01' on, 'cv01' on;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight;
+    @apply font-display font-semibold tracking-tight text-foreground;
+  }
+
+  p {
+    @apply leading-relaxed;
   }
 }
 
@@ -66,8 +72,8 @@
     position: absolute;
     inset: 0;
     background-image:
-      radial-gradient(circle at 50% 120%, hsl(var(--sol) / 0.18) 0%, transparent 45%),
-      radial-gradient(circle at 80% 20%, hsl(var(--celeste-light) / 0.08) 0%, transparent 40%);
+      radial-gradient(circle at 50% 120%, hsl(var(--emprenor-accent) / 0.12) 0%, transparent 45%),
+      radial-gradient(circle at 80% 20%, hsl(var(--celeste-light) / 0.06) 0%, transparent 40%);
     pointer-events: none;
   }
 
@@ -75,6 +81,7 @@
     background: linear-gradient(
       135deg,
       hsl(var(--celeste-dark)) 0%,
+      hsl(212 50% 22%) 50%,
       hsl(var(--celeste)) 100%
     );
   }
@@ -84,11 +91,11 @@
   }
 
   .card-argentina {
-    @apply rounded-2xl border border-border/80 bg-card shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-celeste;
+    @apply rounded-xl border border-border/80 bg-card shadow-sm transition-all duration-300 hover:border-primary/25 hover:shadow-md;
   }
 
   .text-gradient-celeste {
-    @apply bg-gradient-to-r from-primary to-[hsl(201,70%,62%)] bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary to-[hsl(201,62%,48%)] bg-clip-text text-transparent;
   }
 
   .stripes-argentina {
@@ -106,6 +113,10 @@
       linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
       linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
     background-size: 48px 48px;
+  }
+
+  .btn-emprenor {
+    @apply bg-[hsl(var(--emprenor-accent))] text-white shadow-md hover:bg-[hsl(var(--emprenor-accent-hover))];
   }
 }
 

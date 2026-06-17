@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans, Source_Sans_3 } from 'next/font/google';
 import { QueryProvider } from '@/providers/query-provider';
+import { PwaRegister } from '@/components/providers/pwa-register';
 import { SITE_URL } from '@/lib/site-url';
 import './globals.css';
 
@@ -18,33 +19,68 @@ const body = Source_Sans_3({
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: 'FixYa — Servicios profesionales en Argentina | Grupo Emprenor',
+  title: {
+    default: 'FixYa — El marketplace de servicios de Argentina',
+    template: '%s | FixYa',
+  },
   description:
-    'FixYa es la plataforma digital de servicios verificados del Grupo Emprenor. Mercado Pago, factura fiscal ARCA y expediente digital en las 24 provincias.',
+    'Contratá profesionales verificados, compará presupuestos y pagá con Mercado Pago. Marketplace digital del Grupo Emprenor en las 24 provincias.',
+  applicationName: 'FixYa',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'FixYa',
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#152a3d' },
+    { media: '(prefers-color-scheme: dark)', color: '#152a3d' },
+  ],
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
   openGraph: {
     type: 'website',
     locale: 'es_AR',
     url: SITE_URL,
-    siteName: 'FixYa',
+    siteName: 'FixYa · Grupo Emprenor',
+    title: 'FixYa — Marketplace de servicios profesionales',
+    description:
+      'El Mercado Libre de los servicios. Profesionales verificados, presupuestos comparables y pagos seguros.',
   },
   keywords: [
     'FixYa',
     'Grupo Emprenor',
-    'EMPRENOR',
-    'servicios Argentina',
+    'marketplace servicios',
     'profesionales verificados',
     'Mercado Pago',
     'plomero',
     'electricista',
     'gasista',
+    'Argentina',
   ],
+};
+
+export const viewport = {
+  themeColor: '#152a3d',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es-AR" className={`${display.variable} ${body.variable}`}>
       <body className="font-body">
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <PwaRegister />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

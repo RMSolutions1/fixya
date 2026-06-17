@@ -35,8 +35,19 @@ export function ProfessionalCard({ professional }: ProfessionalCardProps) {
                     Verificado
                   </Badge>
                 )}
+                {professional.pendingApproval && !professional.verified && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    En verificación
+                  </Badge>
+                )}
               </div>
               <p className="text-sm text-muted-foreground">{professional.specialty}</p>
+              {(professional.city || professional.province) && (
+                <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                  <MapPin className="h-3 w-3" />
+                  {[professional.city, professional.province].filter(Boolean).join(', ')}
+                </p>
+              )}
               <div className="mt-2 flex items-center gap-3 text-sm">
                 <span className="flex items-center gap-1">
                   <Star className="h-3.5 w-3.5 fill-sol text-sol" />
@@ -74,7 +85,7 @@ export function HeroSearch() {
       onSubmit={(e) => {
         e.preventDefault();
         const q = new FormData(e.currentTarget).get('q') as string;
-        router.push(q ? `/servicios?q=${encodeURIComponent(q)}` : '/servicios');
+        router.push(q ? `/profesionales?q=${encodeURIComponent(q)}` : '/profesionales');
       }}
     >
       <Input
@@ -183,7 +194,7 @@ export function ProCta() {
           cobros seguros y herramientas profesionales.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
-          <Button size="lg" asChild className="bg-sol text-foreground shadow-sol hover:bg-sol/90">
+          <Button size="lg" asChild className="btn-emprenor">
             <Link href="/register?role=PROFESIONAL">Registrarme como profesional</Link>
           </Button>
           <Button size="lg" variant="outlineOnDark" asChild>

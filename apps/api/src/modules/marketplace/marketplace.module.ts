@@ -5,6 +5,7 @@ import {
   CreateServiceRequestHandler,
   PublishServiceRequestHandler,
   SubmitQuotationHandler,
+  CreateReviewHandler,
 } from './commands/marketplace.commands';
 import {
   SearchServicesHandler,
@@ -25,6 +26,7 @@ const CommandHandlers = [
   CreateServiceRequestHandler,
   PublishServiceRequestHandler,
   SubmitQuotationHandler,
+  CreateReviewHandler,
   ToggleFavoriteHandler,
 ];
 

@@ -5,10 +5,10 @@ import {
   Store,
   FileText,
   Wallet,
-  Users,
   ClipboardList,
   TrendingUp,
   Shield,
+  AlertTriangle,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
 import { useServiceRequests, useMarketplaceStats, useWalletBalance } from '@/hooks/use-marketplace';
@@ -23,6 +23,7 @@ import {
   canAccessWallet,
   canCreateRequest,
   canSubmitQuotation,
+  canApproveProfessionals,
 } from '@/lib/dashboard-nav';
 
 export default function DashboardPage() {
@@ -43,6 +44,22 @@ export default function DashboardPage() {
         title={`Hola, ${user?.firstName ?? 'Usuario'}`}
         description={getDashboardDescription(role)}
       />
+
+      {user?.status === 'PENDING_VERIFICATION' && (
+        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+          <div>
+            <p className="font-medium">Tu perfil está en revisión</p>
+            <p className="mt-1 text-sm opacity-90">
+              Ya aparecés en el mapa de profesionales. Subí tu documentación en{' '}
+              <Link href="/dashboard/documentacion" className="font-medium underline">
+                Documentación
+              </Link>{' '}
+              para habilitar cotizaciones.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -82,24 +99,12 @@ export default function DashboardPage() {
           <>
             <Card>
               <CardHeader>
-                <Users className="mb-2 h-6 w-6 text-primary" />
-                <CardTitle className="text-lg">Buscar profesional</CardTitle>
-                <CardDescription>Explorá perfiles verificados cerca tuyo</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full">
-                  <Link href="/profesionales">Ver profesionales</Link>
-                </Button>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
                 <FileText className="mb-2 h-6 w-6 text-primary" />
                 <CardTitle className="text-lg">Nueva solicitud</CardTitle>
                 <CardDescription>Describí lo que necesitás y recibí presupuestos</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button asChild variant="outline" className="w-full">
+                <Button asChild className="w-full">
                   <Link href="/marketplace/requests/new">Crear solicitud</Link>
                 </Button>
               </CardContent>
@@ -166,6 +171,20 @@ export default function DashboardPage() {
           role === 'SUPERVISOR' ||
           role === 'OPERADOR') && (
           <>
+            {canApproveProfessionals(role) && (
+              <Card>
+                <CardHeader>
+                  <Shield className="mb-2 h-6 w-6 text-primary" />
+                  <CardTitle className="text-lg">Aprobaciones</CardTitle>
+                  <CardDescription>Revisá documentación de profesionales nuevos</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button asChild className="w-full">
+                    <Link href="/dashboard/aprobaciones">Ver pendientes</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
             <Card>
               <CardHeader>
                 <Shield className="mb-2 h-6 w-6 text-primary" />

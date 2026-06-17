@@ -6,10 +6,8 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/layout/logo';
-import { GroupBrandMark } from '@/components/brand/group-brand-mark';
-import { GroupBrandBar } from '@/components/brand/group-brand-mark';
 import { getDashboardNav, resolveDashboardRole } from '@/lib/dashboard-nav';
-import { Home, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -35,34 +33,24 @@ export function AppSidebar() {
             ? pathname === href
             : pathname === href || pathname.startsWith(`${href}/`);
           return (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-              isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
-            )}
-          >
-            <Icon className="h-4 w-4" />
-            {label}
-          </Link>
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                isActive
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              {label}
+            </Link>
           );
         })}
-        <Link
-          href="/"
-          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent"
-        >
-          <Home className="h-4 w-4" />
-          Sitio público
-        </Link>
       </nav>
 
       <div className="border-t p-4">
-        <div className="mb-4 px-1">
-          <GroupBrandMark showEmprenor />
-        </div>
         {user && (
           <div className="mb-3 px-3">
             <p className="text-sm font-medium">
@@ -85,12 +73,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen">
       <AppSidebar />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <GroupBrandBar />
-        <main className="flex-1 overflow-auto bg-gradient-to-br from-secondary/40 to-background">
-          <div className="mx-auto max-w-6xl p-6 sm:p-8">{children}</div>
-        </main>
-      </div>
+      <main className="flex-1 overflow-auto bg-gradient-to-br from-secondary/40 to-background">
+        <div className="mx-auto max-w-6xl p-6 sm:p-8">{children}</div>
+      </main>
     </div>
   );
 }

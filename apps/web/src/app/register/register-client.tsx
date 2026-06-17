@@ -7,11 +7,20 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterForm } from '@/lib/validators/auth';
 import { useAuth } from '@/hooks/use-auth';
+import { useCategories } from '@/hooks/use-marketplace';
+import { useMounted } from '@/hooks/use-mounted';
 import { AuthBrandPanel } from '@/components/brand/auth-brand-panel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Logo } from '@/components/layout/logo';
 import { cn } from '@/lib/utils';
 import { User, Wrench, Building2 } from 'lucide-react';
@@ -37,11 +46,40 @@ const roles = [
   },
 ];
 
+const ARGENTINA_PROVINCES = [
+  'Buenos Aires',
+  'CABA',
+  'Catamarca',
+  'Chaco',
+  'Chubut',
+  'Córdoba',
+  'Corrientes',
+  'Entre Ríos',
+  'Formosa',
+  'Jujuy',
+  'La Pampa',
+  'La Rioja',
+  'Mendoza',
+  'Misiones',
+  'Neuquén',
+  'Río Negro',
+  'Salta',
+  'San Juan',
+  'San Luis',
+  'Santa Cruz',
+  'Santa Fe',
+  'Santiago del Estero',
+  'Tierra del Fuego',
+  'Tucumán',
+];
+
 export default function RegisterPageClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const roleParam = searchParams.get('role');
   const { register: registerUser } = useAuth();
+  const mounted = useMounted();
+  const { data: categories } = useCategories(mounted);
   const [error, setError] = useState('');
 
   const {
@@ -53,16 +91,20 @@ export default function RegisterPageClient() {
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { role: 'CLIENTE' },
+    defaultValues: { role: 'CLIENTE', province: 'Salta' },
   });
 
   const selectedRole = watch('role');
+  const isProfessional = selectedRole === 'PROFESIONAL';
 
   useEffect(() => {
     if (roleParam === 'PROFESIONAL' || roleParam === 'CLIENTE' || roleParam === 'EMPRESA') {
       setValue('role', roleParam);
     }
   }, [roleParam, setValue]);
+
+  const flatCategories =
+    categories?.flatMap((c) => [c, ...(c.children ?? [])]) ?? [];
 
   const onSubmit = async (data: RegisterForm) => {
     setError('');
@@ -78,94 +120,191 @@ export default function RegisterPageClient() {
     <div className="flex min-h-full flex-1">
       <AuthBrandPanel
         title="Sumate a la red de servicios argentina"
-        subtitle="Unite a la red nacional de servicios del Grupo Emprenor — clientes, profesionales y empresas con Mercado Pago y expediente digital."
+        subtitle="Completá tu perfil una sola vez. Los datos se cargan automáticamente en cada solicitud."
       />
       <div className="flex flex-1 items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-lg border-primary/10 shadow-celeste">
-        <CardHeader className="text-center lg:hidden">
-          <div className="mx-auto mb-4">
-            <Logo showTagline showSun />
-          </div>
-        </CardHeader>
-        <CardHeader className="hidden lg:block">
-          <CardTitle className="text-2xl">Crear cuenta</CardTitle>
-          <CardDescription>
-            ¿Ya tenés cuenta?{' '}
-            <Link href="/login" className="font-medium text-primary hover:underline">
-              Iniciar sesión
-            </Link>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Label className="mb-3 block">Quiero registrarme como</Label>
-              <Controller
-                name="role"
-                control={control}
-                render={({ field }) => (
-                  <div className="grid gap-2">
-                    {roles.map(({ value, label, description, icon: Icon }) => (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => field.onChange(value)}
-                        className={cn(
-                          'flex items-start gap-3 rounded-xl border p-3 text-left transition-all',
-                          field.value === value
-                            ? 'border-primary bg-primary/5 shadow-celeste'
-                            : 'hover:border-primary/40',
-                        )}
-                      >
-                        <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                        <div>
-                          <p className="font-medium">{label}</p>
-                          <p className="text-xs text-muted-foreground">{description}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              />
+        <Card className="w-full max-w-lg border-primary/10 shadow-celeste">
+          <CardHeader className="text-center lg:hidden">
+            <div className="mx-auto mb-4">
+              <Logo showTagline showSun />
             </div>
+          </CardHeader>
+          <CardHeader className="hidden lg:block">
+            <CardTitle className="text-2xl">Crear cuenta</CardTitle>
+            <CardDescription>
+              ¿Ya tenés cuenta?{' '}
+              <Link href="/login" className="font-medium text-primary hover:underline">
+                Iniciar sesión
+              </Link>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
+                <Label className="mb-3 block">Quiero registrarme como</Label>
+                <Controller
+                  name="role"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="grid gap-2">
+                      {roles.map(({ value, label, description, icon: Icon }) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => field.onChange(value)}
+                          className={cn(
+                            'flex items-start gap-3 rounded-xl border p-3 text-left transition-all',
+                            field.value === value
+                              ? 'border-primary bg-primary/5 shadow-celeste'
+                              : 'hover:border-primary/40',
+                          )}
+                        >
+                          <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                          <div>
+                            <p className="font-medium">{label}</p>
+                            <p className="text-xs text-muted-foreground">{description}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                />
+              </div>
 
-            <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Nombre</Label>
+                  <Input id="firstName" {...register('firstName')} />
+                  {errors.firstName && (
+                    <p className="text-sm text-destructive">{errors.firstName.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Apellido</Label>
+                  <Input id="lastName" {...register('lastName')} />
+                  {errors.lastName && (
+                    <p className="text-sm text-destructive">{errors.lastName.message}</p>
+                  )}
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="firstName">Nombre</Label>
-                <Input id="firstName" {...register('firstName')} />
-                {errors.firstName && (
-                  <p className="text-sm text-destructive">{errors.firstName.message}</p>
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" {...register('email')} />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email.message}</p>
                 )}
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="lastName">Apellido</Label>
-                <Input id="lastName" {...register('lastName')} />
-                {errors.lastName && (
-                  <p className="text-sm text-destructive">{errors.lastName.message}</p>
+                <Label htmlFor="phone">Teléfono</Label>
+                <Input id="phone" placeholder="+54 9 ..." {...register('phone')} />
+                {errors.phone && (
+                  <p className="text-sm text-destructive">{errors.phone.message}</p>
                 )}
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" {...register('email')} />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">Ciudad</Label>
+                  <Input id="city" {...register('city')} />
+                  {errors.city && (
+                    <p className="text-sm text-destructive">{errors.city.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Provincia</Label>
+                  <Controller
+                    name="province"
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Provincia" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ARGENTINA_PROVINCES.map((p) => (
+                            <SelectItem key={p} value={p}>
+                              {p}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.province && (
+                    <p className="text-sm text-destructive">{errors.province.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="address">Dirección (opcional)</Label>
+                <Input id="address" placeholder="Calle, número, barrio" {...register('address')} />
+              </div>
+
+              {isProfessional && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Rubro principal</Label>
+                    <Controller
+                      name="categoryId"
+                      control={control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccioná tu especialidad" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {flatCategories.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {cat.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.categoryId && (
+                      <p className="text-sm text-destructive">{errors.categoryId.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="documentNumber">CUIT o DNI</Label>
+                    <Input id="documentNumber" {...register('documentNumber')} />
+                    {errors.documentNumber && (
+                      <p className="text-sm text-destructive">{errors.documentNumber.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="licenseNumber">Matrícula (opcional)</Label>
+                    <Input id="licenseNumber" {...register('licenseNumber')} />
+                  </div>
+                  <p className="rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
+                    Tu perfil aparecerá en el mapa de profesionales al registrarte. La
+                    administración verificará tu documentación antes de habilitar contacto y
+                    presupuestos.
+                  </p>
+                </>
               )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" type="password" {...register('password')} />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full shadow-celeste" disabled={isSubmitting}>
-              {isSubmitting ? 'Creando cuenta...' : `Continuar como ${roles.find((r) => r.value === selectedRole)?.label}`}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Contraseña</Label>
+                <Input id="password" type="password" {...register('password')} />
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password.message}</p>
+                )}
+              </div>
+
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              <Button type="submit" className="w-full shadow-celeste" disabled={isSubmitting}>
+                {isSubmitting
+                  ? 'Creando cuenta...'
+                  : `Crear cuenta como ${roles.find((r) => r.value === selectedRole)?.label}`}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

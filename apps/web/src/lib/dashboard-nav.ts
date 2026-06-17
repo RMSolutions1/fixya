@@ -5,8 +5,10 @@ import {
   FileText,
   Wallet,
   Heart,
-  Users,
   ClipboardList,
+  ShieldCheck,
+  UserCircle,
+  FileUp,
 } from 'lucide-react';
 
 export type DashboardRole =
@@ -27,37 +29,49 @@ export interface DashboardNavItem {
   exact?: boolean;
 }
 
+const profileNavItem: DashboardNavItem = {
+  href: '/dashboard/perfil',
+  label: 'Mi perfil',
+  icon: UserCircle,
+};
+
 const clientNav: DashboardNavItem[] = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/solicitudes', label: 'Mis solicitudes', icon: ClipboardList },
-  { href: '/profesionales', label: 'Profesionales', icon: Users },
   { href: '/favorites', label: 'Favoritos', icon: Heart },
   { href: '/marketplace/requests/new', label: 'Solicitar servicio', icon: FileText },
+  profileNavItem,
 ];
 
 const professionalNav: DashboardNavItem[] = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/solicitudes', label: 'Oportunidades', icon: ClipboardList },
   { href: '/marketplace', label: 'Marketplace', icon: Store },
+  { href: '/dashboard/documentacion', label: 'Documentación', icon: FileUp },
   { href: '/wallet', label: 'Wallet', icon: Wallet },
+  profileNavItem,
 ];
 
 const adminNav: DashboardNavItem[] = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard/aprobaciones', label: 'Aprobaciones', icon: ShieldCheck },
   { href: '/marketplace', label: 'Marketplace', icon: Store },
   { href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardList },
   { href: '/wallet', label: 'Wallet', icon: Wallet },
+  profileNavItem,
 ];
 
 const auditorNav: DashboardNavItem[] = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardList },
   { href: '/wallet', label: 'Libro contable', icon: Wallet },
+  profileNavItem,
 ];
 
 const gestorNav: DashboardNavItem[] = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/solicitudes', label: 'Expedientes', icon: ClipboardList },
+  profileNavItem,
 ];
 
 const ADMIN_ROLES: DashboardRole[] = [
@@ -98,23 +112,23 @@ export function getDashboardNav(role?: string): DashboardNavItem[] {
 export function getDashboardDescription(role: DashboardRole): string {
   switch (role) {
     case 'PROFESIONAL':
-      return 'Panel profesional FixYa · Grupo Emprenor — oportunidades e ingresos';
+      return 'Panel profesional — oportunidades e ingresos';
     case 'SUPER_ADMIN':
-      return 'Administración FixYa · Grupo Emprenor';
+      return 'Administración FixYa';
     case 'EMPRESA':
-      return 'Panel empresarial FixYa — operaciones y marketplace';
+      return 'Panel empresarial — operaciones y marketplace';
     case 'CONTADOR':
-      return 'Panel contable FixYa — wallet, ledger y comisiones';
+      return 'Panel contable — wallet, ledger y comisiones';
     case 'SUPERVISOR':
-      return 'Supervisión FixYa — monitoreo de operaciones';
+      return 'Supervisión — monitoreo de operaciones';
     case 'OPERADOR':
-      return 'Panel operativo FixYa — solicitudes y marketplace';
+      return 'Panel operativo — solicitudes y marketplace';
     case 'AUDITOR':
-      return 'Auditoría FixYa — solicitudes y libro contable';
+      return 'Auditoría — solicitudes y libro contable';
     case 'GESTOR_DOCUMENTAL':
-      return 'Expedientes FixYa — contrataciones y documentación';
+      return 'Expedientes — contrataciones y documentación';
     default:
-      return 'Tu panel FixYa · Grupo Emprenor';
+      return 'Tu panel FixYa';
   }
 }
 
@@ -128,6 +142,10 @@ export function canCreateRequest(role: DashboardRole): boolean {
 
 export function canSubmitQuotation(role: DashboardRole): boolean {
   return role === 'PROFESIONAL' || role === 'EMPRESA';
+}
+
+export function canApproveProfessionals(role: DashboardRole): boolean {
+  return role === 'SUPER_ADMIN' || role === 'SUPERVISOR' || role === 'OPERADOR';
 }
 
 /** Rutas del dashboard a verificar en E2E por rol */

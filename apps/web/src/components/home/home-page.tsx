@@ -14,7 +14,6 @@ import {
   CategoryPill,
   ProfessionalCard,
   HowItWorks,
-  ProCta,
 } from '@/components/marketing/marketing-blocks';
 import {
   useCategories,
@@ -44,6 +43,8 @@ export function HomePage() {
               ? {
                   professionalsCount: stats.professionalsCount,
                   categoriesCount: stats.categoriesCount,
+                  verifiedProfessionalsCount: stats.verifiedProfessionalsCount,
+                  completedRequests: stats.completedRequests,
                 }
               : undefined
           }
@@ -101,11 +102,8 @@ export function HomePage() {
                 Estamos sumando talento en las 24 provincias. ¿Ofrecés un servicio? Registrate y
                 empezá a recibir solicitudes.
               </p>
-              <Link
-                href="/register?role=PROFESIONAL"
-                className="mt-6 inline-block font-semibold text-primary hover:underline"
-              >
-                Registrarme como profesional →
+              <Link href="/login" className="mt-6 inline-block font-semibold text-primary hover:underline">
+                Ingresar y registrarme →
               </Link>
             </div>
           )}
@@ -113,7 +111,6 @@ export function HomePage() {
       </section>
 
       <HowItWorks />
-      <ProCta />
       <ContactCtaSection />
       <SiteFooter />
     </div>

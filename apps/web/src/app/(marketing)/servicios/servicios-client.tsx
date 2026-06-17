@@ -59,10 +59,19 @@ export default function ServiciosPageClient() {
         <SectionHeading
           eyebrow="Directorio"
           title="Elegí el rubro que necesitás"
-          description="Cada categoría conecta con profesionales verificados. Pagos con Mercado Pago, factura fiscal y expediente digital."
+          description="Cada categoría conecta con profesionales verificados. Pagos con Mercado Pago y expediente digital por servicio."
         />
-        <p className="mb-6 mt-8 text-sm text-muted-foreground">
+        <p className="mb-4 mt-8 text-sm text-muted-foreground">
           {filtered?.length ?? 0} categorías encontradas
+          {search && (
+            <>
+              {' '}
+              ·{' '}
+              <Link href={`/profesionales?q=${encodeURIComponent(search)}`} className="text-primary hover:underline">
+                Buscar profesionales para &quot;{search}&quot;
+              </Link>
+            </>
+          )}
         </p>
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -106,8 +115,8 @@ export default function ServiciosPageClient() {
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
             Registrate gratis y empezá a recibir solicitudes en tu zona.
           </p>
-          <Button className="mt-6 bg-sol text-foreground shadow-sol hover:bg-sol/90" asChild>
-            <Link href="/register?role=PROFESIONAL">Ser profesional en FixYa</Link>
+          <Button className="mt-6 btn-emprenor" asChild>
+            <Link href="/login">Ingresar como profesional</Link>
           </Button>
         </div>
       </section>

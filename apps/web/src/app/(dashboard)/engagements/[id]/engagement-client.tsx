@@ -1,8 +1,8 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { CreditCard, CheckCircle, Loader2, ArrowLeft } from 'lucide-react';
+import { CreditCard, CheckCircle, Loader2, ArrowLeft, Star } from 'lucide-react';
 import Link from 'next/link';
 import { SANDBOX_PAYMENTS_ENABLED } from '@/lib/env';
 import {
@@ -10,7 +10,9 @@ import {
   useCreateCheckout,
   useConfirmSandboxPayment,
   useReleaseFunds,
+  useCreateReview,
 } from '@/hooks/use-marketplace';
+import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -24,8 +26,103 @@ const statusLabels: Record<string, string> = {
   FUNDS_HELD: 'Fondos retenidos',
   FUNDS_RELEASED: 'Fondos liberados',
   IN_PROGRESS: 'En progreso',
+  PENDING_APPROVAL: 'Pendiente de conformidad',
+  WARRANTY: 'En garantía',
   CLOSED: 'Cerrado',
 };
+
+const REVIEWABLE = ['FUNDS_RELEASED', 'WARRANTY', 'CLOSED', 'PENDING_APPROVAL'];
+
+function ReviewCard({
+  engagementId,
+  alreadyReviewed,
+}: {
+  engagementId: string;
+  alreadyReviewed: boolean;
+}) {
+  const createReview = useCreateReview();
+  const [rating, setRating] = useState(0);
+  const [hover, setHover] = useState(0);
+  const [comment, setComment] = useState('');
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState('');
+
+  if (alreadyReviewed || done) {
+    return (
+      <Card className="border-sol/30 bg-sol/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Star className="h-5 w-5 fill-sol text-sol" />
+            ¡Gracias por tu reseña!
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Tu opinión ayuda a otros clientes a elegir mejor.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const submit = async () => {
+    setError('');
+    if (rating < 1) {
+      setError('Elegí una calificación de 1 a 5 estrellas');
+      return;
+    }
+    try {
+      await createReview.mutateAsync({ engagementId, rating, comment: comment || undefined });
+      setDone(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'No se pudo enviar la reseña');
+    }
+  };
+
+  return (
+    <Card className="border-sol/30 bg-sol/5">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Star className="h-5 w-5 text-sol" />
+          Calificá al profesional
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => setRating(n)}
+              onMouseEnter={() => setHover(n)}
+              onMouseLeave={() => setHover(0)}
+              aria-label={`${n} estrellas`}
+            >
+              <Star
+                className={cn(
+                  'h-8 w-8 transition-colors',
+                  (hover || rating) >= n ? 'fill-sol text-sol' : 'text-muted-foreground/40',
+                )}
+              />
+            </button>
+          ))}
+        </div>
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          placeholder="Contanos cómo fue tu experiencia (opcional)"
+          rows={3}
+          maxLength={1000}
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+        />
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <Button onClick={submit} disabled={createReview.isPending}>
+          {createReview.isPending ? 'Enviando...' : 'Enviar reseña'}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function EngagementExpedienteClient({
   params,
@@ -186,6 +283,13 @@ export default function EngagementExpedienteClient({
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {isClient && REVIEWABLE.includes(status) && (
+        <ReviewCard
+          engagementId={id}
+          alreadyReviewed={timeline.some((e) => e.eventType === 'ReviewCreated')}
+        />
       )}
 
       <Card>

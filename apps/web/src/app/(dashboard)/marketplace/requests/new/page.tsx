@@ -1,10 +1,12 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { serviceRequestSchema, type ServiceRequestForm } from '@/lib/validators/auth';
 import { useCategories, useCreateServiceRequest, usePublishServiceRequest } from '@/hooks/use-marketplace';
+import { useAuthStore } from '@/stores/auth.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +23,7 @@ import { DashboardPageHeader } from '@/components/layout/dashboard-page-header';
 
 export default function NewServiceRequestPage() {
   const router = useRouter();
+  const user = useAuthStore((s) => s.user);
   const { data: categories } = useCategories();
   const createRequest = useCreateServiceRequest();
   const publishRequest = usePublishServiceRequest();
@@ -31,6 +34,12 @@ export default function NewServiceRequestPage() {
     control,
     formState: { errors, isSubmitting },
   } = useForm<ServiceRequestForm>({ resolver: zodResolver(serviceRequestSchema) });
+
+  useEffect(() => {
+    if (user && (!user.phone || !user.city || !user.province)) {
+      router.replace('/dashboard/perfil?complete=1');
+    }
+  }, [user, router]);
 
   const onSubmit = async (data: ServiceRequestForm) => {
     const created = await createRequest.mutateAsync(data as unknown as Record<string, unknown>);
@@ -46,8 +55,18 @@ export default function NewServiceRequestPage() {
     <div className="mx-auto max-w-2xl space-y-8">
       <DashboardPageHeader
         title="Nueva solicitud de servicio"
-        description="Describí lo que necesitás y recibí presupuestos de profesionales verificados en tu zona."
+        description="Solo describí el trabajo. Tus datos de contacto y ubicación se toman de tu perfil."
       />
+
+      {user && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="pt-6 text-sm">
+            <p className="font-medium">{user.firstName} {user.lastName}</p>
+            <p className="text-muted-foreground">{user.phone} · {user.city}, {user.province}</p>
+            {user.address && <p className="text-muted-foreground">{user.address}</p>}
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="card-argentina">
         <CardHeader>
@@ -100,22 +119,6 @@ export default function NewServiceRequestPage() {
               {errors.description && (
                 <p className="text-sm text-destructive">{errors.description.message}</p>
               )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="city">Ciudad</Label>
-                <Input id="city" {...register('city')} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="province">Provincia</Label>
-                <Input id="province" {...register('province')} />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">Dirección</Label>
-              <Input id="address" {...register('address')} />
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>

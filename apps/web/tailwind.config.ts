@@ -26,6 +26,10 @@ const config: Config = {
           glow: 'hsl(var(--sol-glow))',
         },
         pampa: 'hsl(var(--pampa))',
+        emprenor: {
+          accent: 'hsl(var(--emprenor-accent))',
+          'accent-hover': 'hsl(var(--emprenor-accent-hover))',
+        },
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',

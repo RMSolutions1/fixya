@@ -12,8 +12,14 @@ apps/api/.env
 dist/
 apps/api/dist/
 apps/web/.next/
+server-dist/
+src/app/api/v1/**/server-dist/
+src/app/api/v1/**/api-dist/
+apps/web/vendor/
+apps/web/lib/server/
 out/
 *.tsbuildinfo
+health-out.txt
 
 # Logs & OS
 *.log
@@ -37,3 +43,5 @@ prisma/*.db-journal
 
 # Docker volumes (local)
 fixya_pgdata/
+.vercel
+.env*.local

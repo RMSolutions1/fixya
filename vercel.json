@@ -5,11 +5,5 @@
   "devCommand": "npm run web:dev",
   "framework": "nextjs",
   "outputDirectory": "apps/web/.next",
-  "regions": ["gru1"],
-  "functions": {
-    "api/[...path].ts": {
-      "maxDuration": 30,
-      "memory": 1024
-    }
-  }
+  "regions": ["gru1"]
 }

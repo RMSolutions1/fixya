@@ -12,12 +12,14 @@ import { SectionHeading } from '@/components/marketing/section-heading';
 import { useProfessionals, useCategories } from '@/hooks/use-marketplace';
 import { useMounted } from '@/hooks/use-mounted';
 import Link from 'next/link';
+import { ProfessionalsMap } from '@/components/marketing/professionals-map';
 export default function ProfesionalesPageClient() {
   const mounted = useMounted();
   const searchParams = useSearchParams();
   const catSlug = searchParams.get('cat') ?? undefined;
-  const [q, setQ] = useState('');
-  const [search, setSearch] = useState('');
+  const initialQ = searchParams.get('q') ?? '';
+  const [q, setQ] = useState(initialQ);
+  const [search, setSearch] = useState(initialQ);
   const [sortBy, setSortBy] = useState('rating');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -29,6 +31,7 @@ export default function ProfesionalesPageClient() {
       q: search || undefined,
       categorySlug: catSlug,
       sortBy,
+      includePending: true,
     },
     mounted,
   );
@@ -86,6 +89,17 @@ export default function ProfesionalesPageClient() {
         </>
       }
     >
+      <SectionHeading
+        eyebrow="Mapa"
+        title="Profesionales en Argentina"
+        description="Ubicación aproximada según provincia de registro. Los nuevos perfiles aparecen al instante; el equipo valida documentación antes de activar operaciones."
+      />
+      {!isLoading && professionals.length > 0 && (
+        <div className="mb-10">
+          <ProfessionalsMap professionals={professionals} />
+        </div>
+      )}
+
       <SectionHeading
         eyebrow="Directorio"
         title="Perfiles con reseñas y precios en pesos"

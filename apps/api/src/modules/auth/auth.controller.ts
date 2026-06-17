@@ -1,7 +1,15 @@
-import { Controller, Post, Get, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, RefreshTokenDto } from './dto/auth.dto';
+import {
+  RegisterDto,
+  LoginDto,
+  RefreshTokenDto,
+  UpdateProfileDto,
+  UploadComplianceDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './dto/auth.dto';
 import { Public, CurrentUser } from '../../common/decorators/auth.decorators';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
@@ -33,10 +41,40 @@ export class AuthController {
     return this.authService.refresh(dto.refreshToken);
   }
 
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Solicitar restablecimiento de contraseña' })
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Restablecer contraseña con token' })
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.token, dto.password);
+  }
+
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Perfil del usuario autenticado' })
   me(@CurrentUser() user: JwtPayload) {
     return this.authService.getProfile(user.sub);
+  }
+
+  @Patch('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar perfil del usuario' })
+  updateProfile(@CurrentUser() user: JwtPayload, @Body() dto: UpdateProfileDto) {
+    return this.authService.updateProfile(user.sub, dto);
+  }
+
+  @Post('me/compliance')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Subir o actualizar documentación de verificación' })
+  uploadCompliance(@CurrentUser() user: JwtPayload, @Body() dto: UploadComplianceDto) {
+    return this.authService.uploadCompliance(user.sub, user.tenantId, dto);
   }
 }

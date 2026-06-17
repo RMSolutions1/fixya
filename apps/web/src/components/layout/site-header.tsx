@@ -13,8 +13,8 @@ import { useMounted } from '@/hooks/use-mounted';
 const navLinks = [
   { href: '/servicios', label: 'Servicios' },
   { href: '/profesionales', label: 'Profesionales' },
-  { href: '/nosotros', label: 'Nosotros' },
   { href: '/para-quienes', label: '¿Para quiénes?' },
+  { href: '/nosotros', label: 'Nosotros' },
 ];
 
 interface SiteHeaderProps {
@@ -77,26 +77,9 @@ export function SiteHeader({
               <Link href="/dashboard">Mi panel</Link>
             </Button>
           ) : (
-            <>
-              <Button
-                variant={isTransparent || overlay ? 'ghostOnDark' : 'ghost'}
-                size="sm"
-                asChild
-              >
-                <Link href="/login">Ingresar</Link>
-              </Button>
-              <Button
-                size="sm"
-                variant={isTransparent || overlay ? 'outlineOnDark' : 'outline'}
-                className={isTransparent || overlay ? undefined : 'border-primary/30'}
-                asChild
-              >
-                <Link href="/register">Registrarse</Link>
-              </Button>
-              <Button size="sm" className="bg-sol text-foreground shadow-sol hover:bg-sol/90" asChild>
-                <Link href="/register">Solicitar servicio</Link>
-              </Button>
-            </>
+            <Button size="sm" className="btn-emprenor shadow-md" asChild>
+              <Link href="/login">Ingresar</Link>
+            </Button>
           )}
         </div>
 
@@ -136,18 +119,13 @@ export function SiteHeader({
                 Mi panel
               </Link>
             ) : (
-              <>
-                <Link href="/login" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 text-sm">
-                  Ingresar
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setOpen(false)}
-                  className="rounded-md px-3 py-2 text-sm font-medium text-primary"
-                >
-                  Solicitar servicio
-                </Link>
-              </>
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="rounded-md px-3 py-2 text-sm font-medium text-primary"
+              >
+                Ingresar
+              </Link>
             )}
           </nav>
         </div>

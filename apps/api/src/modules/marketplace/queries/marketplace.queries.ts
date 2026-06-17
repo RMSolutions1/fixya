@@ -325,7 +325,7 @@ export class ListProfessionalsHandler implements IQueryHandler<ListProfessionals
   constructor(private readonly prisma: PrismaService) {}
 
   async execute(query: ListProfessionalsQuery) {
-    const { q, categoryId, categorySlug, sortBy = 'rating', page = 1, limit = 20 } =
+    const { q, categoryId, categorySlug, sortBy = 'rating', page = 1, limit = 20, includePending = false } =
       query.params;
     const skip = (page - 1) * limit;
 
@@ -338,7 +338,7 @@ export class ListProfessionalsHandler implements IQueryHandler<ListProfessionals
     }
 
     const serviceWhere: Prisma.ServiceWhereInput = {
-      status: 'ACTIVE',
+      status: includePending ? { in: ['ACTIVE', 'DRAFT'] } : 'ACTIVE',
       deletedAt: null,
       professionalId: { not: null },
       ...(resolvedCategoryId && { categoryId: resolvedCategoryId }),
@@ -393,7 +393,7 @@ export class ListProfessionalsHandler implements IQueryHandler<ListProfessionals
       where: {
         id: { in: professionalIds },
         deletedAt: null,
-        status: 'ACTIVE',
+        status: includePending ? { in: ['ACTIVE', 'PENDING_VERIFICATION'] } : 'ACTIVE',
         ...(q && {
           OR: [
             { firstName: { contains: q, mode: 'insensitive' } },
@@ -408,6 +408,9 @@ export class ListProfessionalsHandler implements IQueryHandler<ListProfessionals
         phone: true,
         avatarUrl: true,
         emailVerified: true,
+        status: true,
+        city: true,
+        province: true,
       },
     });
 
@@ -420,7 +423,12 @@ export class ListProfessionalsHandler implements IQueryHandler<ListProfessionals
         lastName: u.lastName,
         phone: u.phone,
         avatarUrl: u.avatarUrl,
-        verified: u.emailVerified,
+        verified: u.emailVerified && u.status === 'ACTIVE',
+        pendingApproval: u.status === 'PENDING_VERIFICATION' || primary.status === 'DRAFT',
+        city: u.city,
+        province: u.province,
+        latitude: primary.latitude ? Number(primary.latitude) : null,
+        longitude: primary.longitude ? Number(primary.longitude) : null,
         specialty: primary.category.name,
         categories: [...agg.categories],
         serviceCount: agg.services.length,
@@ -428,7 +436,7 @@ export class ListProfessionalsHandler implements IQueryHandler<ListProfessionals
         ratingAvg: agg.maxRating,
         ratingCount: agg.totalReviews,
         primaryServiceId: primary.id,
-        available: true,
+        available: u.status === 'ACTIVE' && primary.status === 'ACTIVE',
       };
     });
 
@@ -605,6 +613,9 @@ export class GetMarketplaceStatsHandler
       servicesCount,
       categoriesCount,
       professionalsCount: professionalsCount.length,
+      verifiedProfessionalsCount: await this.prisma.user.count({
+        where: { status: 'ACTIVE', deletedAt: null, memberships: { some: { role: 'PROFESIONAL' } } },
+      }),
       completedRequests: requestsCount,
     };
   }

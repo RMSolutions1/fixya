@@ -27,19 +27,9 @@ export function SiteTopBar() {
           </span>
         </div>
         <div className="flex items-center gap-4">
-          <a
-            href={COMPANY.groupWebsite}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-white/70 transition-colors hover:text-sol"
-          >
-            {COMPANY.groupBrand}
-          </a>
-          <span className="text-white/30">·</span>
-          <span className="font-medium tracking-wider text-white/60">CELESTE Y BLANCO · ARGENTINA</span>
-          <Link href="/login" className="font-medium text-sol hover:underline">
-            Acceso profesionales
-          </Link>
+          <span className="font-medium tracking-wider text-white/60">
+            {COMPANY.groupBrand} · Marketplace nacional
+          </span>
         </div>
       </div>
     </div>

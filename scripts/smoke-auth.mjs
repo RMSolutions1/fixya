@@ -55,6 +55,9 @@ const registered = await post('register', '/auth/register', {
   password,
   firstName: 'Smoke',
   lastName: 'Test',
+  phone: '+54 387 555-0001',
+  city: 'Salta',
+  province: 'Salta',
   role: 'CLIENTE',
 });
 
@@ -96,47 +99,40 @@ if (categoryId) {
   }
 }
 
-// Flujo profesional → presupuesto → contratación → expediente
+// Flujo profesional: registro con perfil completo + guard de verificación.
+// El presupuesto/contratación/reseña con profesional verificado se cubre en
+// scripts/e2e-new-features.mjs (usa usuarios de prueba ya aprobados).
 const proEmail = `smoke-pro-${stamp}@test.fixya.local`;
+const categoryForPro = categoryId;
 const proRegistered = await post('register-pro', '/auth/register', {
   email: proEmail,
   password,
   firstName: 'Pro',
   lastName: 'Smoke',
+  phone: '+54 387 555-0002',
+  city: 'Salta',
+  province: 'Salta',
   role: 'PROFESIONAL',
+  categoryId: categoryForPro,
+  documentNumber: '20-12345678-9',
 });
 
 const proToken = proRegistered?.accessToken;
 
 if (proToken && requestId) {
-  const quotation = await post(
-    'submit-quotation',
-    '/marketplace/quotations',
-    {
+  // Profesional recién registrado está PENDING_VERIFICATION → no puede presupuestar.
+  const blocked = await fetch(`${API}/marketplace/quotations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${proToken}` },
+    body: JSON.stringify({
       serviceRequestId: requestId,
       totalAmount: 15000,
       estimatedDays: 3,
       items: [{ description: 'Servicio smoke test', quantity: 1, unitPrice: 15000 }],
-    },
-    proToken,
-  );
-
-  if (quotation?.id) {
-    quotationId = quotation.id;
-    await get('compare-quotations', `/marketplace/requests/${requestId}/compare`, token);
-  }
-}
-
-if (quotationId) {
-  const engagement = await post(
-    'accept-quotation',
-    `/engagements/accept-quotation/${quotationId}`,
-    {},
-    token,
-  );
-
-  if (engagement?.id) {
-    await get('engagement-expediente', `/engagements/${engagement.id}/expediente`, token);
+    }),
+  });
+  if (blocked.ok) {
+    failures.push('quotation-guard: profesional sin verificar pudo presupuestar');
   }
 }
 

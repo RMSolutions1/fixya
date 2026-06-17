@@ -16,11 +16,13 @@ import {
   SubmitQuotationDto,
   SearchServicesQueryDto,
   ListProfessionalsQueryDto,
+  CreateReviewDto,
 } from './dto/marketplace.dto';
 import {
   CreateServiceRequestCommand,
   PublishServiceRequestCommand,
   SubmitQuotationCommand,
+  CreateReviewCommand,
 } from './commands/marketplace.commands';
 import {
   SearchServicesQuery,
@@ -170,5 +172,12 @@ export class MarketplaceController {
     return this.commandBus.execute(
       new SubmitQuotationCommand(user.sub, user.tenantId, dto),
     );
+  }
+
+  @Post('reviews')
+  @Roles(MemberRole.CLIENTE)
+  @ApiOperation({ summary: 'Reseñar una contratación completada' })
+  createReview(@CurrentUser() user: JwtPayload, @Body() dto: CreateReviewDto) {
+    return this.commandBus.execute(new CreateReviewCommand(user.sub, dto));
   }
 }

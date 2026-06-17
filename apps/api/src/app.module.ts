@@ -21,6 +21,7 @@ import { EngagementModule } from './modules/engagement/engagement.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
     WalletModule,
     WebhooksModule,
     PaymentsModule,
+    AdminModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: GlobalExceptionFilter },

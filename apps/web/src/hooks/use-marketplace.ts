@@ -14,6 +14,14 @@ export interface ServiceCategory {
   children?: ServiceCategory[];
 }
 
+export interface ServiceReview {
+  id: string;
+  rating: number;
+  comment?: string | null;
+  createdAt: string;
+  reviewer?: { firstName: string; lastName: string };
+}
+
 export interface Service {
   id: string;
   title: string;
@@ -24,6 +32,7 @@ export interface Service {
   professionalId?: string | null;
   category: { id: string; name: string; slug?: string };
   tenant: { id: string; name: string };
+  reviews?: ServiceReview[];
   professional?: {
     id: string;
     firstName: string;
@@ -39,6 +48,11 @@ export interface ProfessionalSummary {
   phone?: string | null;
   avatarUrl?: string | null;
   verified: boolean;
+  pendingApproval?: boolean;
+  city?: string | null;
+  province?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   specialty: string;
   categories: string[];
   serviceCount: number;
@@ -75,6 +89,7 @@ export interface MarketplaceStats {
   servicesCount: number;
   categoriesCount: number;
   professionalsCount: number;
+  verifiedProfessionalsCount?: number;
   completedRequests: number;
 }
 
@@ -341,6 +356,7 @@ export function useMarketplaceStats(enabled = true) {
         return {
           categoriesCount: fallbackCategories.length,
           professionalsCount: 0,
+          verifiedProfessionalsCount: 0,
           completedRequests: 0,
         };
       }
@@ -348,6 +364,7 @@ export function useMarketplaceStats(enabled = true) {
     placeholderData: {
       categoriesCount: fallbackCategories.length,
       professionalsCount: 0,
+      verifiedProfessionalsCount: 0,
       completedRequests: 0,
     },
     enabled,
@@ -372,6 +389,7 @@ export function useProfessionals(
     categorySlug?: string;
     sortBy?: string;
     page?: number;
+    includePending?: boolean;
   },
   enabled = true,
 ) {
@@ -381,6 +399,7 @@ export function useProfessionals(
   if (params?.categorySlug) search.set('categorySlug', params.categorySlug);
   if (params?.sortBy) search.set('sortBy', params.sortBy);
   if (params?.page) search.set('page', String(params.page));
+  if (params?.includePending) search.set('includePending', 'true');
   const qs = search.toString();
 
   return useQuery({
@@ -464,6 +483,23 @@ export function useReleaseFunds() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['engagement'] });
       qc.invalidateQueries({ queryKey: ['wallet-balance'] });
+    },
+  });
+}
+
+export function useCreateReview() {
+  const { token, tenantId } = useApiAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { engagementId: string; rating: number; comment?: string }) =>
+      apiRequest('/marketplace/reviews', {
+        method: 'POST',
+        token,
+        tenantId,
+        body: input,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['engagement'] });
     },
   });
 }

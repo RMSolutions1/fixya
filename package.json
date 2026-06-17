@@ -23,7 +23,7 @@
     "api:start": "npm run start:prod -w @fixya/api",
     "web:dev": "npm run dev -w @fixya/web",
     "web:build": "npm run build -w @fixya/web",
-    "vercel-build": "npm run db:generate && npm run build -w @fixya/database && npm run api:build && npm run web:build",
+    "vercel-build": "npm run db:generate && npm run build -w @fixya/database && npm run api:build && node scripts/copy-api-dist.mjs && npm run web:build",
     "build": "npm run db:generate && npm run api:build && npm run web:build",
     "test": "npm run test -w @fixya/api",
     "test:smoke": "node scripts/smoke-test.mjs",
@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@vercel/node": "^5.0.0",
+    "esbuild": "^0.28.1",
     "prisma": "^6.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0"

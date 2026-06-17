@@ -25,7 +25,7 @@ const audiences = [
       'Profesionales verificados con reseñas reales',
       'Presupuestos comparables antes de contratar',
       'Pago retenido hasta tu conformidad',
-      'Factura fiscal en cada servicio',
+      'Factura fiscal (integración Emitia en roadmap)',
     ],
     cta: { href: '/servicios', label: 'Buscar servicios' },
     accent: 'celeste' as const,

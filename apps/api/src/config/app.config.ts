@@ -31,5 +31,5 @@ export const jwtConfig = registerAs('jwt', () => ({
 }));
 
 export const bcryptConfig = registerAs('bcrypt', () => ({
-  rounds: parseInt(process.env.BCRYPT_ROUNDS ?? '12', 10),
+  rounds: parseInt(process.env.BCRYPT_ROUNDS ?? '10', 10),
 }));

@@ -6,10 +6,15 @@ export interface AuthUser {
   email: string;
   firstName: string;
   lastName: string;
+  phone?: string | null;
+  address?: string | null;
+  city?: string | null;
+  province?: string | null;
+  status?: string;
   memberships?: Array<{
     role: string;
     isDefault: boolean;
-    tenant: { id: string; slug: string; name: string; type: string };
+    tenant: { id: string; slug: string; name: string; type: string; status?: string };
   }>;
 }
 

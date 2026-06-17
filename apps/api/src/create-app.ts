@@ -3,10 +3,15 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import express, { type Express } from 'express';
-import helmet from 'helmet';
+import type { Express } from 'express';
 import { AppModule } from './app.module';
 import { validateProductionEnv } from './config/validate-env';
+
+// require() evita problemas de default import en Vercel serverless
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const express = require('express') as typeof import('express');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const helmet = require('helmet') as typeof import('helmet').default;
 
 export async function createApp(): Promise<Express> {
   validateProductionEnv();
