@@ -1,0 +1,112 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Resend } from 'resend';
+
+const APP_NAME = 'FixYa';
+const FROM_ADDRESS = 'FixYa <noreply@fixya.emprenor.com>';
+
+@Injectable()
+export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
+  private readonly resend: Resend | null;
+  private readonly appPublicUrl: string;
+
+  constructor(private readonly config: ConfigService) {
+    const apiKey = this.config.get<string>('app.resendApiKey');
+    this.resend = apiKey ? new Resend(apiKey) : null;
+    this.appPublicUrl = this.config.get<string>('app.appPublicUrl', 'https://fixya.emprenor.com');
+    if (!apiKey) {
+      this.logger.warn('RESEND_API_KEY no configurada — emails desactivados');
+    }
+  }
+
+  private async send(to: string, subject: string, html: string): Promise<void> {
+    if (!this.resend) {
+      this.logger.debug(`[EMAIL SIMULADO] Para: ${to} | Asunto: ${subject}`);
+      return;
+    }
+    try {
+      const { error } = await this.resend.emails.send({ from: FROM_ADDRESS, to, subject, html });
+      if (error) this.logger.error(`Error Resend: ${JSON.stringify(error)}`);
+    } catch (err) {
+      this.logger.error(`Excepción al enviar email a ${to}: ${err}`);
+    }
+  }
+
+  async sendWelcome(to: string, firstName: string): Promise<void> {
+    const subject = `Bienvenido a ${APP_NAME}, ${firstName}`;
+    const html = `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1c1917">
+        <h1 style="color:#2E2A6E">¡Hola, ${firstName}! 👋</h1>
+        <p>Tu cuenta en <strong>${APP_NAME}</strong> ya está activa.</p>
+        <p>Podés empezar a buscar profesionales, comparar presupuestos y contratar con pagos seguros vía Mercado Pago.</p>
+        <a href="${this.appPublicUrl}/dashboard"
+           style="display:inline-block;background:#16a34a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:16px 0">
+          Ir a mi dashboard →
+        </a>
+        <p style="font-size:12px;color:#78716c;margin-top:32px">
+          ${APP_NAME} · Grupo Emprenor · RM International Group SAS<br>
+          Av. Casiano Casas 3080, Salta, Argentina
+        </p>
+      </div>`;
+    await this.send(to, subject, html);
+  }
+
+  async sendPasswordReset(to: string, firstName: string, token: string): Promise<void> {
+    const resetUrl = `${this.appPublicUrl}/reset-password?token=${token}`;
+    const subject = `Restablecer tu contraseña · ${APP_NAME}`;
+    const html = `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1c1917">
+        <h1 style="color:#2E2A6E">Restablecé tu contraseña</h1>
+        <p>Hola, ${firstName}. Recibimos una solicitud para restablecer la contraseña de tu cuenta.</p>
+        <a href="${resetUrl}"
+           style="display:inline-block;background:#16a34a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:16px 0">
+          Restablecer contraseña →
+        </a>
+        <p>Este enlace expira en <strong>1 hora</strong>. Si no solicitaste el cambio, ignorá este email.</p>
+        <p style="word-break:break-all;font-size:12px;color:#78716c">
+          O copiá este enlace en tu navegador:<br>${resetUrl}
+        </p>
+        <p style="font-size:12px;color:#78716c;margin-top:32px">
+          ${APP_NAME} · Grupo Emprenor · RM International Group SAS
+        </p>
+      </div>`;
+    await this.send(to, subject, html);
+  }
+
+  async sendProfessionalApproved(to: string, firstName: string): Promise<void> {
+    const subject = `¡Tu perfil profesional fue aprobado! · ${APP_NAME}`;
+    const html = `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1c1917">
+        <h1 style="color:#2E2A6E">¡Felicitaciones, ${firstName}! 🎉</h1>
+        <p>Tu perfil como profesional verificado en <strong>${APP_NAME}</strong> fue aprobado. Ya aparecés en el mapa y podés recibir y enviar presupuestos.</p>
+        <a href="${this.appPublicUrl}/dashboard"
+           style="display:inline-block;background:#16a34a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:16px 0">
+          Ver mi perfil →
+        </a>
+        <p style="font-size:12px;color:#78716c;margin-top:32px">
+          ${APP_NAME} · Grupo Emprenor · RM International Group SAS
+        </p>
+      </div>`;
+    await this.send(to, subject, html);
+  }
+
+  async sendProfessionalRejected(to: string, firstName: string, note?: string): Promise<void> {
+    const subject = `Revisión de documentación pendiente · ${APP_NAME}`;
+    const html = `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1c1917">
+        <h1 style="color:#2E2A6E">Revisión de documentación</h1>
+        <p>Hola, ${firstName}. Revisamos tu documentación y encontramos un inconveniente:</p>
+        ${note ? `<blockquote style="border-left:3px solid #e5e7eb;padding-left:12px;color:#78716c">${note}</blockquote>` : ''}
+        <p>Podés actualizar tu documentación desde tu dashboard e iniciar una nueva revisión.</p>
+        <a href="${this.appPublicUrl}/dashboard/documentacion"
+           style="display:inline-block;background:#2E2A6E;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:16px 0">
+          Actualizar documentación →
+        </a>
+        <p style="font-size:12px;color:#78716c;margin-top:32px">
+          ${APP_NAME} · Grupo Emprenor · RM International Group SAS
+        </p>
+      </div>`;
+    await this.send(to, subject, html);
+  }
+}

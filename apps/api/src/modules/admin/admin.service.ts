@@ -11,10 +11,14 @@ import {
   UserStatus,
 } from '@fixya/database';
 import { PrismaService } from '../../database/prisma.service';
+import { EmailService } from '../../common/email/email.service';
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly email: EmailService,
+  ) {}
 
   async listPendingProfessionals() {
     const users = await this.prisma.user.findMany({
@@ -123,6 +127,9 @@ export class AdminService {
       });
     });
 
+    // Email de aprobación — no bloqueante
+    this.email.sendProfessionalApproved(user.email, user.firstName).catch(() => undefined);
+
     return { ok: true, userId };
   }
 
@@ -150,6 +157,9 @@ export class AdminService {
         },
       });
     });
+
+    // Email de rechazo — no bloqueante
+    this.email.sendProfessionalRejected(user.email, user.firstName, note).catch(() => undefined);
 
     return { ok: true, userId };
   }

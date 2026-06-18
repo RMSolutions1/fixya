@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'crypto';
+import { EmailService } from '../../common/email/email.service';
 import {
   ComplianceDocType,
   ComplianceStatus,
@@ -23,6 +24,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    private readonly email: EmailService,
   ) {}
 
   async register(dto: RegisterDto): Promise<TokenPair> {
@@ -149,9 +151,14 @@ export class AuthService {
       return { user, tenant };
     });
 
-    return this.generateTokens(result.user.id, result.user.email, result.tenant.id, [
+    const tokens = await this.generateTokens(result.user.id, result.user.email, result.tenant.id, [
       dto.role,
     ]);
+
+    // Email de bienvenida — no bloqueante
+    this.email.sendWelcome(result.user.email, result.user.firstName).catch(() => undefined);
+
+    return tokens;
   }
 
   async login(dto: LoginDto): Promise<TokenPair & { tenantId: string }> {
@@ -342,6 +349,12 @@ export class AuthService {
     });
 
     const isProd = this.config.get<string>('app.nodeEnv') === 'production';
+
+    // Enviar email con el enlace de recuperación (no bloqueante)
+    this.email
+      .sendPasswordReset(user.email, user.firstName, token)
+      .catch(() => undefined);
+
     return {
       message: genericMessage,
       ...(isProd ? {} : { devToken: token }),

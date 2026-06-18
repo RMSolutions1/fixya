@@ -33,8 +33,8 @@ export const metadata: Metadata = {
     title: 'FixYa',
   },
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#152a3d' },
-    { media: '(prefers-color-scheme: dark)', color: '#152a3d' },
+    { media: '(prefers-color-scheme: light)', color: '#2E2A6E' },
+    { media: '(prefers-color-scheme: dark)', color: '#2E2A6E' },
   ],
   icons: {
     icon: [
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: '#152a3d',
+  themeColor: '#2E2A6E',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,

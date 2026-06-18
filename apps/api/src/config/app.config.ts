@@ -18,6 +18,9 @@ export default registerAs('app', () => ({
   corsOrigins: (process.env.CORS_ORIGINS ?? 'http://localhost:3000').split(','),
   enableSandboxPayments: process.env.ENABLE_SANDBOX_PAYMENTS === 'true',
   enableSwagger: process.env.ENABLE_SWAGGER !== 'false' && process.env.NODE_ENV !== 'production',
+  resendApiKey: process.env.RESEND_API_KEY,
+  appPublicUrl: process.env.APP_PUBLIC_URL ?? 'https://fixya.emprenor.com',
+  mpWebhookSecret: process.env.MP_WEBHOOK_SECRET,
 }));
 
 export const jwtConfig = registerAs('jwt', () => ({
