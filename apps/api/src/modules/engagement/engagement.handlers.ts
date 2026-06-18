@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   EngagementStatus,
+  MemberRole,
   QuotationStatus,
   ServiceRequestStatus,
 } from '@fixya/database';
@@ -98,6 +99,187 @@ export class AcceptQuotationHandler
       });
 
       return engagement;
+    });
+  }
+}
+
+// ─── Profesional: iniciar trabajo ────────────────────────────────────────────
+
+export class StartEngagementCommand {
+  constructor(
+    public readonly engagementId: string,
+    public readonly professionalId: string,
+  ) {}
+}
+
+@CommandHandler(StartEngagementCommand)
+export class StartEngagementHandler implements ICommandHandler<StartEngagementCommand> {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute({ engagementId, professionalId }: StartEngagementCommand) {
+    const eng = await this.prisma.engagement.findFirst({
+      where: { id: engagementId, deletedAt: null },
+    });
+    if (!eng) throw new NotFoundException('Contratación no encontrada');
+    if (eng.professionalId !== professionalId) throw new ForbiddenException('No autorizado');
+    if (eng.status !== EngagementStatus.FUNDS_HELD) {
+      throw new BadRequestException('Solo se puede iniciar cuando los fondos están retenidos');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.engagement.update({
+        where: { id: engagementId },
+        data: { status: EngagementStatus.IN_PROGRESS },
+      });
+      await tx.engagementTimelineEvent.create({
+        data: {
+          engagementId,
+          tenantId: eng.tenantId,
+          eventType: 'WorkStarted',
+          actorId: professionalId,
+          payload: {},
+        },
+      });
+      return updated;
+    });
+  }
+}
+
+// ─── Profesional: marcar trabajo como terminado ──────────────────────────────
+
+export class CompleteEngagementCommand {
+  constructor(
+    public readonly engagementId: string,
+    public readonly professionalId: string,
+    public readonly note?: string,
+  ) {}
+}
+
+@CommandHandler(CompleteEngagementCommand)
+export class CompleteEngagementHandler implements ICommandHandler<CompleteEngagementCommand> {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute({ engagementId, professionalId, note }: CompleteEngagementCommand) {
+    const eng = await this.prisma.engagement.findFirst({
+      where: { id: engagementId, deletedAt: null },
+    });
+    if (!eng) throw new NotFoundException('Contratación no encontrada');
+    if (eng.professionalId !== professionalId) throw new ForbiddenException('No autorizado');
+    if (
+      eng.status !== EngagementStatus.IN_PROGRESS &&
+      eng.status !== EngagementStatus.FUNDS_HELD
+    ) {
+      throw new BadRequestException('Estado inválido para marcar como terminado');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.engagement.update({
+        where: { id: engagementId },
+        data: { status: EngagementStatus.PENDING_APPROVAL },
+      });
+      await tx.engagementTimelineEvent.create({
+        data: {
+          engagementId,
+          tenantId: eng.tenantId,
+          eventType: 'WorkCompleted',
+          actorId: professionalId,
+          payload: { note: note ?? null },
+        },
+      });
+      return updated;
+    });
+  }
+}
+
+// ─── Cliente: abrir disputa ──────────────────────────────────────────────────
+
+export class OpenDisputeCommand {
+  constructor(
+    public readonly engagementId: string,
+    public readonly clientId: string,
+    public readonly reason: string,
+  ) {}
+}
+
+@CommandHandler(OpenDisputeCommand)
+export class OpenDisputeHandler implements ICommandHandler<OpenDisputeCommand> {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute({ engagementId, clientId, reason }: OpenDisputeCommand) {
+    const eng = await this.prisma.engagement.findFirst({
+      where: { id: engagementId, deletedAt: null },
+    });
+    if (!eng) throw new NotFoundException('Contratación no encontrada');
+    if (eng.clientId !== clientId) throw new ForbiddenException('No autorizado');
+
+    const openableStatuses: EngagementStatus[] = [
+      EngagementStatus.FUNDS_HELD,
+      EngagementStatus.IN_PROGRESS,
+      EngagementStatus.PENDING_APPROVAL,
+    ];
+    if (!openableStatuses.includes(eng.status)) {
+      throw new BadRequestException('No se puede abrir una disputa en este estado');
+    }
+
+    const existing = await this.prisma.dispute.findUnique({ where: { engagementId } });
+    if (existing) throw new BadRequestException('Ya existe una disputa abierta');
+
+    return this.prisma.$transaction(async (tx) => {
+      const dispute = await tx.dispute.create({
+        data: {
+          engagementId,
+          tenantId: eng.tenantId,
+          openedById: clientId,
+          reason,
+        },
+      });
+      await tx.engagement.update({
+        where: { id: engagementId },
+        data: { status: EngagementStatus.DISPUTED },
+      });
+      await tx.engagementTimelineEvent.create({
+        data: {
+          engagementId,
+          tenantId: eng.tenantId,
+          eventType: 'DisputeOpened',
+          actorId: clientId,
+          payload: { disputeId: dispute.id, reason },
+        },
+      });
+      return dispute;
+    });
+  }
+}
+
+// ─── Lista de engagements por usuario ────────────────────────────────────────
+
+export class ListEngagementsQuery {
+  constructor(
+    public readonly userId: string,
+    public readonly roles: MemberRole[],
+  ) {}
+}
+
+@QueryHandler(ListEngagementsQuery)
+export class ListEngagementsHandler implements IQueryHandler<ListEngagementsQuery> {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute({ userId, roles }: ListEngagementsQuery) {
+    const isProfessional = roles.includes(MemberRole.PROFESIONAL);
+    const where = isProfessional
+      ? { professionalId: userId, deletedAt: null }
+      : { clientId: userId, deletedAt: null };
+
+    return this.prisma.engagement.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        serviceRequest: { select: { title: true, description: true } },
+        client: { select: { firstName: true, lastName: true } },
+        professional: { select: { firstName: true, lastName: true } },
+        payment: { select: { status: true, amount: true } },
+        walletAccount: { select: { heldAmount: true, releasedAmount: true } },
+      },
     });
   }
 }

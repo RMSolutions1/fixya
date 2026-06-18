@@ -91,4 +91,24 @@ export class MercadoPagoService {
   getCheckoutUrl(preference: MpPreferenceResult): string {
     return this.isSandbox ? preference.sandbox_init_point : preference.init_point;
   }
+
+  async getPaymentStatus(mpPaymentId: string): Promise<{
+    id: number;
+    status: string;
+    status_detail: string;
+    external_reference: string;
+    transaction_amount: number;
+    currency_id: string;
+  } | null> {
+    if (!this.accessToken) return null;
+    try {
+      const res = await fetch(`https://api.mercadopago.com/v1/payments/${mpPaymentId}`, {
+        headers: { Authorization: `Bearer ${this.accessToken}` },
+      });
+      if (!res.ok) return null;
+      return res.json();
+    } catch {
+      return null;
+    }
+  }
 }

@@ -487,6 +487,72 @@ export function useReleaseFunds() {
   });
 }
 
+export function useListEngagements() {
+  const { token, tenantId } = useApiAuth();
+  return useQuery({
+    queryKey: ['engagements'],
+    queryFn: () =>
+      apiRequest<
+        Array<{
+          id: string;
+          status: string;
+          totalAmount: string;
+          currency: string;
+          createdAt: string;
+          serviceRequest: { title: string; description: string } | null;
+          client: { firstName: string; lastName: string };
+          professional: { firstName: string; lastName: string };
+          payment: { status: string; amount: string } | null;
+          walletAccount: { heldAmount: string; releasedAmount: string } | null;
+        }>
+      >('/engagements', { token, tenantId }),
+    enabled: !!token,
+  });
+}
+
+export function useStartEngagement() {
+  const { token, tenantId } = useApiAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (engagementId: string) =>
+      apiRequest(`/engagements/${engagementId}/start`, { method: 'POST', token, tenantId }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['engagement'] }),
+  });
+}
+
+export function useCompleteEngagement() {
+  const { token, tenantId } = useApiAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ engagementId, note }: { engagementId: string; note?: string }) =>
+      apiRequest(`/engagements/${engagementId}/complete`, {
+        method: 'POST',
+        token,
+        tenantId,
+        body: { note },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['engagement'] });
+      qc.invalidateQueries({ queryKey: ['wallet-balance'] });
+    },
+  });
+}
+
+export function useOpenDispute() {
+  const { token, tenantId } = useApiAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ engagementId, reason }: { engagementId: string; reason: string }) =>
+      apiRequest(`/engagements/${engagementId}/dispute`, {
+        method: 'POST',
+        token,
+        tenantId,
+        body: { reason },
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['engagement'] }),
+  });
+}
+
 export function useCreateReview() {
   const { token, tenantId } = useApiAuth();
   const qc = useQueryClient();

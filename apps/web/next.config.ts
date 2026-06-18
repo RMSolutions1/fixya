@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: [
     '@fixya/api-runtime',
     '@fixya/database',
+    'resend',
     'supertest',
     '@nestjs/common',
     '@nestjs/config',

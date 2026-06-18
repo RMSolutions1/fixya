@@ -4,11 +4,22 @@ import { EngagementController } from './engagement.controller';
 import {
   AcceptQuotationHandler,
   GetEngagementExpedienteHandler,
+  StartEngagementHandler,
+  CompleteEngagementHandler,
+  OpenDisputeHandler,
+  ListEngagementsHandler,
 } from './engagement.handlers';
 
 @Module({
   imports: [CqrsModule],
   controllers: [EngagementController],
-  providers: [AcceptQuotationHandler, GetEngagementExpedienteHandler],
+  providers: [
+    AcceptQuotationHandler,
+    GetEngagementExpedienteHandler,
+    StartEngagementHandler,
+    CompleteEngagementHandler,
+    OpenDisputeHandler,
+    ListEngagementsHandler,
+  ],
 })
 export class EngagementModule {}
