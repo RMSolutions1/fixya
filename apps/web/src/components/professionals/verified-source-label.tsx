@@ -1,6 +1,7 @@
 import { ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getRegistryVerificationLabel } from '@/lib/category-colors';
+import { isProfessionalCredentialRegistry } from '@/lib/professional-registries';
 import type { RegistrySourceInfo } from '@/components/professionals/registry-badge';
 
 interface VerifiedSourceLabelProps {
@@ -12,10 +13,14 @@ interface VerifiedSourceLabelProps {
 /** Línea discreta bajo el profesional: «Datos verificados (COPAIPA)». */
 export function VerifiedSourceLabel({ registry, verified, className }: VerifiedSourceLabelProps) {
   if (!registry && !verified) return null;
+  if (registry && !isProfessionalCredentialRegistry(registry.id)) {
+    if (!verified) return null;
+  }
 
-  const text = registry
-    ? getRegistryVerificationLabel(registry.acronym, registry.id)
-    : 'Datos verificados (FixYa)';
+  const text =
+    registry && isProfessionalCredentialRegistry(registry.id)
+      ? getRegistryVerificationLabel(registry.acronym, registry.id)
+      : 'Datos verificados (FixYa)';
 
   return (
     <p className={cn('flex items-center gap-1 text-xs text-muted-foreground', className)}>

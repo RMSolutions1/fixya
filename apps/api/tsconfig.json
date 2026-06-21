@@ -23,6 +23,6 @@
       "@fixya/database": ["../../packages/database/src"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../shared/professional-registries.ts"],
   "exclude": ["node_modules", "dist", "test"]
 }

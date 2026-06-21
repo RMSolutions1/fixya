@@ -24,8 +24,8 @@ export const DEFAULT_CATEGORY_FAQS: Array<{ q: string; a: string }> = [
     a: 'Publicá tu solicitud o contactá profesionales desde el mapa. Recibí presupuestos comparables antes de contratar.',
   },
   {
-    q: '¿Dónde verifico la matrícula del profesional?',
-    a: 'En la landing del rubro vas a ver los organismos oficiales (COPIME, Gasnor, CARC, etc.). FixYa no reemplaza esas consultas: usá el padrón correspondiente a tu provincia y distribuidora de gas.',
+    q: '¿Cómo sé que el profesional está habilitado?',
+    a: 'FixYa verifica identidad y matrícula en el onboarding. En cada perfil vas a ver la fuente oficial cuando corresponda (COPAIPA, Gasnor, Aguas del Norte, etc.). La facturación fiscal ARCA se gestiona aparte, vía Emitia, cuando esté activa en tu expediente.',
   },
 ];
 

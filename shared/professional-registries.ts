@@ -6,6 +6,13 @@
 
 export type RegistryScope = 'nacional' | 'provincial' | 'regional' | 'distribuidora' | 'camara';
 
+/** ARCA/AFIP: administración fiscal — no acredita oficio ni matrícula (facturación vía Emitia). */
+export const FISCAL_ONLY_REGISTRY_IDS = new Set(['afip-habilitacion']);
+
+export function isProfessionalCredentialRegistry(registryId: string): boolean {
+  return !FISCAL_ONLY_REGISTRY_IDS.has(registryId);
+}
+
 export interface ProfessionalRegistry {
   id: string;
   name: string;
@@ -49,7 +56,6 @@ const REGISTRY_BRAND_COLORS: Record<string, string> = {
   'senasa-vet': '#2E7D32',
   cmv: '#1565C0',
   cacaaav: '#0277BD',
-  'afip-habilitacion': '#003DA5',
   'municipal-habilitacion': '#546E7A',
 };
 
@@ -286,28 +292,6 @@ export const PROFESSIONAL_REGISTRIES: ProfessionalRegistry[] = [
     automatedLookup: false,
   },
   {
-    id: 'afip-habilitacion',
-    name: 'AFIP — Monotributo / responsable inscripto',
-    acronym: 'AFIP',
-    scope: 'nacional',
-    categorySlugs: [
-      'plomeria',
-      'electricidad',
-      'gas',
-      'limpieza',
-      'pintura',
-      'jardineria',
-      'flete',
-      'mudanza',
-      'peluqueria',
-      'tecnico-pc',
-    ],
-    regulates: 'Constancia de inscripción fiscal del prestador independiente.',
-    verificationUrl: 'https://www.afip.gob.ar/',
-    notes: 'Complementa identidad; no acredita oficio ni matrícula habilitante.',
-    automatedLookup: false,
-  },
-  {
     id: 'municipal-habilitacion',
     name: 'Habilitación municipal / comercial',
     acronym: 'MUNICIPAL',
@@ -320,42 +304,45 @@ export const PROFESSIONAL_REGISTRIES: ProfessionalRegistry[] = [
   },
 ];
 
-/** Rubro → organismos recomendados para verificación */
+/** Rubro → organismos que acreditan idoneidad / matrícula (sin AFIP/ARCA). */
 export const CATEGORY_REGISTRY_MAP: Record<string, string[]> = {
-  electricidad: ['copime', 'copaipa', 'edesa', 'afip-habilitacion'],
-  plomeria: ['aguas-del-norte', 'municipal-habilitacion', 'afip-habilitacion'],
+  electricidad: ['copime', 'copaipa', 'edesa'],
+  plomeria: ['aguas-del-norte', 'municipal-habilitacion'],
   gas: ['enargas', 'gasnor', 'metrogas', 'naturgy-ban', 'camuzzi', 'ecogas'],
   'aire-acondicionado': ['carc', 'aafrio', 'carhaa', 'ca-frigoristas', 'cacaaav', 'copime'],
-  seguridad: ['afip-habilitacion', 'municipal-habilitacion'],
-  cerrajeria: ['municipal-habilitacion', 'afip-habilitacion'],
-  mecanica: ['copime', 'afip-habilitacion'],
-  pintura: ['afip-habilitacion', 'municipal-habilitacion'],
-  mudanza: ['afip-habilitacion'],
-  flete: ['afip-habilitacion'],
-  limpieza: ['afip-habilitacion', 'municipal-habilitacion'],
-  jardineria: ['afip-habilitacion'],
-  peluqueria: ['municipal-habilitacion', 'afip-habilitacion'],
+  seguridad: ['municipal-habilitacion'],
+  cerrajeria: ['municipal-habilitacion'],
+  mecanica: ['copime'],
+  pintura: ['municipal-habilitacion'],
+  mudanza: [],
+  flete: [],
+  limpieza: ['municipal-habilitacion'],
+  jardineria: [],
+  peluqueria: ['municipal-habilitacion'],
   veterinaria: ['senasa-vet', 'cmv'],
-  ninera: ['afip-habilitacion'],
-  'cuidador-adultos': ['afip-habilitacion'],
-  albanileria: ['copaipa', 'municipal-habilitacion', 'afip-habilitacion'],
-  carpinteria: ['copaipa', 'afip-habilitacion'],
-  'tecnico-pc': ['afip-habilitacion'],
-  'profesor-particular': ['afip-habilitacion'],
+  ninera: [],
+  'cuidador-adultos': [],
+  albanileria: ['copaipa', 'municipal-habilitacion'],
+  carpinteria: ['copaipa'],
+  'tecnico-pc': [],
+  'profesor-particular': [],
 };
 
 export function getRegistryById(id: string): ProfessionalRegistry | undefined {
+  if (!isProfessionalCredentialRegistry(id)) return undefined;
   const found = PROFESSIONAL_REGISTRIES.find((r) => r.id === id);
   return found ? withRegistryDefaults(found) : undefined;
 }
 
 export function getAllRegistries(): ProfessionalRegistry[] {
-  return PROFESSIONAL_REGISTRIES.map(withRegistryDefaults);
+  return PROFESSIONAL_REGISTRIES.map(withRegistryDefaults).filter((r) =>
+    isProfessionalCredentialRegistry(r.id),
+  );
 }
 
 export function getRegistriesForCategory(categorySlug?: string): ProfessionalRegistry[] {
   if (!categorySlug) return getAllRegistries();
-  const ids = CATEGORY_REGISTRY_MAP[categorySlug] ?? [];
+  const ids = (CATEGORY_REGISTRY_MAP[categorySlug] ?? []).filter(isProfessionalCredentialRegistry);
   return ids.map((id) => getRegistryById(id)).filter(Boolean) as ProfessionalRegistry[];
 }
 

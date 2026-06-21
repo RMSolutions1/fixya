@@ -1,4 +1,4 @@
-import { getRegistryById } from '../data/professional-registries';
+import { getRegistryById, isProfessionalCredentialRegistry } from '../data/professional-registries';
 
 export type PresenceStatus = 'online' | 'away' | 'offline' | 'directory';
 
@@ -65,7 +65,7 @@ export function buildRegistrySource(
   registryId: string | null | undefined,
   directoryListing: boolean,
 ): RegistrySourcePublic | null {
-  if (!registryId) return null;
+  if (!registryId || !isProfessionalCredentialRegistry(registryId)) return null;
   const reg = getRegistryById(registryId);
   if (!reg) return null;
   return {

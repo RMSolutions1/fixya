@@ -22,7 +22,7 @@ import {
   verifyTotp,
   buildOtpauthUrl,
 } from '../../common/utils/totp';
-import { getRegistryById } from '../../common/data/professional-registries';
+import { getRegistryById, isProfessionalCredentialRegistry } from '../../common/data/professional-registries';
 
 @Injectable()
 export class AuthService {
@@ -124,7 +124,10 @@ export class AuthService {
             coverageRadiusKm: 25,
             metadata: {
               licenseNumber: dto.licenseNumber ?? null,
-              registryId: dto.registryId ?? null,
+              registryId:
+                dto.registryId && isProfessionalCredentialRegistry(dto.registryId)
+                  ? dto.registryId
+                  : null,
               pendingApproval: true,
             },
           },
