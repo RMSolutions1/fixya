@@ -281,9 +281,12 @@ export class NearbyProfessionalsQueryDto {
   @Type(() => Number)
   page?: number = 1;
 
-  @ApiPropertyOptional({ default: 24 })
+  @ApiPropertyOptional({ default: 24, maximum: 5000 })
   @IsOptional()
   @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(5000)
   limit?: number = 24;
 }
 

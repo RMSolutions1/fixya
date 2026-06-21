@@ -35,7 +35,11 @@ function RegistryCard({ registry }: { registry: ProfessionalRegistry }) {
             </span>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">{registry.regulates}</p>
-          <p className="mt-2 text-xs text-muted-foreground">{registry.notes}</p>
+          {(registry.shortTagline ?? registry.notes) && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {registry.shortTagline ?? registry.notes}
+            </p>
+          )}
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
               href={registry.verificationUrl}

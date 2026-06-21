@@ -3,6 +3,9 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import 'leaflet.markercluster';
 import type { GeoMapProps } from './geo-map';
 
 const FixYaIcon = L.divIcon({
@@ -19,16 +22,21 @@ const UserIcon = L.divIcon({
   iconAnchor: [9, 9],
 });
 
+type MarkerClusterGroup = ReturnType<typeof L.markerClusterGroup>;
+
 export function GeoMapInner({
   center,
   markers,
   radiusKm = 50,
   className = '',
   zoom = 12,
+  clusterMarkers = false,
   onMarkerClick,
 }: GeoMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const onMarkerClickRef = useRef(onMarkerClick);
+  onMarkerClickRef.current = onMarkerClick;
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -60,6 +68,8 @@ export function GeoMapInner({
     map.eachLayer((layer) => {
       if (layer instanceof L.Marker || layer instanceof L.Circle) {
         map.removeLayer(layer);
+      } else if ('getLayers' in layer && typeof (layer as L.LayerGroup).getLayers === 'function') {
+        map.removeLayer(layer);
       }
     });
 
@@ -76,15 +86,35 @@ export function GeoMapInner({
       dashArray: '6 4',
     }).addTo(map);
 
+    const useClusters = clusterMarkers && markers.length > 40;
+    let clusterGroup: MarkerClusterGroup | null = null;
+
+    if (useClusters) {
+      clusterGroup = L.markerClusterGroup({
+        maxClusterRadius: 50,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        disableClusteringAtZoom: 16,
+      });
+    }
+
     markers.forEach((m) => {
-      const marker = L.marker([m.latitude, m.longitude], { icon: FixYaIcon }).addTo(map);
+      const marker = L.marker([m.latitude, m.longitude], { icon: FixYaIcon });
       const dist =
         m.distanceKm != null ? `<br/><small>${m.distanceKm} km</small>` : '';
       marker.bindPopup(`<strong>${m.label}</strong>${dist}`);
-      if (onMarkerClick) {
-        marker.on('click', () => onMarkerClick(m.id));
+      marker.on('click', () => onMarkerClickRef.current?.(m.id));
+
+      if (clusterGroup) {
+        clusterGroup.addLayer(marker);
+      } else {
+        marker.addTo(map);
       }
     });
+
+    if (clusterGroup) {
+      clusterGroup.addTo(map);
+    }
 
     if (markers.length > 0) {
       const bounds = L.latLngBounds([
@@ -95,7 +125,7 @@ export function GeoMapInner({
     } else {
       map.setView([center.lat, center.lng], zoom);
     }
-  }, [center, markers, radiusKm, zoom, onMarkerClick]);
+  }, [center, markers, radiusKm, zoom, clusterMarkers]);
 
   return (
     <div

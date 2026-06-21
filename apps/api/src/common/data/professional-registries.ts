@@ -92,7 +92,7 @@ export const PROFESSIONAL_REGISTRIES: ProfessionalRegistry[] = [
     directoryUrl: 'https://padrones.copaipa.org.ar/profesionesmatriculadas',
     email: 'info@copaipa.org.ar',
     notes:
-      'Padrón público en padrones.copaipa.org.ar (~3.900 matriculados). FixYa sincroniza con npm run scrape:copaipa && npm run db:import:copaipa:directory.',
+      'Padrón público en padrones.copaipa.org.ar con más de 3.900 profesionales matriculados en Salta. Podés contrastar la matrícula en el enlace oficial.',
     automatedLookup: true,
     shortTagline: 'Profesional matriculado en el padrón oficial COPAIPA (Salta).',
   },
@@ -120,7 +120,7 @@ export const PROFESSIONAL_REGISTRIES: ProfessionalRegistry[] = [
     verificationUrl: 'https://gasnor.idearit.com.ar/instaladores',
     directoryUrl: 'https://gasnor.idearit.com.ar/instaladores',
     notes:
-      'Padrón público NOA (Jujuy, Salta, Santiago del Estero, Tucumán). FixYa sincroniza con npm run scrape:gasnor && npm run db:import:gasnor:directory.',
+      'Padrón público de instaladores de gas en el NOA (Jujuy, Salta, Santiago del Estero, Tucumán y Catamarca). Consultá la matrícula en el listado oficial.',
     automatedLookup: true,
     shortTagline: 'Instalador de gas matriculado en el padrón oficial Gasnor / Naturgy NOA.',
   },
@@ -150,7 +150,7 @@ export const PROFESSIONAL_REGISTRIES: ProfessionalRegistry[] = [
     verificationUrl: 'https://www.aguasdelnortesalta.com.ar/consulta_matriculados.php',
     directoryUrl: 'https://www.aguasdelnortesalta.com.ar/consulta_matriculados.php',
     notes:
-      'Padrón público vía API /api/v1/web/matriculados. FixYa sincroniza con npm run sync:adn.',
+      'Padrón público de plomeros y sanitaristas habilitados ante Aguas del Norte. Verificá la matrícula en el portal oficial antes de contratar.',
     automatedLookup: true,
     shortTagline: 'Plomero habilitado ante Aguas del Norte (NOA).',
   },

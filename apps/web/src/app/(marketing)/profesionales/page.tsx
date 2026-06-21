@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import ProfesionalesPageClient from './profesionales-client';
 
 export const metadata = {
-  title: 'Profesionales | FixYa',
+  title: 'Profesionales',
   description: 'Directorio de profesionales con reseñas, precios en pesos y cobertura en las 24 provincias.',
 };
 

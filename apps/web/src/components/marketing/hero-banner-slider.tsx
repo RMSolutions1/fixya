@@ -208,8 +208,16 @@ export function HeroBannerSlider({
         {/* Stats — estilo CRONEC / Emprenor */}
         <div className="mt-auto grid max-w-3xl grid-cols-2 gap-4 border-t border-white/20 pt-8 sm:grid-cols-4">
           {[
-            { value: stats?.categoriesCount ?? '20', label: 'Rubros' },
-            { value: stats?.verifiedProfessionalsCount ?? stats?.professionalsCount ?? '—', label: 'Profesionales' },
+            { value: stats?.categoriesCount ?? '—', label: 'Rubros' },
+            {
+              value:
+                stats?.verifiedProfessionalsCount != null
+                  ? stats.verifiedProfessionalsCount
+                  : stats?.professionalsCount != null
+                    ? stats.professionalsCount
+                    : '—',
+              label: 'Profesionales',
+            },
             { value: '24', label: 'Provincias' },
             { value: stats?.completedRequests ?? '—', label: 'Servicios' },
           ].map(({ value, label }) => (

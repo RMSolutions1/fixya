@@ -9,7 +9,7 @@ import { GeoMap, professionalsToMarkers } from '@/components/geo/geo-map';
 import { ProfessionalCard } from '@/components/marketing/marketing-blocks';
 import { SectionHeading } from '@/components/marketing/section-heading';
 import { useLocation } from '@/components/providers/location-provider';
-import { useNearbyProfessionals, useNearbyStats } from '@/hooks/use-marketplace';
+import { useNearbyProfessionals, useNearbyMapMarkers, useNearbyStats } from '@/hooks/use-marketplace';
 import { getCategoryIcon } from '@/lib/category-icons';
 
 export function NearbyDiscoverySection() {
@@ -22,8 +22,10 @@ export function NearbyDiscoverySection() {
   };
 
   const { data: stats } = useNearbyStats(geoParams);
-  const { data: prosData, isLoading } = useNearbyProfessionals(geoParams);
+  const { data: prosData, isLoading } = useNearbyProfessionals({ ...geoParams, limit: 6, page: 1 });
+  const { data: mapData } = useNearbyMapMarkers(geoParams);
   const professionals = prosData?.items ?? [];
+  const mapMarkers = professionalsToMarkers(mapData?.items ?? []);
 
   return (
     <section className="relative overflow-hidden border-y bg-gradient-to-b from-secondary/40 via-background to-background py-20">
@@ -90,9 +92,10 @@ export function NearbyDiscoverySection() {
           <div className="h-80 lg:col-span-3 lg:h-96">
             <GeoMap
               center={{ lat: location.latitude, lng: location.longitude }}
-              markers={professionalsToMarkers(professionals)}
+              markers={mapMarkers}
               radiusKm={radiusKm}
               zoom={10}
+              clusterMarkers
               onMarkerClick={(id) => router.push(`/profesionales/${id}`)}
             />
           </div>

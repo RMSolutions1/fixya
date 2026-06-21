@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Loader2, Search, SlidersHorizontal } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ProfessionalCard, EmptyState } from '@/components/marketing/marketing-blocks';
@@ -13,7 +13,12 @@ import { SectionHeading } from '@/components/marketing/section-heading';
 import { LocationBar } from '@/components/geo/location-bar';
 import { GeoMap, professionalsToMarkers } from '@/components/geo/geo-map';
 import { useLocation } from '@/components/providers/location-provider';
-import { useNearbyProfessionals, useCategories } from '@/hooks/use-marketplace';
+import {
+  useInfiniteNearbyProfessionals,
+  useNearbyMapMarkers,
+  useCategories,
+  type ProfessionalSummary,
+} from '@/hooks/use-marketplace';
 import { useMounted } from '@/hooks/use-mounted';
 import { RegistryLogo } from '@/components/professionals/registry-logo';
 import { getRegistryById } from '@/lib/professional-registries';
@@ -21,6 +26,15 @@ import { cn } from '@/lib/utils';
 
 /** Padrones ya sincronizados en FixYa (filtro rápido en directorio) */
 const DIRECTORY_REGISTRY_IDS = ['copaipa', 'gasnor', 'aguas-del-norte'] as const;
+
+function dedupeProfessionals(items: ProfessionalSummary[]): ProfessionalSummary[] {
+  const seen = new Set<string>();
+  return items.filter((p) => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+}
 
 export default function ProfesionalesPageClient() {
   const mounted = useMounted();
@@ -48,8 +62,26 @@ export default function ProfesionalesPageClient() {
     q: search || undefined,
   };
 
-  const { data, isLoading, isError } = useNearbyProfessionals(geoParams, mounted);
-  const professionals = data?.items ?? [];
+  const {
+    data,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteNearbyProfessionals(geoParams, mounted);
+
+  const { data: mapData, isLoading: mapLoading } = useNearbyMapMarkers(geoParams, mounted);
+
+  const professionals = useMemo(
+    () => dedupeProfessionals(data?.pages.flatMap((p) => p.items) ?? []),
+    [data],
+  );
+
+  const total = data?.pages[0]?.meta.total ?? 0;
+  const mapMarkers = professionalsToMarkers(mapData?.items ?? []);
+
+  const runSearch = () => setSearch(q.trim());
 
   return (
     <>
@@ -71,9 +103,9 @@ export default function ProfesionalesPageClient() {
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Buscar por nombre..."
                   className="border-0 bg-transparent pl-4 text-foreground shadow-none focus-visible:ring-0"
-                  onKeyDown={(e) => e.key === 'Enter' && setSearch(q)}
+                  onKeyDown={(e) => e.key === 'Enter' && runSearch()}
                 />
-                <Button variant="emprenor" className="rounded-full" onClick={() => setSearch(q)} aria-label="Buscar">
+                <Button variant="emprenor" className="rounded-full" onClick={runSearch} aria-label="Buscar">
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
@@ -135,27 +167,48 @@ export default function ProfesionalesPageClient() {
       >
         <SectionHeading
           eyebrow="Mapa interactivo"
-          title={`${data?.meta.total ?? 0} profesionales en ${radiusKm} km`}
-          description="OpenStreetMap · Click en un marcador para ver el perfil · Radio ajustable arriba"
+          title={
+            isLoading && total === 0
+              ? `Cargando profesionales en ${radiusKm} km…`
+              : `${total} profesionales en ${radiusKm} km`
+          }
+          description={
+            mapLoading
+              ? 'Cargando marcadores en el mapa…'
+              : `${mapMarkers.length} en el mapa · OpenStreetMap · Click en un marcador para ver el perfil`
+          }
         />
 
-        <div className="mb-10 h-96">
+        <div className="relative mb-10 h-96">
           <GeoMap
             center={{ lat: location.latitude, lng: location.longitude }}
-            markers={professionalsToMarkers(professionals)}
+            markers={mapMarkers}
             radiusKm={radiusKm}
             zoom={10}
+            clusterMarkers
             onMarkerClick={(id) => router.push(`/profesionales/${id}`)}
           />
+          {mapLoading && (
+            <div className="pointer-events-none absolute inset-0 flex items-end justify-center rounded-2xl bg-gradient-to-t from-background/60 to-transparent pb-4">
+              <span className="inline-flex items-center gap-2 rounded-full bg-background/90 px-3 py-1.5 text-xs text-muted-foreground shadow">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Cargando mapa…
+              </span>
+            </div>
+          )}
         </div>
 
         <SectionHeading
           eyebrow="Directorio"
           title="Perfiles con reseñas y precios en pesos"
-          description="Compará profesionales, revisá calificaciones y contactá con respaldo FixYa."
+          description={
+            total > 0
+              ? `Mostrando ${professionals.length} de ${total} · Compará profesionales y contactá con respaldo FixYa.`
+              : 'Compará profesionales, revisá calificaciones y contactá con respaldo FixYa.'
+          }
         />
 
-        {isLoading ? (
+        {isLoading && professionals.length === 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="h-48 animate-pulse rounded-xl bg-muted" />
@@ -172,11 +225,36 @@ export default function ProfesionalesPageClient() {
             }
           />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {professionals.map((pro) => (
-              <ProfessionalCard key={pro.id} professional={pro} />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {professionals.map((pro) => (
+                <ProfessionalCard key={pro.id} professional={pro} />
+              ))}
+            </div>
+
+            {hasNextPage && (
+              <div className="mt-10 flex flex-col items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                >
+                  {isFetchingNextPage ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Cargando…
+                    </>
+                  ) : (
+                    `Cargar más (${professionals.length} de ${total})`
+                  )}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  {total - professionals.length} profesionales más en este radio
+                </p>
+              </div>
+            )}
+          </>
         )}
       </MarketingPageShell>
       <MarketingPageCloser />

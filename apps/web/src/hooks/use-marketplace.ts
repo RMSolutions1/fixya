@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/api';
 import { FALLBACK_CATEGORIES } from '@/lib/fallback-categories';
 import { useApiAuth } from '@/hooks/use-auth';
@@ -358,24 +358,7 @@ export function useWalletLedger(page = 1, limit = 20) {
 export function useMarketplaceStats(enabled = true) {
   return useQuery({
     queryKey: ['marketplace-stats'],
-    queryFn: async () => {
-      try {
-        return await apiRequest<MarketplaceStats>('/marketplace/stats');
-      } catch {
-        return {
-          categoriesCount: fallbackCategories.length,
-          professionalsCount: 0,
-          verifiedProfessionalsCount: 0,
-          completedRequests: 0,
-        };
-      }
-    },
-    placeholderData: {
-      categoriesCount: fallbackCategories.length,
-      professionalsCount: 0,
-      verifiedProfessionalsCount: 0,
-      completedRequests: 0,
-    },
+    queryFn: () => apiRequest<MarketplaceStats>('/marketplace/stats'),
     enabled,
     staleTime: 60_000,
   });
@@ -391,37 +374,124 @@ export function useService(id: string, enabled = true) {
   });
 }
 
+export const NEARBY_PAGE_SIZE = 24;
+/** Límite alto para pintar todos los marcadores en el mapa (con clustering). */
+export const NEARBY_MAP_LIMIT = 5000;
+
+export interface NearbyProfessionalsMeta {
+  total: number;
+  page: number;
+  limit: number;
+  pages: number;
+  radiusKm: number;
+}
+
+export interface NearbyProfessionalsParams {
+  latitude: number;
+  longitude: number;
+  radiusKm?: number;
+  categorySlug?: string;
+  registryId?: string;
+  q?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface NearbyProfessionalsResponse {
+  items: ProfessionalSummary[];
+  meta: NearbyProfessionalsMeta;
+}
+
+function buildNearbyProfessionalsUrl(params: NearbyProfessionalsParams): string {
+  const search = new URLSearchParams();
+  search.set('latitude', String(params.latitude));
+  search.set('longitude', String(params.longitude));
+  if (params.radiusKm) search.set('radiusKm', String(params.radiusKm));
+  if (params.categorySlug) search.set('categorySlug', params.categorySlug);
+  if (params.registryId) search.set('registryId', params.registryId);
+  if (params.q) search.set('q', params.q);
+  if (params.page) search.set('page', String(params.page));
+  if (params.limit) search.set('limit', String(params.limit));
+  return `/marketplace/nearby/professionals?${search.toString()}`;
+}
+
+function fetchNearbyProfessionals(
+  params: NearbyProfessionalsParams,
+): Promise<NearbyProfessionalsResponse> {
+  return apiRequest<NearbyProfessionalsResponse>(buildNearbyProfessionalsUrl(params));
+}
+
 export function useNearbyProfessionals(
-  params: {
-    latitude: number;
-    longitude: number;
-    radiusKm?: number;
-    categorySlug?: string;
-    registryId?: string;
-    q?: string;
-    page?: number;
-  } | null,
+  params: NearbyProfessionalsParams | null,
   enabled = true,
 ) {
   return useQuery({
     queryKey: ['nearby-professionals', params],
     queryFn: () => {
-      if (!params) return { items: [], meta: { total: 0, pages: 0, radiusKm: 50 } };
-      const search = new URLSearchParams();
-      search.set('latitude', String(params.latitude));
-      search.set('longitude', String(params.longitude));
-      if (params.radiusKm) search.set('radiusKm', String(params.radiusKm));
-      if (params.categorySlug) search.set('categorySlug', params.categorySlug);
-      if (params.registryId) search.set('registryId', params.registryId);
-      if (params.q) search.set('q', params.q);
-      if (params.page) search.set('page', String(params.page));
-      return apiRequest<{
-        items: ProfessionalSummary[];
-        meta: { total: number; pages: number; radiusKm: number };
-      }>(`/marketplace/nearby/professionals?${search.toString()}`);
+      if (!params) {
+        return {
+          items: [],
+          meta: { total: 0, page: 1, limit: NEARBY_PAGE_SIZE, pages: 0, radiusKm: 50 },
+        };
+      }
+      return fetchNearbyProfessionals(params);
     },
     enabled: enabled && !!params?.latitude && !!params?.longitude,
     staleTime: 30_000,
+  });
+}
+
+export function useInfiniteNearbyProfessionals(
+  params: Omit<NearbyProfessionalsParams, 'page' | 'limit'> | null,
+  enabled = true,
+) {
+  return useInfiniteQuery({
+    queryKey: ['nearby-professionals-infinite', params],
+    queryFn: ({ pageParam }) => {
+      if (!params) {
+        return {
+          items: [],
+          meta: { total: 0, page: 1, limit: NEARBY_PAGE_SIZE, pages: 0, radiusKm: 50 },
+        };
+      }
+      return fetchNearbyProfessionals({
+        ...params,
+        page: pageParam,
+        limit: NEARBY_PAGE_SIZE,
+      });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, pages } = lastPage.meta;
+      return page < pages ? page + 1 : undefined;
+    },
+    enabled: enabled && !!params?.latitude && !!params?.longitude,
+    staleTime: 30_000,
+  });
+}
+
+/** Todos los profesionales del radio para el mapa (payload mínimo vía clustering en cliente). */
+export function useNearbyMapMarkers(
+  params: Omit<NearbyProfessionalsParams, 'page' | 'limit'> | null,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ['nearby-map-markers', params],
+    queryFn: () => {
+      if (!params) {
+        return {
+          items: [],
+          meta: { total: 0, page: 1, limit: NEARBY_MAP_LIMIT, pages: 0, radiusKm: 50 },
+        };
+      }
+      return fetchNearbyProfessionals({
+        ...params,
+        page: 1,
+        limit: NEARBY_MAP_LIMIT,
+      });
+    },
+    enabled: enabled && !!params?.latitude && !!params?.longitude,
+    staleTime: 60_000,
   });
 }
 

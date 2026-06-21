@@ -18,6 +18,8 @@ export interface GeoMapProps {
   radiusKm?: number;
   className?: string;
   zoom?: number;
+  /** Agrupa marcadores cuando hay muchos (directorio/padrones). */
+  clusterMarkers?: boolean;
   onMarkerClick?: (id: string) => void;
 }
 

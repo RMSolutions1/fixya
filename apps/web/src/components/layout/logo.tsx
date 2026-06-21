@@ -19,7 +19,7 @@ export function Logo({
   const isLight = variant === 'light';
 
   return (
-    <Link href="/" className={cn('inline-flex items-center gap-2.5', className)}>
+    <Link href="/" className={cn('inline-flex items-center gap-2.5', className)} aria-label="FixYa — inicio">
       {showSun && (
         <SolDeMayo
           size={32}

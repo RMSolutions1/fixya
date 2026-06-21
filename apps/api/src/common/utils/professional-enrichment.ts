@@ -81,6 +81,8 @@ export function buildRegistrySource(
   };
 }
 
+export const DIRECTORY_REGISTRY_IDS = new Set(['copaipa', 'gasnor', 'aguas-del-norte']);
+
 export function enrichProfessionalPublicFields(
   metadata: unknown,
   lastLoginAt: Date | null | undefined,
@@ -91,8 +93,10 @@ export function enrichProfessionalPublicFields(
   },
 ) {
   const m = extractServiceMetadata(metadata);
-  const directoryListing = m.directoryListing === true;
   const registryId = typeof m.registryId === 'string' ? m.registryId : null;
+  const directoryListing =
+    m.directoryListing === true ||
+    (registryId != null && DIRECTORY_REGISTRY_IDS.has(registryId));
   const licenseNumber = typeof m.licenseNumber === 'string' ? m.licenseNumber : null;
   const registry = buildRegistrySource(registryId, directoryListing);
   const presence = resolvePresence(lastLoginAt, directoryListing);

@@ -3,7 +3,8 @@ import { Prisma } from '@fixya/database';
 import { PrismaService } from '../../../database/prisma.service';
 import { SearchServicesQueryDto } from '../dto/marketplace.dto';
 import { geoBoundingBox, haversineKm, geoServiceWhere } from '../../../common/utils/geo.utils';
-import { enrichProfessionalPublicFields } from '../../../common/utils/professional-enrichment';
+import { enrichProfessionalPublicFields, DIRECTORY_REGISTRY_IDS } from '../../../common/utils/professional-enrichment';
+import { PUBLIC_DIRECTORY_USER_WHERE, INTERNAL_DIRECTORY_EMAIL_SUFFIXES } from '../../../common/constants/public-directory';
 
 export class SearchServicesQuery {
   constructor(public readonly params: SearchServicesQueryDto) {}
@@ -102,6 +103,51 @@ export class SearchServicesHandler implements IQueryHandler<SearchServicesQuery>
 
 function computeRankingScore(rating: number, count: number): number {
   return Math.round((rating * 0.7 + Math.min(count / 50, 1) * 5 * 0.3) * 100) / 100;
+}
+
+type NearbyProfessionalItem = {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+  distanceKm: number | null;
+  licenseNumber: string | null;
+  directoryListing?: boolean;
+  registry?: { id: string } | null;
+};
+
+/** Evita duplicados del mismo matriculado importado dos veces en distintos usuarios. */
+function dedupeDirectoryProfessionals<T extends NearbyProfessionalItem>(items: T[]): T[] {
+  const seen = new Map<string, T>();
+  const result: T[] = [];
+
+  for (const item of items) {
+    const registryId = item.registry?.id;
+    const license = item.licenseNumber?.trim();
+    const fullName = `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim().toUpperCase();
+    const nameKey =
+      registryId && fullName ? `${registryId}:name:${fullName}` : null;
+    const licenseKey =
+      registryId && license ? `${registryId}:${license.toUpperCase()}` : null;
+    const key =
+      registryId && DIRECTORY_REGISTRY_IDS.has(registryId) && nameKey
+        ? nameKey
+        : (licenseKey ?? nameKey ?? item.id);
+
+    const existing = seen.get(key);
+    if (!existing) {
+      seen.set(key, item);
+      result.push(item);
+      continue;
+    }
+
+    if ((item.distanceKm ?? 999) < (existing.distanceKm ?? 999)) {
+      const idx = result.indexOf(existing);
+      if (idx >= 0) result[idx] = item;
+      seen.set(key, item);
+    }
+  }
+
+  return result;
 }
 
 export class GetServiceRequestQuery {
@@ -631,7 +677,12 @@ export class GetMarketplaceStatsHandler
       categoriesCount,
       professionalsCount: professionalsCount.length,
       verifiedProfessionalsCount: await this.prisma.user.count({
-        where: { status: 'ACTIVE', deletedAt: null, memberships: { some: { role: 'PROFESIONAL' } } },
+        where: {
+          status: 'ACTIVE',
+          deletedAt: null,
+          memberships: { some: { role: 'PROFESIONAL' } },
+          ...PUBLIC_DIRECTORY_USER_WHERE,
+        },
       }),
       completedRequests: requestsCount,
     };
@@ -774,6 +825,7 @@ export class NearbyProfessionalsHandler
         id: { in: professionalIds },
         deletedAt: null,
         status: 'ACTIVE',
+        ...PUBLIC_DIRECTORY_USER_WHERE,
         ...(q && {
           OR: [
             { firstName: { contains: q, mode: 'insensitive' } },
@@ -834,6 +886,8 @@ export class NearbyProfessionalsHandler
       };
     });
 
+    items.sort((a, b) => (a.distanceKm ?? 999) - (b.distanceKm ?? 999));
+    items = dedupeDirectoryProfessionals(items);
     items.sort((a, b) => (a.distanceKm ?? 999) - (b.distanceKm ?? 999));
     const total = items.length;
     const skip = (page - 1) * limit;
@@ -901,6 +955,19 @@ export class NearbyStatsHandler implements IQueryHandler<NearbyStatsQuery> {
       };
       cat.count += 1;
       byCategory.set(s.category.slug, cat);
+    }
+
+    if (prosNearby.size > 0) {
+      const internalUsers = await this.prisma.user.findMany({
+        where: {
+          id: { in: [...prosNearby] },
+          OR: INTERNAL_DIRECTORY_EMAIL_SUFFIXES.map((suffix) => ({
+            email: { endsWith: suffix, mode: 'insensitive' as const },
+          })),
+        },
+        select: { id: true },
+      });
+      for (const u of internalUsers) prosNearby.delete(u.id);
     }
 
     return {
