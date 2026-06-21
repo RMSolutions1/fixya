@@ -17,11 +17,10 @@ export function ContactCtaSection() {
               {COMPANY.groupBrand}
             </span>
             <h2 className="mt-3 text-3xl font-bold sm:text-4xl">
-              El marketplace de servicios de Argentina
+              {COMPANY.campaign.label}: el marketplace que Argentina está probando
             </h2>
             <p className="mt-4 text-lg text-white/80">
-              Publicá lo que necesitás, recibí presupuestos comparables y contratá con respaldo.
-              Un producto digital del ecosistema {COMPANY.groupBrand}.
+              {COMPANY.campaign.tagline} Un producto digital del ecosistema {COMPANY.groupBrand}.
             </p>
             <div className="mt-8 space-y-4">
               <a
@@ -50,14 +49,18 @@ export function ContactCtaSection() {
             <p className="mt-2 text-sm text-white/75">
               Un solo acceso para clientes y profesionales. Sin costo de registro.
             </p>
-            <div className="mt-6">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <Button size="lg" variant="emprenor" className="w-full sm:w-auto" asChild>
-                <Link href="/login">
-                  Ingresar a FixYa
+                <Link href="/marketplace/requests/new">
+                  {COMPANY.campaign.ctaClient}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
+              <Button size="lg" variant="outlineOnDark" className="w-full sm:w-auto" asChild>
+                <Link href="/register">{COMPANY.campaign.ctaPro}</Link>
+              </Button>
             </div>
+            <p className="mt-3 text-xs text-white/50">{COMPANY.campaign.disclaimer}</p>
             <p className="mt-4 text-xs text-white/50">
               Al registrarte aceptás nuestros{' '}
               <Link href="/terminos" className="underline hover:text-white">

@@ -65,16 +65,16 @@ const defaultSlides: HeroSlide[] = [
   },
   {
     id: 'celeste',
-    badge: 'Hecho en Argentina · Cobertura nacional',
-    title: 'Celeste y blanco,',
-    highlight: 'confianza real',
+    badge: 'Beta abierta · Grupo Emprenor',
+    title: 'Argentina entera,',
+    highlight: 'un click',
     subtitle:
-      'Pagos con Mercado Pago, expediente digital y trazabilidad de cada servicio. La plataforma que Argentina merece.',
+      'Miles de profesionales en el mapa. Pedí presupuesto gratis, compará y seguí tu solicitud en un solo lugar.',
     image: HERO_SLIDE_IMAGES.celeste,
     imageAlt: 'Paisaje con cielo celeste y montañas',
     overlay: 'celeste',
-    primaryCta: { label: 'Registrarse', href: '/register' },
-    secondaryCta: { label: 'Conocé FixYa', href: '/nosotros' },
+    primaryCta: { label: 'Pedir presupuesto', href: '/marketplace/requests/new' },
+    secondaryCta: { label: 'Ver profesionales', href: '/profesionales' },
   },
 ];
 

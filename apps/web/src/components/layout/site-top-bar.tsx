@@ -28,7 +28,7 @@ export function SiteTopBar() {
         </div>
         <div className="flex items-center gap-4">
           <span className="font-medium tracking-wider text-white/60">
-            {COMPANY.groupBrand} · Mercado nacional de servicios
+            {COMPANY.campaign.label} · {COMPANY.groupBrand}
           </span>
         </div>
       </div>

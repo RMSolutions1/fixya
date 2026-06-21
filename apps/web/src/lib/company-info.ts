@@ -64,7 +64,16 @@ export const COMPANY = {
   fixyaTagline: 'Marketplace de servicios profesionales',
   /** Copy estándar para páginas de servicios y landings */
   marketingPitch:
-    'Profesionales con identidad revisada. Pagos con Mercado Pago y expediente digital por servicio.',
+    'Profesionales con identidad revisada. Pedí presupuesto online y seguí tu solicitud en un solo lugar.',
+  /** Campaña beta abierta — copy centralizado para web y redes */
+  campaign: {
+    phase: 'beta_abierta' as const,
+    label: 'Beta abierta',
+    tagline: 'Explorá profesionales en todo el país y pedí presupuesto gratis.',
+    disclaimer: 'Pagos con Mercado Pago: próximamente en esta beta.',
+    ctaClient: 'Pedir presupuesto',
+    ctaPro: 'Soy profesional',
+  },
   fixyaDomain: SITE_HOST,
   fixyaWebsite: SITE_URL,
 

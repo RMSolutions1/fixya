@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: '%s | FixYa',
   },
   description:
-    'Contratá profesionales con identidad revisada, compará presupuestos y pagá con Mercado Pago. Marketplace digital del Grupo Emprenor en las 24 provincias.',
+    'Beta abierta: encontrá profesionales en las 24 provincias y pedí presupuesto gratis. Marketplace digital del Grupo Emprenor.',
   applicationName: 'FixYa',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
@@ -45,9 +45,9 @@ export const metadata: Metadata = {
     locale: 'es_AR',
     url: SITE_URL,
     siteName: 'FixYa · Grupo Emprenor',
-    title: 'FixYa — Marketplace de servicios profesionales',
+    title: 'FixYa — Beta abierta · Marketplace de servicios',
     description:
-      'El marketplace de servicios de Argentina. Profesionales con identidad revisada, presupuestos comparables y pagos con Mercado Pago.',
+      'Beta abierta en Argentina. Profesionales en el mapa, presupuestos comparables y solicitudes online. Grupo Emprenor.',
   },
   keywords: [
     'FixYa',
