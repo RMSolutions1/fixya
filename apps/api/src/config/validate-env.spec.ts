@@ -36,10 +36,12 @@ describe('validateProductionEnv', () => {
     process.env.SEED_DEMO_DATA = 'false';
   };
 
-  it('falla si falta RESEND_API_KEY o MP_WEBHOOK_SECRET', () => {
+  it('arranca sin MP/Resend pero advierte integraciones pendientes', () => {
     validProdEnv();
+    process.env.MP_ACCESS_TOKEN = undefined;
+    process.env.MP_WEBHOOK_SECRET = undefined;
     process.env.RESEND_API_KEY = undefined;
-    expect(() => validateProductionEnv()).toThrow(/RESEND_API_KEY/);
+    expect(() => validateProductionEnv()).not.toThrow();
   });
 
   it('falla con MP_ACCESS_TOKEN placeholder', () => {

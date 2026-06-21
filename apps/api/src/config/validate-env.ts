@@ -9,9 +9,6 @@ export function validateProductionEnv(): void {
   const required: Array<[string, string | undefined]> = [
     ['JWT_SECRET', process.env.JWT_SECRET],
     ['DATABASE_URL', process.env.DATABASE_URL],
-    ['MP_ACCESS_TOKEN', process.env.MP_ACCESS_TOKEN],
-    ['MP_WEBHOOK_SECRET', process.env.MP_WEBHOOK_SECRET],
-    ['RESEND_API_KEY', process.env.RESEND_API_KEY],
     ['APP_PUBLIC_URL', process.env.APP_PUBLIC_URL],
     ['API_PUBLIC_URL', process.env.API_PUBLIC_URL],
     ['CORS_ORIGINS', process.env.CORS_ORIGINS],
@@ -29,8 +26,22 @@ export function validateProductionEnv(): void {
     throw new Error('JWT_SECRET debe tener al menos 32 caracteres y no ser un valor de desarrollo');
   }
 
-  const mpToken = process.env.MP_ACCESS_TOKEN!;
-  if (mpToken.includes('PLACEHOLDER') || mpToken.includes('CONFIGURE')) {
+  const integrationVars: Array<[string, string | undefined]> = [
+    ['MP_ACCESS_TOKEN', process.env.MP_ACCESS_TOKEN],
+    ['MP_WEBHOOK_SECRET', process.env.MP_WEBHOOK_SECRET],
+    ['RESEND_API_KEY', process.env.RESEND_API_KEY],
+  ];
+  const missingIntegrations = integrationVars
+    .filter(([, value]) => !value?.trim())
+    .map(([key]) => key);
+  if (missingIntegrations.length > 0) {
+    logger.warn(
+      `Integraciones pendientes (directorio/marketplace operativo; pagos/emails limitados): ${missingIntegrations.join(', ')}`,
+    );
+  }
+
+  const mpToken = process.env.MP_ACCESS_TOKEN?.trim();
+  if (mpToken && (mpToken.includes('PLACEHOLDER') || mpToken.includes('CONFIGURE'))) {
     throw new Error('MP_ACCESS_TOKEN tiene un valor placeholder; configurá el token real de Mercado Pago');
   }
 
