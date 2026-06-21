@@ -2,16 +2,25 @@ import {
   Controller,
   Post,
   Get,
+  Body,
   Param,
   ParseUUIDPipe,
   NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { IsOptional, IsString, MaxLength } from 'class-validator';
 import { MemberRole } from '@fixya/database';
 import { PaymentProcessorService } from './payment-processor.service';
 import { CurrentUser, Roles } from '../../common/decorators/auth.decorators';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { ConfigService } from '@nestjs/config';
+
+class RefundDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
+}
 
 @ApiTags('Payments')
 @ApiBearerAuth()
@@ -40,6 +49,17 @@ export class PaymentsController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.processor.releaseFunds(engagementId, user.sub);
+  }
+
+  @Post('engagements/:engagementId/refund')
+  @Roles(MemberRole.CLIENTE)
+  @ApiOperation({ summary: 'Devolución / botón de arrepentimiento (fondos retenidos)' })
+  refund(
+    @Param('engagementId', ParseUUIDPipe) engagementId: string,
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: RefundDto,
+  ) {
+    return this.processor.refundEngagement(engagementId, user.sub, dto.reason);
   }
 
   @Post('sandbox/:paymentId/confirm')

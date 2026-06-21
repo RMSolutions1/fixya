@@ -45,3 +45,6 @@ prisma/*.db-journal
 fixya_pgdata/
 .vercel
 .env*.local
+
+# Intermediarios de scraping (se regeneran con los scripts)
+data/imports/*.html

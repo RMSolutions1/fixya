@@ -183,3 +183,39 @@ npx vercel alias set <deploy-url> fixya.emprenor.com
 - [ ] Webhook de MP verificado con simulación
 - [ ] DNS apuntando al dominio correcto
 - [ ] HTTPS activo (Vercel lo maneja automáticamente)
+
+---
+
+## Directorio profesional COPAIPA (Salta)
+
+El padrón público de COPAIPA (~3.887 matriculados) se puede cargar como **directorio
+referencial** visible en el mapa de `/profesionales`.
+
+```bash
+# 1. Descargar el padrón actualizado
+npm run scrape:copaipa
+
+# 2a. Importar como directorio ACTIVO (visible en el mapa, coords de Salta)
+npm run db:import:copaipa:directory
+
+# 2b. O importar pendiente de aprobación (flujo admin clásico)
+npm run db:import:copaipa
+
+# 3. Si ya importaste pendiente y querés activarlo en bloque:
+npm run db:approve:copaipa            # usar -- --dry para simular
+```
+
+> El import asigna coordenadas de Salta y radio de cobertura para que los perfiles
+> figuren en el mapa. Las cuentas sin email real usan `@padron.fixya.local` y no
+> pueden iniciar sesión hasta reclamar su perfil.
+
+---
+
+## Seguridad de cuentas
+
+- **Verificación de email**: al registrarse se envía un enlace a `/verificar-email`.
+  Reenvío desde *Perfil → Seguridad* o `POST /auth/resend-verification`.
+- **2FA (TOTP)**: opcional por usuario desde *Perfil → Seguridad*. Compatible con
+  Google Authenticator / Authy. Con 2FA activo, el login exige `mfaCode`.
+- **Devoluciones / arrepentimiento**: `POST /payments/engagements/:id/refund`
+  reembolsa al cliente vía Mercado Pago mientras los fondos sigan retenidos.

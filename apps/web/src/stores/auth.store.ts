@@ -11,6 +11,8 @@ export interface AuthUser {
   city?: string | null;
   province?: string | null;
   status?: string;
+  emailVerified?: boolean;
+  mfaEnabled?: boolean;
   memberships?: Array<{
     role: string;
     isDefault: boolean;

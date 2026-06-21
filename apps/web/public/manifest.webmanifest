@@ -1,14 +1,43 @@
 {
+  "id": "/",
   "name": "FixYa — Servicios profesionales",
   "short_name": "FixYa",
   "description": "Marketplace de servicios verificados del Grupo Emprenor. Contratá profesionales, compará presupuestos y pagá con Mercado Pago.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#fafaf9",
   "theme_color": "#2E2A6E",
   "lang": "es-AR",
   "orientation": "portrait-primary",
   "categories": ["business", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "Nueva solicitud",
+      "short_name": "Pedir",
+      "url": "/marketplace/requests/new",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mercado",
+      "short_name": "Mercado",
+      "url": "/marketplace",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mis solicitudes",
+      "short_name": "Solicitudes",
+      "url": "/dashboard/solicitudes",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Wallet",
+      "short_name": "Wallet",
+      "url": "/wallet",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "/icon.svg",

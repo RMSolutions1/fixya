@@ -42,7 +42,7 @@ export function SiteHeader({
         overlay ? 'absolute inset-x-0 top-0 border-white/10 bg-transparent' : 'sticky top-0',
         !overlay &&
           (isTransparent
-            ? 'border-white/10 bg-[hsl(var(--celeste-dark)/0.85)] backdrop-blur-md'
+            ? 'border-white/10 bg-[hsl(var(--brand-indigo)/0.85)] backdrop-blur-md'
             : 'border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90'),
         className,
       )}

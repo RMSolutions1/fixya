@@ -17,6 +17,8 @@ import {
   SearchServicesQueryDto,
   ListProfessionalsQueryDto,
   CreateReviewDto,
+  NearbyProfessionalsQueryDto,
+  NearbyStatsQueryDto,
 } from './dto/marketplace.dto';
 import {
   CreateServiceRequestCommand,
@@ -36,10 +38,16 @@ import {
   GetProfessionalByIdQuery,
   ListServiceRequestsQuery,
   GetMarketplaceStatsQuery,
+  NearbyProfessionalsQuery,
+  NearbyStatsQuery,
 } from './queries/marketplace.queries';
 import { ToggleFavoriteCommand } from './commands/favorites.commands';
 import { CurrentUser, Roles, Public } from '../../common/decorators/auth.decorators';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import {
+  getRegistriesForCategory,
+  getRegistriesForProvince,
+} from '../../common/data/professional-registries';
 
 @ApiTags('Marketplace')
 @ApiBearerAuth()
@@ -92,6 +100,33 @@ export class MarketplaceController {
   @ApiOperation({ summary: 'Listar profesionales verificados' })
   listProfessionals(@Query() query: ListProfessionalsQueryDto) {
     return this.queryBus.execute(new ListProfessionalsQuery(query));
+  }
+
+  @Get('registries')
+  @Public()
+  @ApiOperation({ summary: 'Organismos habilitantes y consultas públicas por rubro' })
+  listRegistries(
+    @Query('categorySlug') categorySlug?: string,
+    @Query('province') province?: string,
+  ) {
+    if (categorySlug && province) {
+      return getRegistriesForProvince(categorySlug, province);
+    }
+    return getRegistriesForCategory(categorySlug);
+  }
+
+  @Get('nearby/stats')
+  @Public()
+  @ApiOperation({ summary: 'Profesionales y rubros cerca del usuario' })
+  nearbyStats(@Query() query: NearbyStatsQueryDto) {
+    return this.queryBus.execute(new NearbyStatsQuery(query));
+  }
+
+  @Get('nearby/professionals')
+  @Public()
+  @ApiOperation({ summary: 'Profesionales verificados cerca del usuario' })
+  nearbyProfessionals(@Query() query: NearbyProfessionalsQueryDto) {
+    return this.queryBus.execute(new NearbyProfessionalsQuery(query));
   }
 
   @Get('professionals/:id')

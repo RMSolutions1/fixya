@@ -97,7 +97,7 @@ export function PrensaPage() {
               <SectionHeading
                 eyebrow="Contacto prensa"
                 title="Consultas de medios"
-                description="Respondemos solicitudes de entrevistas, material gráfico y datos verificados para publicaciones."
+                description="Respondemos solicitudes de entrevistas, material gráfico y datos oficiales para publicaciones."
               />
               <div className="mt-8 space-y-4">
                 <a
@@ -154,7 +154,7 @@ export function PrensaPage() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <SectionHeading
-          eyebrow="Datos verificados"
+          eyebrow="Datos oficiales"
           title="Ficha corporativa"
           description="Información oficial para redacciones y partners."
         />
@@ -169,7 +169,7 @@ export function PrensaPage() {
           ))}
         </dl>
         <div className="mt-10 flex flex-wrap gap-3">
-          <Button asChild>
+          <Button variant="emprenor" asChild>
             <Link href="/nosotros">
               Sobre FixYa
               <ArrowRight className="ml-2 h-4 w-4" />

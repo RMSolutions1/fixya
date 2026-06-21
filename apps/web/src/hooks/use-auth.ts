@@ -18,7 +18,11 @@ export function useAuth() {
   const login = async (data: LoginForm) => {
     const res = await apiRequest<TokenResponse & { tenantId: string }>('/auth/login', {
       method: 'POST',
-      body: data,
+      body: {
+        email: data.email,
+        password: data.password,
+        ...(data.mfaCode ? { mfaCode: data.mfaCode } : {}),
+      },
     });
     store.setAuth({
       accessToken: res.accessToken,

@@ -87,6 +87,12 @@ export class LoginDto {
   @IsOptional()
   @IsString()
   tenantId?: string;
+
+  @ApiPropertyOptional({ description: 'Código MFA (si la cuenta lo tiene activado)' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(6)
+  mfaCode?: string;
 }
 
 export class RefreshTokenDto {
@@ -111,6 +117,20 @@ export class ResetPasswordDto {
   @MinLength(8)
   @MaxLength(72)
   password!: string;
+}
+
+export class VerifyEmailDto {
+  @ApiProperty({ description: 'Token de verificación recibido por email' })
+  @IsString()
+  token!: string;
+}
+
+export class MfaVerifyDto {
+  @ApiProperty({ description: 'Código TOTP de 6 dígitos', example: '123456' })
+  @IsString()
+  @MinLength(6)
+  @MaxLength(6)
+  code!: string;
 }
 
 export class UpdateProfileDto {

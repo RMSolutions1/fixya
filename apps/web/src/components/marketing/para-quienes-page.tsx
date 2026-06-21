@@ -20,9 +20,9 @@ const audiences = [
     icon: Home,
     title: 'Hogares y familias',
     description:
-      'Gasistas, plomeros, electricistas y cuidadores en tu barrio. Pagá con Mercado Pago, recibí factura y seguí cada etapa en el expediente digital.',
+      'Gasistas, plomeros, electricistas y cuidadores en tu barrio. Pagá con Mercado Pago, comprobantes en el expediente y seguí cada etapa desde tu cuenta.',
     benefits: [
-      'Profesionales verificados con reseñas reales',
+      'Profesionales con identidad revisada y reseñas reales',
       'Presupuestos comparables antes de contratar',
       'Pago retenido hasta tu conformidad',
       'Factura fiscal (integración Emitia en roadmap)',
@@ -34,7 +34,7 @@ const audiences = [
     icon: Wrench,
     title: 'Profesionales del oficio',
     description:
-      'Del campo a la capital: más clientes, cotizaciones online, cobros en pesos con MP y reputación que crece con cada trabajo bien hecho.',
+      'Del campo a la capital: más clientes, presupuestos online, cobros en pesos con MP y reputación que crece con cada trabajo bien hecho.',
     benefits: [
       'Solicitudes geolocalizadas en tu zona',
       'Perfil profesional con servicios y precios',
@@ -64,7 +64,7 @@ const audiences = [
     description:
       'Centralizá mantenimiento preventivo, proveedores recurrentes e historial por unidad funcional con documentación completa.',
     benefits: [
-      'Proveedores recurrentes verificados',
+      'Proveedores recurrentes con identidad revisada',
       'Historial por unidad o espacio común',
       'Presupuestos y actas digitalizadas',
       'Control de gastos y facturación',
@@ -155,7 +155,7 @@ export function ParaQuienesPage() {
                   ))}
                 </ul>
               </div>
-              <Button className="shrink-0 bg-sol text-foreground shadow-sol hover:bg-sol/90" asChild>
+              <Button className="shrink-0" variant="emprenor" asChild>
                 <Link href={cta.href}>
                   {cta.label}
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -219,7 +219,7 @@ export function ParaQuienesPage() {
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
             Escribinos y te orientamos sobre la mejor forma de usar FixYa según tu necesidad.
           </p>
-          <Button className="mt-8" size="lg" asChild>
+          <Button className="mt-8" size="lg" variant="emprenor" asChild>
             <a href={`mailto:${COMPANY.emails.general}`}>Contactar al equipo</a>
           </Button>
         </div>

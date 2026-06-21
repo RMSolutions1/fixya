@@ -18,6 +18,7 @@ import {
   usePublishServiceRequest,
 } from '@/hooks/use-marketplace';
 import { formatCurrency } from '@/lib/utils';
+import { RegistryVerificationPanel } from '@/components/marketing/registry-verification-panel';
 import { useMounted } from '@/hooks/use-mounted';
 
 export default function ProfesionalDetailPage({
@@ -91,7 +92,7 @@ export default function ProfesionalDetailPage({
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6">
         <h1 className="text-2xl font-bold">Profesional no encontrado</h1>
-        <Button className="mt-6" asChild>
+        <Button className="mt-6" variant="emprenor" asChild>
           <Link href="/profesionales">Volver al listado</Link>
         </Button>
       </div>
@@ -242,6 +243,16 @@ export default function ProfesionalDetailPage({
               </Card>
             );
           })()}
+
+          {primaryService?.category?.slug && (
+            <div className="mt-8">
+              <RegistryVerificationPanel
+                categorySlug={primaryService.category.slug}
+                province={pro.province ?? undefined}
+                variant="light"
+              />
+            </div>
+          )}
         </div>
 
         <div>
@@ -308,14 +319,14 @@ export default function ProfesionalDetailPage({
                   />
                 </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={submitting}>
+                <Button type="submit" variant="emprenor" className="w-full" disabled={submitting}>
                   {submitting ? 'Enviando...' : 'Enviar solicitud'}
                 </Button>
                 {!isAuthenticated && (
                   <p className="text-center text-xs text-muted-foreground">
                     Necesitás{' '}
                     <Link href={`/login?redirect=/profesionales/${id}`} className="text-primary">
-                      iniciar sesión
+                      ingresar
                     </Link>{' '}
                     para enviar
                   </p>

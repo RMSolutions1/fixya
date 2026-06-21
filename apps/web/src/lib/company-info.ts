@@ -31,7 +31,7 @@ export const GROUP_BUSINESS_UNITS: GroupBusinessUnit[] = [
   {
     id: 'fixya',
     brand: 'FixYa',
-    tagline: 'Marketplace de servicios verificados',
+    tagline: 'Marketplace de servicios profesionales',
     website: SITE_URL,
     isCurrent: true,
   },
@@ -61,7 +61,10 @@ export const COMPANY = {
 
   /** Unidad de negocio digital — marketplace de servicios */
   fixyaBrand: 'FixYa',
-  fixyaTagline: 'Servicios profesionales verificados',
+  fixyaTagline: 'Marketplace de servicios profesionales',
+  /** Copy estándar para páginas de servicios y landings */
+  marketingPitch:
+    'Profesionales con identidad revisada. Pagos con Mercado Pago y expediente digital por servicio.',
   fixyaDomain: SITE_HOST,
   fixyaWebsite: SITE_URL,
 

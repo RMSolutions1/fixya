@@ -18,9 +18,9 @@ const faqGroups: { title: string; description: string; items: FaqItem[] }[] = [
           'Buscá por categoría en Servicios o por nombre en Profesionales. Elegí el perfil, completá la solicitud y recibí presupuestos comparables. Aceptá el que prefieras y seguí el trabajo en tu expediente digital.',
       },
       {
-        question: '¿Los profesionales están verificados?',
+        question: '¿Cómo se revisa la identidad de los profesionales?',
         answer:
-          'Sí. Verificamos identidad y, cuando el rubro lo exige, matrículas y habilitaciones. El badge "Verificado" indica que completó nuestro proceso de onboarding.',
+          'Revisamos identidad y, cuando el rubro lo exige, matrículas y habilitaciones. El badge "Verificado" indica que completó nuestro proceso de onboarding en FixYa.',
       },
       {
         question: '¿Qué pasa si hay un problema con el servicio?',
@@ -57,7 +57,7 @@ const faqGroups: { title: string; description: string; items: FaqItem[] }[] = [
       {
         question: '¿Cómo me registro como profesional?',
         answer:
-          'Entrá a "Ser profesional", completá tu perfil con servicios y zona de cobertura. Tras la verificación, empezás a recibir solicitudes de clientes en tu área.',
+          'Andá a Registrarse, elegí el rol Profesional y completá tu perfil con servicios y zona de cobertura. Tras la revisión de identidad y documentación, empezás a recibir solicitudes de clientes en tu área.',
       },
       {
         question: '¿Cuándo recibo el pago?',
@@ -125,7 +125,7 @@ export function FaqPage() {
             Nuestro equipo responde consultas de lunes a viernes de 8:00 a 20:00.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button asChild>
+            <Button variant="emprenor" asChild>
               <a href={`mailto:${COMPANY.emails.general}`}>
                 <MessageCircle className="mr-2 h-4 w-4" />
                 {COMPANY.emails.general}
@@ -135,7 +135,7 @@ export function FaqPage() {
               <a href={COMPANY.phoneHref}>{COMPANY.phone}</a>
             </Button>
             <Button variant="outline" className="border-primary/30" asChild>
-              <Link href="/nosotros">Conocer FixYa</Link>
+              <Link href="/nosotros">Conocé FixYa</Link>
             </Button>
           </div>
         </div>

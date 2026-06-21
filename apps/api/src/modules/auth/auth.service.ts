@@ -17,6 +17,11 @@ import { PrismaService } from '../../database/prisma.service';
 import { RegisterDto, LoginDto, UpdateProfileDto, UploadComplianceDto } from './dto/auth.dto';
 import { JwtPayload, TokenPair } from './interfaces/jwt-payload.interface';
 import { coordsForProvince } from '../../common/utils/argentina-geo';
+import {
+  generateBase32Secret,
+  verifyTotp,
+  buildOtpauthUrl,
+} from '../../common/utils/totp';
 
 @Injectable()
 export class AuthService {
@@ -155,10 +160,67 @@ export class AuthService {
       dto.role,
     ]);
 
-    // Email de bienvenida — no bloqueante
+    // Email de bienvenida + verificación de email — no bloqueantes
     this.email.sendWelcome(result.user.email, result.user.firstName).catch(() => undefined);
+    this.issueEmailVerification(result.user.id, result.user.email, result.user.firstName).catch(
+      () => undefined,
+    );
 
     return tokens;
+  }
+
+  /** Crea (o reemplaza) el token de verificación y envía el email. */
+  private async issueEmailVerification(
+    userId: string,
+    email: string,
+    firstName: string,
+  ): Promise<void> {
+    await this.prisma.emailVerificationToken.updateMany({
+      where: { userId, usedAt: null },
+      data: { usedAt: new Date() },
+    });
+
+    const token = randomBytes(32).toString('hex');
+    await this.prisma.emailVerificationToken.create({
+      data: {
+        userId,
+        tokenHash: this.hashToken(token),
+        expiresAt: new Date(Date.now() + 24 * 3600_000),
+      },
+    });
+
+    await this.email.sendEmailVerification(email, firstName, token);
+  }
+
+  async resendEmailVerification(userId: string): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('Usuario no encontrado');
+    if (user.emailVerified) return { message: 'Tu email ya está verificado.' };
+    await this.issueEmailVerification(user.id, user.email, user.firstName);
+    return { message: 'Te reenviamos el email de verificación.' };
+  }
+
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    const stored = await this.prisma.emailVerificationToken.findUnique({
+      where: { tokenHash: this.hashToken(token) },
+    });
+
+    if (!stored || stored.usedAt || stored.expiresAt < new Date()) {
+      throw new BadRequestException('El enlace de verificación es inválido o expiró');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: stored.userId },
+        data: { emailVerified: true },
+      }),
+      this.prisma.emailVerificationToken.update({
+        where: { id: stored.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    return { message: 'Email verificado. ¡Gracias!' };
   }
 
   async login(dto: LoginDto): Promise<TokenPair & { tenantId: string }> {
@@ -179,6 +241,15 @@ export class AuthService {
     const valid = await bcrypt.compare(dto.password, user.passwordHash);
     if (!valid) {
       throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    if (user.mfaEnabled && user.mfaSecret) {
+      if (!dto.mfaCode) {
+        throw new UnauthorizedException('MFA_REQUIRED');
+      }
+      if (!verifyTotp(user.mfaSecret, dto.mfaCode)) {
+        throw new UnauthorizedException('Código MFA inválido');
+      }
     }
 
     const membership = dto.tenantId
@@ -259,6 +330,7 @@ export class AuthService {
         province: true,
         avatarUrl: true,
         status: true,
+        emailVerified: true,
         mfaEnabled: true,
         memberships: {
           where: { isActive: true },
@@ -389,6 +461,56 @@ export class AuthService {
     ]);
 
     return { message: 'Contraseña actualizada. Ya podés ingresar.' };
+  }
+
+  // ── MFA (TOTP) ─────────────────────────────────────────────────────────
+
+  /** Genera un secreto y la URL otpauth para enrolar la app de autenticación. */
+  async setupMfa(userId: string): Promise<{ secret: string; otpauthUrl: string }> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('Usuario no encontrado');
+    if (user.mfaEnabled) throw new BadRequestException('MFA ya está activado');
+
+    const secret = generateBase32Secret();
+    // Se guarda el secreto provisional; queda activo recién al confirmar un código.
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { mfaSecret: secret, mfaEnabled: false },
+    });
+
+    return { secret, otpauthUrl: buildOtpauthUrl(secret, user.email) };
+  }
+
+  /** Confirma el enrolamiento verificando un código y activa el MFA. */
+  async enableMfa(userId: string, code: string): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.mfaSecret) {
+      throw new BadRequestException('Iniciá la configuración de MFA primero');
+    }
+    if (!verifyTotp(user.mfaSecret, code)) {
+      throw new BadRequestException('Código inválido. Revisá la hora de tu dispositivo.');
+    }
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { mfaEnabled: true },
+    });
+    return { message: 'Verificación en dos pasos activada.' };
+  }
+
+  /** Desactiva el MFA validando un código vigente. */
+  async disableMfa(userId: string, code: string): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.mfaEnabled || !user.mfaSecret) {
+      throw new BadRequestException('MFA no está activado');
+    }
+    if (!verifyTotp(user.mfaSecret, code)) {
+      throw new BadRequestException('Código inválido');
+    }
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { mfaEnabled: false, mfaSecret: null },
+    });
+    return { message: 'Verificación en dos pasos desactivada.' };
   }
 
   private async generateTokens(

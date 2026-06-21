@@ -88,7 +88,7 @@ const timeline = [
     year: '2025',
     title: 'Lanzamiento comercial',
     description:
-      'Apertura de FixYa al público en Argentina: marketplace de servicios verificados con cobertura nacional.',
+      'Apertura de FixYa al público en Argentina: marketplace de servicios profesionales con cobertura nacional.',
   },
   {
     year: '2026',
@@ -101,7 +101,7 @@ const timeline = [
 const platformCapabilities = [
   {
     icon: Globe,
-    title: 'Marketplace geolocalizado',
+    title: 'Mercado geolocalizado',
     description: 'Búsqueda por zona, categoría y reputación en las 24 provincias.',
   },
   {
@@ -141,7 +141,7 @@ export function NosotrosPage() {
             <span className="text-sol">confianza</span> para servicios en Argentina
           </>
         }
-        subtitle={`FixYa es la unidad de negocio digital de ${COMPANY.groupBrand}: marketplace de servicios verificados operado por ${COMPANY.legalName}, con la experiencia en obra de ${COMPANY.emprenorBrand} desde ${COMPANY.emprenorFoundedYear}.`}
+        subtitle={`FixYa es la unidad de negocio digital de ${COMPANY.groupBrand}: ${COMPANY.fixyaTagline} operado por ${COMPANY.legalName}, con la experiencia en obra de ${COMPANY.emprenorBrand} desde ${COMPANY.emprenorFoundedYear}.`}
       >
         <div className="mt-10 grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-4">
           {heroStats.map(({ value, label }) => (
@@ -170,7 +170,7 @@ export function NosotrosPage() {
               sizes="(max-width: 1024px) 100vw, 50vw"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--celeste-dark)/0.85)] via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[hsl(var(--brand-indigo)/0.85)] via-transparent to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
               <p className="text-xs font-semibold uppercase tracking-widest text-sol">
                 Hecho en Argentina
@@ -185,14 +185,14 @@ export function NosotrosPage() {
             <SectionHeading
               eyebrow="Quiénes somos"
               title="Más que un directorio: una plataforma operativa"
-              description={`FixYa es la unidad digital de ${COMPANY.groupBrand}: resolver contratar servicios en Argentina con la misma seriedad que una obra industrial o un consorcio — accesible para cualquier hogar o PyME.`}
+              description={`FixYa es la unidad digital de ${COMPANY.groupBrand}: ayudarte a contratar servicios en Argentina con la misma seriedad que una obra industrial o un consorcio — accesible para cualquier hogar o PyME.`}
             />
             <p className="mt-6 leading-relaxed text-muted-foreground">
               {ecosystemSummary()} Desarrollamos software propio para matching de profesionales,
               pagos seguros, documentación legal y seguimiento de cada trabajo.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Button className="bg-sol text-foreground shadow-sol hover:bg-sol/90" asChild>
+              <Button variant="emprenor" asChild>
                 <Link href="/servicios">
                   Explorar servicios
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -215,7 +215,7 @@ export function NosotrosPage() {
               <Sparkles className="h-8 w-8 text-primary" />
               <h2 className="mt-4 text-2xl font-bold">Misión</h2>
               <p className="mt-4 leading-relaxed text-muted-foreground">
-                Conectar a personas y empresas con profesionales verificados, con pagos seguros,
+                Conectar a personas y empresas con profesionales con identidad revisada, pagos con Mercado Pago,
                 trazabilidad completa y garantía en cada contratación — desde el primer mensaje
                 hasta la factura final.
               </p>
@@ -379,7 +379,7 @@ export function NosotrosPage() {
                 <GroupBusinessUnitsList excludeCurrent={false} />
               </div>
               <div className="mt-6 flex flex-wrap gap-3">
-                <Button size="sm" asChild>
+                <Button size="sm" variant="emprenor" asChild>
                   <Link href="/prensa">Sala de prensa</Link>
                 </Button>
                 <Button size="sm" variant="outline" className="border-primary/30" asChild>

@@ -2,19 +2,10 @@ import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
 import { Prisma } from '@fixya/database';
 import { PrismaService } from '../../../database/prisma.service';
 import { SearchServicesQueryDto } from '../dto/marketplace.dto';
+import { geoBoundingBox, haversineKm, geoServiceWhere } from '../../../common/utils/geo.utils';
 
 export class SearchServicesQuery {
   constructor(public readonly params: SearchServicesQueryDto) {}
-}
-
-/** Aproximación bounding box para filtro geo (sin PostGIS en dev) */
-function geoBoundingBox(lat: number, lng: number, radiusKm: number) {
-  const latDelta = radiusKm / 111;
-  const lngDelta = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
-  return {
-    latitude: { gte: lat - latDelta, lte: lat + latDelta },
-    longitude: { gte: lng - lngDelta, lte: lng + lngDelta },
-  };
 }
 
 @QueryHandler(SearchServicesQuery)
@@ -88,14 +79,7 @@ export class SearchServicesHandler implements IQueryHandler<SearchServicesQuery>
         s.latitude !== null &&
         s.longitude !== null
       ) {
-        const lat1 = (latitude * Math.PI) / 180;
-        const lat2 = (Number(s.latitude) * Math.PI) / 180;
-        const dLat = lat2 - lat1;
-        const dLng = ((Number(s.longitude) - longitude) * Math.PI) / 180;
-        const a =
-          Math.sin(dLat / 2) ** 2 +
-          Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
-        distanceKm = Math.round(6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 10) / 10;
+        distanceKm = haversineKm(latitude, longitude, Number(s.latitude), Number(s.longitude));
       }
       return {
         ...s,
@@ -346,7 +330,15 @@ export class ListProfessionalsHandler implements IQueryHandler<ListProfessionals
 
     const services = await this.prisma.service.findMany({
       where: serviceWhere,
-      include: {
+      select: {
+        id: true,
+        professionalId: true,
+        status: true,
+        latitude: true,
+        longitude: true,
+        basePrice: true,
+        ratingAvg: true,
+        ratingCount: true,
         category: { select: { id: true, name: true, slug: true } },
       },
     });
@@ -643,5 +635,240 @@ export class ListFavoritesHandler implements IQueryHandler<ListFavoritesQuery> {
       orderBy: { createdAt: 'desc' },
     });
     return favorites.map((f) => f.service).filter(Boolean);
+  }
+}
+
+export class NearbyProfessionalsQuery {
+  constructor(
+    public readonly params: import('../dto/marketplace.dto').NearbyProfessionalsQueryDto,
+  ) {}
+}
+
+@QueryHandler(NearbyProfessionalsQuery)
+export class NearbyProfessionalsHandler
+  implements IQueryHandler<NearbyProfessionalsQuery>
+{
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(query: NearbyProfessionalsQuery) {
+    const {
+      latitude,
+      longitude,
+      radiusKm = 50,
+      categorySlug,
+      q,
+      page = 1,
+      limit = 24,
+    } = query.params;
+
+    let categoryId: string | undefined;
+    if (categorySlug) {
+      const cat = await this.prisma.serviceCategory.findFirst({
+        where: { slug: categorySlug, isActive: true, deletedAt: null },
+      });
+      categoryId = cat?.id;
+    }
+
+    const services = await this.prisma.service.findMany({
+      where: {
+        status: 'ACTIVE',
+        deletedAt: null,
+        professionalId: { not: null },
+        ...(categoryId && { categoryId }),
+        ...geoServiceWhere(latitude, longitude, radiusKm),
+      },
+      select: {
+        id: true,
+        professionalId: true,
+        latitude: true,
+        longitude: true,
+        basePrice: true,
+        ratingAvg: true,
+        ratingCount: true,
+        category: { select: { id: true, name: true, slug: true } },
+      },
+    });
+
+    const byProfessional = new Map<
+      string,
+      {
+        services: typeof services;
+        minPrice: number | null;
+        maxRating: number;
+        totalReviews: number;
+        categories: Set<string>;
+        minDistance: number;
+      }
+    >();
+
+    for (const s of services) {
+      if (!s.professionalId || s.latitude === null || s.longitude === null) continue;
+      const dist = haversineKm(
+        latitude,
+        longitude,
+        Number(s.latitude),
+        Number(s.longitude),
+      );
+      if (dist > radiusKm) continue;
+
+      const entry = byProfessional.get(s.professionalId) ?? {
+        services: [],
+        minPrice: null,
+        maxRating: 0,
+        totalReviews: 0,
+        categories: new Set<string>(),
+        minDistance: dist,
+      };
+      entry.services.push(s);
+      entry.minDistance = Math.min(entry.minDistance, dist);
+      if (s.basePrice !== null) {
+        const price = Number(s.basePrice);
+        entry.minPrice = entry.minPrice === null ? price : Math.min(entry.minPrice, price);
+      }
+      entry.maxRating = Math.max(entry.maxRating, Number(s.ratingAvg));
+      entry.totalReviews += s.ratingCount;
+      entry.categories.add(s.category.name);
+      byProfessional.set(s.professionalId, entry);
+    }
+
+    const professionalIds = [...byProfessional.keys()];
+    if (professionalIds.length === 0) {
+      return {
+        items: [],
+        meta: { total: 0, page, limit, pages: 0, radiusKm, center: { latitude, longitude } },
+      };
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: { in: professionalIds },
+        deletedAt: null,
+        status: 'ACTIVE',
+        ...(q && {
+          OR: [
+            { firstName: { contains: q, mode: 'insensitive' } },
+            { lastName: { contains: q, mode: 'insensitive' } },
+          ],
+        }),
+      },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        avatarUrl: true,
+        emailVerified: true,
+        status: true,
+        city: true,
+        province: true,
+      },
+    });
+
+    let items = users.map((u) => {
+      const agg = byProfessional.get(u.id)!;
+      const primary = agg.services.sort((a, b) => Number(a.basePrice ?? 0) - Number(b.basePrice ?? 0))[0];
+      return {
+        id: u.id,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        phone: u.phone,
+        avatarUrl: u.avatarUrl,
+        verified: u.emailVerified && u.status === 'ACTIVE',
+        pendingApproval: false,
+        city: u.city,
+        province: u.province,
+        latitude: primary.latitude ? Number(primary.latitude) : null,
+        longitude: primary.longitude ? Number(primary.longitude) : null,
+        distanceKm: agg.minDistance,
+        specialty: primary.category.name,
+        categories: [...agg.categories],
+        serviceCount: agg.services.length,
+        minPrice: agg.minPrice,
+        ratingAvg: agg.maxRating,
+        ratingCount: agg.totalReviews,
+        primaryServiceId: primary.id,
+        available: true,
+      };
+    });
+
+    items.sort((a, b) => (a.distanceKm ?? 999) - (b.distanceKm ?? 999));
+    const total = items.length;
+    const skip = (page - 1) * limit;
+    items = items.slice(skip, skip + limit);
+
+    return {
+      items,
+      meta: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+        radiusKm,
+        center: { latitude, longitude },
+      },
+    };
+  }
+}
+
+export class NearbyStatsQuery {
+  constructor(
+    public readonly params: import('../dto/marketplace.dto').NearbyStatsQueryDto,
+  ) {}
+}
+
+@QueryHandler(NearbyStatsQuery)
+export class NearbyStatsHandler implements IQueryHandler<NearbyStatsQuery> {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async execute(query: NearbyStatsQuery) {
+    const { latitude, longitude, radiusKm = 50 } = query.params;
+
+    const services = await this.prisma.service.findMany({
+      where: {
+        status: 'ACTIVE',
+        deletedAt: null,
+        professionalId: { not: null },
+        ...geoServiceWhere(latitude, longitude, radiusKm),
+      },
+      select: {
+        professionalId: true,
+        latitude: true,
+        longitude: true,
+        category: { select: { slug: true, name: true } },
+      },
+    });
+
+    const prosNearby = new Set<string>();
+    const byCategory = new Map<string, { slug: string; name: string; count: number }>();
+
+    for (const s of services) {
+      if (!s.professionalId || s.latitude === null || s.longitude === null) continue;
+      const dist = haversineKm(
+        latitude,
+        longitude,
+        Number(s.latitude),
+        Number(s.longitude),
+      );
+      if (dist > radiusKm) continue;
+      prosNearby.add(s.professionalId);
+      const cat = byCategory.get(s.category.slug) ?? {
+        slug: s.category.slug,
+        name: s.category.name,
+        count: 0,
+      };
+      cat.count += 1;
+      byCategory.set(s.category.slug, cat);
+    }
+
+    return {
+      professionalsCount: prosNearby.size,
+      servicesCount: services.filter((s) => {
+        if (s.latitude === null || s.longitude === null) return false;
+        return haversineKm(latitude, longitude, Number(s.latitude), Number(s.longitude)) <= radiusKm;
+      }).length,
+      radiusKm,
+      center: { latitude, longitude },
+      categoriesNearby: [...byCategory.values()].sort((a, b) => b.count - a.count),
+    };
   }
 }

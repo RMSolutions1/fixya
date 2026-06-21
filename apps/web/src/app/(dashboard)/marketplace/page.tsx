@@ -1,8 +1,8 @@
 import MarketplaceLoader from '@/components/marketplace/marketplace-loader';
 
 export const metadata = {
-  title: 'Marketplace | FixYa',
-  description: 'Explorá servicios y oportunidades en el marketplace FixYa.',
+  title: 'Mercado | FixYa',
+  description: 'Explorá servicios publicados y competí con presupuestos en solicitudes abiertas.',
 };
 
 export default function MarketplacePage() {

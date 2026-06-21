@@ -42,9 +42,12 @@ export function ProfessionalCard({ professional }: ProfessionalCardProps) {
                 )}
               </div>
               <p className="text-sm text-muted-foreground">{professional.specialty}</p>
-              {(professional.city || professional.province) && (
+              {(professional.city || professional.province || professional.distanceKm != null) && (
                 <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                   <MapPin className="h-3 w-3" />
+                  {professional.distanceKm != null && (
+                    <span className="font-medium text-primary">{professional.distanceKm} km · </span>
+                  )}
                   {[professional.city, professional.province].filter(Boolean).join(', ')}
                 </p>
               )}
@@ -67,7 +70,7 @@ export function ProfessionalCard({ professional }: ProfessionalCardProps) {
                 </p>
                 <p className="text-xs text-muted-foreground">desde / servicio</p>
               </div>
-              <span className={buttonVariants({ size: 'sm' })}>Contratar</span>
+              <span className={buttonVariants({ size: 'sm', variant: 'outline' })}>Ver perfil</span>
             </div>
           )}
         </Link>
@@ -93,7 +96,7 @@ export function HeroSearch() {
         placeholder="¿Qué servicio necesitás? Ej: plomero, gasista, electricista..."
         className="border-0 bg-transparent pl-4 text-foreground shadow-none focus-visible:ring-0"
       />
-      <Button type="submit" className="rounded-xl px-6 shadow-celeste">
+      <Button type="submit" variant="emprenor" className="rounded-xl px-6 shadow-celeste">
         <Search className="mr-2 h-4 w-4" />
         Buscar
       </Button>
@@ -112,13 +115,13 @@ export function CategoryPill({
 }) {
   return (
     <Link
-      href={`/profesionales?cat=${slug}`}
+      href={`/servicios/${slug}`}
       className="flex flex-col items-center gap-2 rounded-2xl border bg-card p-4 text-center transition-all hover:border-primary/40 hover:shadow-celeste"
     >
       <span className="text-3xl">{getCategoryIcon(slug)}</span>
       <span className="text-sm font-medium">{name}</span>
       {count !== undefined && count > 0 && (
-        <span className="text-xs text-primary">{count} disp.</span>
+        <span className="text-xs text-primary">{count} disponibles</span>
       )}
     </Link>
   );
@@ -134,12 +137,12 @@ export function HowItWorks() {
     {
       step: '02',
       title: 'Compará presupuestos',
-      description: 'Recibí cotizaciones, compará precios y elegí con información clara en pesos.',
+      description: 'Recibí presupuestos, compará precios y elegí con información clara en pesos.',
     },
     {
       step: '03',
       title: 'Contratá con confianza',
-      description: 'Aceptá el presupuesto, firmá digitalmente y abrí tu expediente FixYa.',
+      description: 'Aceptá el presupuesto, confirmá la contratación y abrí tu expediente FixYa.',
     },
     {
       step: '04',
@@ -154,7 +157,7 @@ export function HowItWorks() {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-[hsl(var(--celeste-dark))] py-24 text-white">
+    <section className="relative overflow-hidden bg-[hsl(var(--brand-indigo))] py-24 text-white">
       <div className="pointer-events-none absolute inset-0 pattern-grid-subtle opacity-10" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <div className="text-center">
@@ -163,7 +166,7 @@ export function HowItWorks() {
           </span>
           <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Metodología probada</h2>
           <p className="mx-auto mt-3 max-w-2xl text-white/70">
-            Cinco pasos que garantizan resultados excepcionales — inspirado en las mejores empresas
+            Cinco pasos claros para contratar con respaldo — inspirado en las mejores empresas
             de servicios del país
           </p>
         </div>

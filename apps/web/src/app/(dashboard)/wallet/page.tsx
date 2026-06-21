@@ -105,7 +105,29 @@ export default function WalletPage() {
           ) : entries.length === 0 ? (
             <p className="text-muted-foreground">Sin asientos contables registrados</p>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              <div className="space-y-3 md:hidden">
+                {entries.map((entry) => (
+                  <div key={entry.id} className="rounded-lg border p-3 text-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <Badge variant="secondary">{entry.entryType}</Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(entry.postedAt).toLocaleString('es-AR')}
+                      </span>
+                    </div>
+                    <p className="mt-2 font-medium">{entry.description}</p>
+                    <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      {entry.lines.map((line) => (
+                        <li key={line.id}>
+                          {line.accountCode}: D {formatCurrency(line.debit)} / C{' '}
+                          {formatCurrency(line.credit)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              <div className="hidden overflow-x-auto md:block">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-muted-foreground">
@@ -139,7 +161,8 @@ export default function WalletPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

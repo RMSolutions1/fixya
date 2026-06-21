@@ -3,7 +3,7 @@ import ServiciosPageClient from './servicios-client';
 
 export const metadata = {
   title: 'Servicios | FixYa',
-  description: 'Directorio de categorías de servicios profesionales verificados en Argentina.',
+  description: 'Directorio de categorías de servicios profesionales en las 24 provincias de Argentina.',
 };
 
 export default function ServiciosPage() {

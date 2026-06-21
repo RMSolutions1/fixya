@@ -13,6 +13,7 @@ import { MarketingPageShell } from '@/components/marketing/marketing-page-shell'
 import { TrustBadges } from '@/components/brand/trust-badges';
 import { MarketingPageCloser } from '@/components/marketing/marketing-page-closer';
 import { SectionHeading } from '@/components/marketing/section-heading';
+import { COMPANY } from '@/lib/company-info';
 
 export default function ServiciosPageClient() {
   const mounted = useMounted();
@@ -35,7 +36,7 @@ export default function ServiciosPageClient() {
             Todos los <span className="text-sol">servicios</span>
           </>
         }
-        subtitle={`${categories?.length ?? 0} categorías de servicios profesionales verificados en Argentina`}
+        subtitle={`${categories?.length ?? 0} categorías de servicios profesionales en las 24 provincias`}
         heroExtra={
           <form
             className="mt-8 flex max-w-xl gap-2 rounded-full bg-white p-1.5"
@@ -50,7 +51,7 @@ export default function ServiciosPageClient() {
               placeholder="Buscar servicios..."
               className="border-0 bg-transparent pl-4 text-foreground shadow-none focus-visible:ring-2 focus-visible:ring-primary"
             />
-            <Button type="submit" className="rounded-full" aria-label="Buscar servicios">
+            <Button type="submit" variant="emprenor" className="rounded-full" aria-label="Buscar servicios">
               <Search className="h-4 w-4" />
             </Button>
           </form>
@@ -59,7 +60,7 @@ export default function ServiciosPageClient() {
         <SectionHeading
           eyebrow="Directorio"
           title="Elegí el rubro que necesitás"
-          description="Cada categoría conecta con profesionales verificados. Pagos con Mercado Pago y expediente digital por servicio."
+          description={COMPANY.marketingPitch}
         />
         <p className="mb-4 mt-8 text-sm text-muted-foreground">
           {filtered?.length ?? 0} categorías encontradas
@@ -84,7 +85,7 @@ export default function ServiciosPageClient() {
             {filtered?.map((cat) => (
               <Link
                 key={cat.id}
-                href={`/profesionales?cat=${cat.slug}`}
+                href={`/servicios/${cat.slug}`}
                 className="group card-argentina p-6 hover:shadow-celeste"
               >
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-2xl">
@@ -116,7 +117,7 @@ export default function ServiciosPageClient() {
             Registrate gratis y empezá a recibir solicitudes en tu zona.
           </p>
           <Button variant="emprenor" className="mt-6" asChild>
-            <Link href="/login">Ingresar como profesional</Link>
+            <Link href="/register?role=PROFESIONAL">Sumate como profesional</Link>
           </Button>
         </div>
       </section>

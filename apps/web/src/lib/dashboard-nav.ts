@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   UserCircle,
   FileUp,
+  Menu,
 } from 'lucide-react';
 
 export type DashboardRole =
@@ -46,7 +47,16 @@ const clientNav: DashboardNavItem[] = [
 const professionalNav: DashboardNavItem[] = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/solicitudes', label: 'Oportunidades', icon: ClipboardList },
-  { href: '/marketplace', label: 'Marketplace', icon: Store },
+  { href: '/marketplace', label: 'Mercado', icon: Store },
+  { href: '/dashboard/documentacion', label: 'Documentación', icon: FileUp },
+  { href: '/wallet', label: 'Wallet', icon: Wallet },
+  profileNavItem,
+];
+
+const empresaNav: DashboardNavItem[] = [
+  { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard/solicitudes', label: 'Oportunidades', icon: ClipboardList },
+  { href: '/marketplace', label: 'Mercado', icon: Store },
   { href: '/dashboard/documentacion', label: 'Documentación', icon: FileUp },
   { href: '/wallet', label: 'Wallet', icon: Wallet },
   profileNavItem,
@@ -55,7 +65,7 @@ const professionalNav: DashboardNavItem[] = [
 const adminNav: DashboardNavItem[] = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/aprobaciones', label: 'Aprobaciones', icon: ShieldCheck },
-  { href: '/marketplace', label: 'Marketplace', icon: Store },
+  { href: '/marketplace', label: 'Mercado', icon: Store },
   { href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardList },
   { href: '/wallet', label: 'Wallet', icon: Wallet },
   profileNavItem,
@@ -76,10 +86,41 @@ const gestorNav: DashboardNavItem[] = [
 
 const ADMIN_ROLES: DashboardRole[] = [
   'SUPER_ADMIN',
-  'EMPRESA',
   'CONTADOR',
   'SUPERVISOR',
   'OPERADOR',
+];
+
+export interface MobileNavItem {
+  href?: string;
+  label: string;
+  icon: LucideIcon;
+  exact?: boolean;
+  action?: 'menu' | 'create';
+}
+
+const mobileClient: MobileNavItem[] = [
+  { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardList },
+  { href: '/marketplace/requests/new', label: 'Pedir', icon: FileText, action: 'create' },
+  { href: '/favorites', label: 'Favoritos', icon: Heart },
+  { href: '/dashboard/perfil', label: 'Perfil', icon: UserCircle },
+];
+
+const mobileProEmpresa: MobileNavItem[] = [
+  { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard/solicitudes', label: 'Trabajos', icon: ClipboardList },
+  { href: '/marketplace', label: 'Mercado', icon: Store },
+  { href: '/wallet', label: 'Wallet', icon: Wallet },
+  { href: '/dashboard/perfil', label: 'Perfil', icon: UserCircle },
+];
+
+const mobileAdmin: MobileNavItem[] = [
+  { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardList },
+  { href: '/marketplace', label: 'Mercado', icon: Store },
+  { href: '/wallet', label: 'Wallet', icon: Wallet },
+  { label: 'Más', icon: Menu, action: 'menu' },
 ];
 
 export function resolveDashboardRole(role?: string): DashboardRole {
@@ -103,10 +144,21 @@ export function resolveDashboardRole(role?: string): DashboardRole {
 export function getDashboardNav(role?: string): DashboardNavItem[] {
   const r = resolveDashboardRole(role);
   if (r === 'PROFESIONAL') return professionalNav;
+  if (r === 'EMPRESA') return empresaNav;
   if (r === 'AUDITOR') return auditorNav;
   if (r === 'GESTOR_DOCUMENTAL') return gestorNav;
   if (ADMIN_ROLES.includes(r)) return adminNav;
   return clientNav;
+}
+
+export function getMobileBottomNav(role?: string): MobileNavItem[] {
+  const r = resolveDashboardRole(role);
+  if (r === 'CLIENTE') return mobileClient;
+  if (r === 'PROFESIONAL' || r === 'EMPRESA') return mobileProEmpresa;
+  if (r === 'AUDITOR' || r === 'GESTOR_DOCUMENTAL') {
+    return mobileAdmin.filter((item) => item.action !== 'menu' || r === 'AUDITOR');
+  }
+  return mobileAdmin;
 }
 
 export function getDashboardDescription(role: DashboardRole): string {

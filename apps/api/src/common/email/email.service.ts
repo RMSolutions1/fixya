@@ -74,6 +74,28 @@ export class EmailService {
     await this.send(to, subject, html);
   }
 
+  async sendEmailVerification(to: string, firstName: string, token: string): Promise<void> {
+    const verifyUrl = `${this.appPublicUrl}/verificar-email?token=${token}`;
+    const subject = `Confirmá tu email · ${APP_NAME}`;
+    const html = `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1c1917">
+        <h1 style="color:#2E2A6E">Confirmá tu email</h1>
+        <p>Hola, ${firstName}. Gracias por registrarte en <strong>${APP_NAME}</strong>. Confirmá tu dirección de email para activar todas las funciones de tu cuenta.</p>
+        <a href="${verifyUrl}"
+           style="display:inline-block;background:#16a34a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:16px 0">
+          Confirmar mi email →
+        </a>
+        <p>Este enlace expira en <strong>24 horas</strong>. Si no creaste esta cuenta, ignorá este email.</p>
+        <p style="word-break:break-all;font-size:12px;color:#78716c">
+          O copiá este enlace en tu navegador:<br>${verifyUrl}
+        </p>
+        <p style="font-size:12px;color:#78716c;margin-top:32px">
+          ${APP_NAME} · Grupo Emprenor · RM International Group SAS
+        </p>
+      </div>`;
+    await this.send(to, subject, html);
+  }
+
   async sendProfessionalApproved(to: string, firstName: string): Promise<void> {
     const subject = `¡Tu perfil profesional fue aprobado! · ${APP_NAME}`;
     const html = `

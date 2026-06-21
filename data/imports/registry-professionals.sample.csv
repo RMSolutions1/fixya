@@ -1,0 +1,3 @@
+email,firstName,lastName,phone,city,province,categorySlug,licenseNumber,registryId,documentNumber
+ejemplo@fixya.test,Juan,Pérez,+5493870000000,Salta,Salta,gas,12345-G,gasnor,20123456789
+ejemplo2@fixya.test,María,García,+5491120000000,CABA,Ciudad Autónoma de Buenos Aires,electricidad,COPIME-14882,copime,27123456789

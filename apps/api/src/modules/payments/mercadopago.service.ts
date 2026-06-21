@@ -48,6 +48,12 @@ export class MercadoPagoService {
     const baseUrl = this.config.get<string>('APP_PUBLIC_URL', 'http://localhost:3000');
     const apiUrl = this.config.get<string>('API_PUBLIC_URL', 'http://localhost:4000');
 
+    // API_PUBLIC_URL puede venir con o sin el prefijo /api/v1 — evitar duplicarlo.
+    const apiBase = apiUrl.replace(/\/+$/, '');
+    const notificationUrl = /\/api\/v\d+$/.test(apiBase)
+      ? `${apiBase}/webhooks/mercadopago`
+      : `${apiBase}/api/v1/webhooks/mercadopago`;
+
     const body = {
       items: [
         {
@@ -60,7 +66,7 @@ export class MercadoPagoService {
       ],
       payer: { email: params.payerEmail },
       external_reference: params.engagementId,
-      notification_url: `${apiUrl}/api/v1/webhooks/mercadopago`,
+      notification_url: notificationUrl,
       back_urls: {
         success: `${baseUrl}/engagements/${params.engagementId}?payment=success`,
         failure: `${baseUrl}/engagements/${params.engagementId}?payment=failure`,
@@ -90,6 +96,37 @@ export class MercadoPagoService {
 
   getCheckoutUrl(preference: MpPreferenceResult): string {
     return this.isSandbox ? preference.sandbox_init_point : preference.init_point;
+  }
+
+  /** Devolución total o parcial vía API de Mercado Pago. */
+  async refundPayment(
+    mpPaymentId: string,
+    amount?: number,
+  ): Promise<{ id: number; status: string } | null> {
+    if (!this.accessToken) return null;
+    try {
+      const res = await fetch(
+        `https://api.mercadopago.com/v1/payments/${mpPaymentId}/refunds`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json',
+            'X-Idempotency-Key': `refund-${mpPaymentId}-${amount ?? 'full'}`,
+          },
+          body: JSON.stringify(amount ? { amount } : {}),
+        },
+      );
+      if (!res.ok) {
+        const err = await res.text();
+        this.logger.error(`MP refund error: ${err}`);
+        return null;
+      }
+      return res.json() as Promise<{ id: number; status: string }>;
+    } catch (err) {
+      this.logger.error(`Excepción al reembolsar MP ${mpPaymentId}: ${err}`);
+      return null;
+    }
   }
 
   async getPaymentStatus(mpPaymentId: string): Promise<{

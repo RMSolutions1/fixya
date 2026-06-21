@@ -36,7 +36,20 @@ export class WebhooksController {
     signature?: string,
     requestId?: string,
   ): void {
-    if (!this.mpWebhookSecret || !signature) return;
+    // Sin secreto configurado solo se permite fuera de producción (dev/sandbox).
+    if (!this.mpWebhookSecret) {
+      if (process.env.NODE_ENV === 'production') {
+        this.logger.error('MP_WEBHOOK_SECRET no configurado en producción');
+        throw new ForbiddenException('Webhook no configurado');
+      }
+      return;
+    }
+
+    // Con secreto configurado, la firma es obligatoria.
+    if (!signature) {
+      this.logger.warn('Webhook MP: falta cabecera x-signature');
+      throw new ForbiddenException('Firma requerida');
+    }
 
     // Formato MP: "ts=<timestamp>,v1=<hash>"
     const parts = Object.fromEntries(signature.split(',').map((p) => p.split('=')));

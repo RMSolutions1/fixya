@@ -10,6 +10,8 @@ export function validateProductionEnv(): void {
     ['JWT_SECRET', process.env.JWT_SECRET],
     ['DATABASE_URL', process.env.DATABASE_URL],
     ['MP_ACCESS_TOKEN', process.env.MP_ACCESS_TOKEN],
+    ['MP_WEBHOOK_SECRET', process.env.MP_WEBHOOK_SECRET],
+    ['RESEND_API_KEY', process.env.RESEND_API_KEY],
     ['APP_PUBLIC_URL', process.env.APP_PUBLIC_URL],
     ['API_PUBLIC_URL', process.env.API_PUBLIC_URL],
     ['CORS_ORIGINS', process.env.CORS_ORIGINS],
@@ -25,6 +27,11 @@ export function validateProductionEnv(): void {
   const jwtSecret = process.env.JWT_SECRET!;
   if (jwtSecret.length < 32 || jwtSecret.includes('dev-secret')) {
     throw new Error('JWT_SECRET debe tener al menos 32 caracteres y no ser un valor de desarrollo');
+  }
+
+  const mpToken = process.env.MP_ACCESS_TOKEN!;
+  if (mpToken.includes('PLACEHOLDER') || mpToken.includes('CONFIGURE')) {
+    throw new Error('MP_ACCESS_TOKEN tiene un valor placeholder; configurá el token real de Mercado Pago');
   }
 
   if (process.env.ENABLE_SANDBOX_PAYMENTS === 'true') {

@@ -4,7 +4,7 @@ import { COMPANY } from '@/lib/company-info';
 
 export function SiteTopBar() {
   return (
-    <div className="hidden border-b border-primary/10 bg-[hsl(var(--celeste-dark))] text-white lg:block">
+    <div className="hidden border-b border-primary/10 bg-[hsl(var(--brand-indigo))] text-white lg:block">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-xs sm:px-6">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
           <a
@@ -28,7 +28,7 @@ export function SiteTopBar() {
         </div>
         <div className="flex items-center gap-4">
           <span className="font-medium tracking-wider text-white/60">
-            {COMPANY.groupBrand} · Marketplace nacional
+            {COMPANY.groupBrand} · Mercado nacional de servicios
           </span>
         </div>
       </div>

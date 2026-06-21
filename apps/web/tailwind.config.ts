@@ -16,10 +16,13 @@ const config: Config = {
         ring: 'hsl(var(--ring))',
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        brand: {
+          indigo: 'hsl(var(--brand-indigo))',
+        },
         celeste: {
           DEFAULT: 'hsl(var(--celeste))',
           light: 'hsl(var(--celeste-light))',
-          dark: 'hsl(var(--celeste-dark))',
+          dark: 'hsl(var(--brand-indigo))',
         },
         sol: {
           DEFAULT: 'hsl(var(--sol))',

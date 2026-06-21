@@ -52,15 +52,30 @@ const vars = {
   DATABASE_URL: dbUrl,
   DIRECT_URL: directUrl,
   APP_PUBLIC_URL: 'https://fixya.emprenor.com',
-  API_PUBLIC_URL: 'https://fixya.emprenor.com/api/v1',
+  // Base sin /api/v1 — el backend agrega el prefijo al armar notification_url de MP.
+  API_PUBLIC_URL: 'https://fixya.emprenor.com',
   CORS_ORIGINS: 'https://fixya.emprenor.com,https://fixya-dun.vercel.app',
   ENABLE_SWAGGER: 'false',
   ENABLE_SANDBOX_PAYMENTS: 'false',
   MP_SANDBOX: 'false',
-  MP_ACCESS_TOKEN: process.env.MP_ACCESS_TOKEN || 'APP_USR-PLACEHOLDER-CONFIGURE-IN-MERCADOPAGO',
+  MP_ACCESS_TOKEN:
+    process.env.MP_ACCESS_TOKEN || rootEnv.MP_ACCESS_TOKEN || webEnv.MP_ACCESS_TOKEN || '',
+  MP_WEBHOOK_SECRET:
+    process.env.MP_WEBHOOK_SECRET || rootEnv.MP_WEBHOOK_SECRET || webEnv.MP_WEBHOOK_SECRET || '',
+  RESEND_API_KEY:
+    process.env.RESEND_API_KEY || rootEnv.RESEND_API_KEY || webEnv.RESEND_API_KEY || '',
   API_PREFIX: 'v1',
   SEED_DEMO_DATA: 'false',
 };
+
+const REQUIRED_PROD = ['MP_ACCESS_TOKEN', 'MP_WEBHOOK_SECRET', 'RESEND_API_KEY'];
+for (const key of REQUIRED_PROD) {
+  if (!vars[key]) {
+    console.warn(
+      `⚠ ${key} vacío — configurá el valor real antes del deploy o la API fallará al iniciar en producción.`,
+    );
+  }
+}
 
 for (const [key, value] of Object.entries(vars)) {
   if (value === undefined || value === null) continue;

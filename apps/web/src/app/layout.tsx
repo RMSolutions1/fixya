@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: '%s | FixYa',
   },
   description:
-    'Contratá profesionales verificados, compará presupuestos y pagá con Mercado Pago. Marketplace digital del Grupo Emprenor en las 24 provincias.',
+    'Contratá profesionales con identidad revisada, compará presupuestos y pagá con Mercado Pago. Marketplace digital del Grupo Emprenor en las 24 provincias.',
   applicationName: 'FixYa',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
@@ -32,10 +32,6 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'FixYa',
   },
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#2E2A6E' },
-    { media: '(prefers-color-scheme: dark)', color: '#2E2A6E' },
-  ],
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },
@@ -51,13 +47,13 @@ export const metadata: Metadata = {
     siteName: 'FixYa · Grupo Emprenor',
     title: 'FixYa — Marketplace de servicios profesionales',
     description:
-      'El Mercado Libre de los servicios. Profesionales verificados, presupuestos comparables y pagos seguros.',
+      'El marketplace de servicios de Argentina. Profesionales con identidad revisada, presupuestos comparables y pagos con Mercado Pago.',
   },
   keywords: [
     'FixYa',
     'Grupo Emprenor',
     'marketplace servicios',
-    'profesionales verificados',
+    'profesionales Argentina',
     'Mercado Pago',
     'plomero',
     'electricista',
@@ -71,6 +67,7 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -243,3 +243,59 @@ export class ListProfessionalsQueryDto {
   @Transform(({ value }) => value === true || value === 'true')
   includePending?: boolean;
 }
+
+export class NearbyProfessionalsQueryDto {
+  @ApiProperty({ description: 'Latitud del cliente' })
+  @Type(() => Number)
+  @IsNumber()
+  latitude!: number;
+
+  @ApiProperty({ description: 'Longitud del cliente' })
+  @Type(() => Number)
+  @IsNumber()
+  longitude!: number;
+
+  @ApiPropertyOptional({ description: 'Radio en km', default: 50 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  radiusKm?: number = 50;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  categorySlug?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  @ApiPropertyOptional({ default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ default: 24 })
+  @IsOptional()
+  @Type(() => Number)
+  limit?: number = 24;
+}
+
+export class NearbyStatsQueryDto {
+  @ApiProperty()
+  @Type(() => Number)
+  @IsNumber()
+  latitude!: number;
+
+  @ApiProperty()
+  @Type(() => Number)
+  @IsNumber()
+  longitude!: number;
+
+  @ApiPropertyOptional({ default: 50 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  radiusKm?: number = 50;
+}

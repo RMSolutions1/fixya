@@ -88,7 +88,7 @@ export default function ForgotPasswordClient() {
             </form>
             <p className="mt-4 text-center text-sm text-muted-foreground">
               <Link href="/login" className="font-medium text-primary hover:underline">
-                Volver a iniciar sesión
+                Volver a ingresar
               </Link>
             </p>
           </CardContent>

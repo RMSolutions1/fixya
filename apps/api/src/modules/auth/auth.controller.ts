@@ -10,6 +10,8 @@ import {
   UploadComplianceDto,
   ForgotPasswordDto,
   ResetPasswordDto,
+  VerifyEmailDto,
+  MfaVerifyDto,
 } from './dto/auth.dto';
 import { Public, CurrentUser } from '../../common/decorators/auth.decorators';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
@@ -60,6 +62,47 @@ export class AuthController {
   @ApiOperation({ summary: 'Restablecer contraseña con token' })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.password);
+  }
+
+  @Public()
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 3600000, limit: 10 } })
+  @ApiOperation({ summary: 'Verificar email con token' })
+  verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto.token);
+  }
+
+  @Post('resend-verification')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 3600000, limit: 5 } })
+  @ApiOperation({ summary: 'Reenviar email de verificación' })
+  resendVerification(@CurrentUser() user: JwtPayload) {
+    return this.authService.resendEmailVerification(user.sub);
+  }
+
+  @Post('mfa/setup')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Generar secreto MFA (TOTP)' })
+  setupMfa(@CurrentUser() user: JwtPayload) {
+    return this.authService.setupMfa(user.sub);
+  }
+
+  @Post('mfa/enable')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Confirmar y activar MFA' })
+  enableMfa(@CurrentUser() user: JwtPayload, @Body() dto: MfaVerifyDto) {
+    return this.authService.enableMfa(user.sub, dto.code);
+  }
+
+  @Post('mfa/disable')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Desactivar MFA' })
+  disableMfa(@CurrentUser() user: JwtPayload, @Body() dto: MfaVerifyDto) {
+    return this.authService.disableMfa(user.sub, dto.code);
   }
 
   @Get('me')

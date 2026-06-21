@@ -19,6 +19,8 @@ import {
   GetProfessionalByIdHandler,
   ListServiceRequestsHandler,
   GetMarketplaceStatsHandler,
+  NearbyProfessionalsHandler,
+  NearbyStatsHandler,
 } from './queries/marketplace.queries';
 import { ToggleFavoriteHandler } from './commands/favorites.commands';
 
@@ -42,6 +44,8 @@ const QueryHandlers = [
   GetProfessionalByIdHandler,
   ListServiceRequestsHandler,
   GetMarketplaceStatsHandler,
+  NearbyProfessionalsHandler,
+  NearbyStatsHandler,
 ];
 
 @Module({

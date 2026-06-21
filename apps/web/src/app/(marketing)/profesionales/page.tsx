@@ -3,7 +3,7 @@ import ProfesionalesPageClient from './profesionales-client';
 
 export const metadata = {
   title: 'Profesionales | FixYa',
-  description: 'Directorio de profesionales verificados con reseñas, precios en pesos y cobertura nacional.',
+  description: 'Directorio de profesionales con reseñas, precios en pesos y cobertura en las 24 provincias.',
 };
 
 export default function ProfesionalesPage() {

@@ -61,6 +61,7 @@ export interface ProfessionalSummary {
   ratingCount: number;
   primaryServiceId: string;
   available: boolean;
+  distanceKm?: number | null;
 }
 
 export interface ProfessionalProfile extends ProfessionalSummary {
@@ -379,6 +380,63 @@ export function useService(id: string, enabled = true) {
       `/marketplace/services/${id}`,
     ),
     enabled: !!id && enabled,
+  });
+}
+
+export function useNearbyProfessionals(
+  params: {
+    latitude: number;
+    longitude: number;
+    radiusKm?: number;
+    categorySlug?: string;
+    q?: string;
+    page?: number;
+  } | null,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ['nearby-professionals', params],
+    queryFn: () => {
+      if (!params) return { items: [], meta: { total: 0, pages: 0, radiusKm: 50 } };
+      const search = new URLSearchParams();
+      search.set('latitude', String(params.latitude));
+      search.set('longitude', String(params.longitude));
+      if (params.radiusKm) search.set('radiusKm', String(params.radiusKm));
+      if (params.categorySlug) search.set('categorySlug', params.categorySlug);
+      if (params.q) search.set('q', params.q);
+      if (params.page) search.set('page', String(params.page));
+      return apiRequest<{
+        items: ProfessionalSummary[];
+        meta: { total: number; pages: number; radiusKm: number };
+      }>(`/marketplace/nearby/professionals?${search.toString()}`);
+    },
+    enabled: enabled && !!params?.latitude && !!params?.longitude,
+    staleTime: 30_000,
+  });
+}
+
+export function useNearbyStats(
+  params: { latitude: number; longitude: number; radiusKm?: number } | null,
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: ['nearby-stats', params],
+    queryFn: () => {
+      if (!params) return null;
+      const search = new URLSearchParams({
+        latitude: String(params.latitude),
+        longitude: String(params.longitude),
+        radiusKm: String(params.radiusKm ?? 50),
+      });
+      return apiRequest<{
+        professionalsCount: number;
+        servicesCount: number;
+        radiusKm: number;
+        categoriesNearby: Array<{ slug: string; name: string; count: number }>;
+      }>(`/marketplace/nearby/stats?${search.toString()}`);
+    },
+    enabled: enabled && !!params?.latitude && !!params?.longitude,
+    staleTime: 30_000,
   });
 }
 

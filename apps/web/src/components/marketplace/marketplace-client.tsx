@@ -59,7 +59,7 @@ export default function MarketplaceClient() {
   return (
     <div className="space-y-8">
       <DashboardPageHeader
-        title="Marketplace de servicios"
+        title="Mercado de servicios"
         description="Explorá servicios publicados, filtrá por categoría y ubicación, y competí con presupuestos."
         action={
           <Button variant="outline" asChild>

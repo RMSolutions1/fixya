@@ -15,6 +15,7 @@ const buttonVariants = cva(
         outlineOnDark:
           'border border-white/40 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white',
         emprenor:
+          /* CTAs primarios en marketing público (home, landings, auth) */
           'bg-[hsl(var(--emprenor-accent))] text-white shadow-md hover:bg-[hsl(var(--emprenor-accent-hover))]',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: 'text-foreground hover:bg-accent hover:text-accent-foreground',

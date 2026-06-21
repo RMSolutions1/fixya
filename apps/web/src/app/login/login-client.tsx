@@ -17,7 +17,7 @@ import { Logo } from '@/components/layout/logo';
 
 const trustSignals = [
   { icon: Lock, label: 'Conexión cifrada' },
-  { icon: BadgeCheck, label: 'Profesionales verificados' },
+  { icon: BadgeCheck, label: 'Identidad revisada' },
   { icon: ShieldCheck, label: 'Pagos protegidos' },
 ];
 
@@ -29,6 +29,7 @@ export default function LoginPageClient() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
+  const [mfaRequired, setMfaRequired] = useState(false);
 
   const {
     register,
@@ -43,6 +44,11 @@ export default function LoginPageClient() {
       router.push(redirect);
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Error al iniciar sesión';
+      if (/MFA_REQUIRED/i.test(message)) {
+        setMfaRequired(true);
+        setError('Ingresá el código de tu app de autenticación.');
+        return;
+      }
       setError(
         /timeout|fetch|network|Failed/i.test(message)
           ? 'No pudimos conectar con el servidor. Reintentá en unos segundos.'
@@ -59,7 +65,7 @@ export default function LoginPageClient() {
     <div className="flex min-h-[calc(100vh-8rem)]">
       <AuthBrandPanel
         title="Bienvenido de vuelta"
-        subtitle="Ingresá a tu panel FixYa — pagos protegidos con Mercado Pago, expediente digital y profesionales verificados del Grupo Emprenor."
+        subtitle="Ingresá a tu panel FixYa — pagos con Mercado Pago, expediente digital y profesionales con identidad revisada del Grupo Emprenor."
       />
       <div className="flex flex-1 items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md border-primary/10 shadow-celeste">
@@ -127,6 +133,21 @@ export default function LoginPageClient() {
                   </p>
                 )}
               </div>
+
+              {mfaRequired && (
+                <div className="space-y-2">
+                  <Label htmlFor="mfaCode">Código de verificación (MFA)</Label>
+                  <Input
+                    id="mfaCode"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    placeholder="123456"
+                    autoFocus
+                    {...register('mfaCode')}
+                  />
+                </div>
+              )}
 
               {error && (
                 <div

@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { RegisterRegistryHint } from '@/components/marketing/register-registry-hint';
 import { Logo } from '@/components/layout/logo';
 import { cn } from '@/lib/utils';
 import {
@@ -37,7 +38,7 @@ import {
 
 const trustSignals = [
   { icon: Lock, label: 'Conexión cifrada' },
-  { icon: BadgeCheck, label: 'Profesionales verificados' },
+  { icon: BadgeCheck, label: 'Identidad revisada' },
   { icon: ShieldCheck, label: 'Pagos protegidos' },
 ];
 
@@ -64,7 +65,7 @@ function passwordStrength(pw: string): number {
 const roles = [
   {
     value: 'CLIENTE' as const,
-    label: 'Usuario',
+    label: 'Cliente',
     description: 'Necesito contratar servicios para mi hogar o negocio',
     icon: User,
   },
@@ -134,6 +135,7 @@ export default function RegisterPageClient() {
   });
 
   const selectedRole = watch('role');
+  const selectedCategoryId = watch('categoryId');
   const isProfessional = selectedRole === 'PROFESIONAL';
   const passwordValue = watch('password') ?? '';
   const strength = passwordStrength(passwordValue);
@@ -188,7 +190,7 @@ export default function RegisterPageClient() {
             <CardDescription>
               ¿Ya tenés cuenta?{' '}
               <Link href="/login" className="font-medium text-primary hover:underline">
-                Iniciar sesión
+                Ingresar
               </Link>
             </CardDescription>
           </CardHeader>
@@ -340,8 +342,9 @@ export default function RegisterPageClient() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="licenseNumber">Matrícula (opcional)</Label>
-                    <Input id="licenseNumber" {...register('licenseNumber')} />
+                    <Input id="licenseNumber" placeholder="Ej. COPIME / Gasnor / CARC" {...register('licenseNumber')} />
                   </div>
+                  <RegisterRegistryHint categoryId={selectedCategoryId} />
                   <p className="rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
                     Tu perfil aparecerá en el mapa de profesionales al registrarte. La
                     administración verificará tu documentación antes de habilitar contacto y
@@ -441,7 +444,7 @@ export default function RegisterPageClient() {
             <p className="mt-4 text-center text-sm text-muted-foreground lg:hidden">
               ¿Ya tenés cuenta?{' '}
               <Link href="/login" className="font-medium text-primary hover:underline">
-                Iniciar sesión
+                Ingresar
               </Link>
             </p>
 

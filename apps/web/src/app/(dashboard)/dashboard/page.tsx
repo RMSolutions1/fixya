@@ -41,7 +41,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       <DashboardPageHeader
-        title={`Hola, ${user?.firstName ?? 'Usuario'}`}
+        title={`Hola, ${user?.firstName ?? 'Cliente'}`}
         description={getDashboardDescription(role)}
       />
 
@@ -55,7 +55,7 @@ export default function DashboardPage() {
               <Link href="/dashboard/documentacion" className="font-medium underline">
                 Documentación
               </Link>{' '}
-              para habilitar cotizaciones.
+              para habilitar presupuestos.
             </p>
           </div>
         </div>
@@ -141,12 +141,12 @@ export default function DashboardPage() {
             <Card>
               <CardHeader>
                 <TrendingUp className="mb-2 h-6 w-6 text-primary" />
-                <CardTitle className="text-lg">Marketplace</CardTitle>
+                <CardTitle className="text-lg">Mercado</CardTitle>
                 <CardDescription>Competí con presupuestos en solicitudes abiertas</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button asChild variant="outline" className="w-full">
-                  <Link href="/marketplace">Ir al marketplace</Link>
+                  <Link href="/marketplace">Ir al mercado</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -197,7 +197,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <Button asChild className="w-full">
-                  <Link href="/marketplace">Marketplace global</Link>
+                  <Link href="/marketplace">Mercado global</Link>
                 </Button>
               </CardContent>
             </Card>

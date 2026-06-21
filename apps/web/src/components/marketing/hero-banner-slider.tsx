@@ -47,7 +47,7 @@ const defaultSlides: HeroSlide[] = [
     image: HERO_SLIDE_IMAGES.industria,
     imageAlt: 'Trabajadores en obra de construcción industrial',
     overlay: 'industria',
-    primaryCta: { label: 'Ingresar', href: '/login' },
+    primaryCta: { label: 'Ver profesionales', href: '/profesionales' },
     secondaryCta: { label: 'Cómo funciona', href: '/para-quienes' },
   },
   {
@@ -56,7 +56,7 @@ const defaultSlides: HeroSlide[] = [
     title: 'Tu barrio,',
     highlight: 'tu especialista',
     subtitle:
-      'Plomeros, cerrajeros, limpieza y mudanzas. Profesionales verificados a un toque en toda la Argentina.',
+      'Plomeros, cerrajeros, limpieza y mudanzas. Profesionales cerca tuyo en las 24 provincias.',
     image: HERO_SLIDE_IMAGES.ciudad,
     imageAlt: 'Profesional de limpieza trabajando en un hogar',
     overlay: 'ciudad',
@@ -73,7 +73,7 @@ const defaultSlides: HeroSlide[] = [
     image: HERO_SLIDE_IMAGES.celeste,
     imageAlt: 'Paisaje con cielo celeste y montañas',
     overlay: 'celeste',
-    primaryCta: { label: 'Ingresar', href: '/login' },
+    primaryCta: { label: 'Registrarse', href: '/register' },
     secondaryCta: { label: 'Conocé FixYa', href: '/nosotros' },
   },
 ];
@@ -90,10 +90,10 @@ const slideBackgrounds: Record<NonNullable<HeroSlide['overlay']>, string> = {
 };
 
 const overlayClasses: Record<NonNullable<HeroSlide['overlay']>, string> = {
-  campo: 'from-[hsl(150_35%_18%/0.95)] via-[hsl(var(--celeste-dark)/0.88)] to-[hsl(var(--celeste-dark)/0.95)]',
-  industria: 'from-slate-950/95 via-[hsl(var(--celeste-dark)/0.9)] to-[hsl(var(--celeste-dark)/0.96)]',
-  ciudad: 'from-[hsl(var(--celeste-dark)/0.94)] via-[hsl(var(--celeste-dark)/0.82)] to-[hsl(var(--celeste-dark)/0.94)]',
-  celeste: 'from-[hsl(var(--celeste-dark)/0.94)] via-primary/80 to-[hsl(var(--celeste-dark)/0.96)]',
+  campo: 'from-[hsl(150_35%_18%/0.95)] via-[hsl(var(--brand-indigo)/0.88)] to-[hsl(var(--brand-indigo)/0.95)]',
+  industria: 'from-slate-950/95 via-[hsl(var(--brand-indigo)/0.9)] to-[hsl(var(--brand-indigo)/0.96)]',
+  ciudad: 'from-[hsl(var(--brand-indigo)/0.94)] via-[hsl(var(--brand-indigo)/0.82)] to-[hsl(var(--brand-indigo)/0.94)]',
+  celeste: 'from-[hsl(var(--brand-indigo)/0.94)] via-primary/80 to-[hsl(var(--brand-indigo)/0.96)]',
 };
 
 interface HeroBannerSliderProps {
@@ -209,7 +209,7 @@ export function HeroBannerSlider({
         <div className="mt-auto grid max-w-3xl grid-cols-2 gap-4 border-t border-white/20 pt-8 sm:grid-cols-4">
           {[
             { value: stats?.categoriesCount ?? '20', label: 'Rubros' },
-            { value: stats?.verifiedProfessionalsCount ?? stats?.professionalsCount ?? '—', label: 'Verificados' },
+            { value: stats?.verifiedProfessionalsCount ?? stats?.professionalsCount ?? '—', label: 'Profesionales' },
             { value: '24', label: 'Provincias' },
             { value: stats?.completedRequests ?? '—', label: 'Servicios' },
           ].map(({ value, label }) => (

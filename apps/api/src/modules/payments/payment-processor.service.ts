@@ -279,6 +279,102 @@ export class PaymentProcessorService {
     });
   }
 
+  /**
+   * Devolución / botón de arrepentimiento: reembolsa al cliente mientras los fondos
+   * sigan retenidos (no liberados al profesional). Llama a MP si está configurado y
+   * registra el reverso contable.
+   */
+  async refundEngagement(engagementId: string, clientId: string, reason?: string) {
+    const engagement = await this.prisma.engagement.findFirst({
+      where: { id: engagementId, clientId, deletedAt: null },
+      include: { walletAccount: true, payment: true },
+    });
+
+    if (!engagement) throw new NotFoundException('Contratación no encontrada');
+    if (!engagement.payment || engagement.payment.status !== PaymentStatus.APPROVED) {
+      throw new BadRequestException('No hay un pago aprobado para reembolsar');
+    }
+    if (engagement.status === EngagementStatus.FUNDS_RELEASED) {
+      throw new BadRequestException(
+        'Los fondos ya fueron liberados al profesional; gestioná el reclamo por disputa',
+      );
+    }
+
+    const payment = engagement.payment;
+    const amount = Number(payment.amount);
+
+    // Reembolso real en Mercado Pago (si hay pago MP y credenciales)
+    let mpRefundId: string | null = null;
+    if (payment.mpPaymentId && this.mp.isConfigured()) {
+      const refund = await this.mp.refundPayment(payment.mpPaymentId, amount);
+      if (!refund) {
+        throw new BadRequestException('No se pudo procesar la devolución en Mercado Pago');
+      }
+      mpRefundId = String(refund.id);
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.paymentRefund.create({
+        data: {
+          paymentId: payment.id,
+          mpRefundId,
+          amount: payment.amount,
+          reason: reason ?? 'Botón de arrepentimiento (Res. 424/2020)',
+          processedAt: new Date(),
+        },
+      });
+
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: { status: PaymentStatus.REFUNDED, refundedAmount: payment.amount },
+      });
+
+      if (engagement.walletAccount) {
+        const held = Number(engagement.walletAccount.heldAmount);
+        await tx.walletAccount.update({
+          where: { id: engagement.walletAccount.id },
+          data: { heldAmount: 0 },
+        });
+        await tx.ledgerEntry.create({
+          data: {
+            tenantId: engagement.tenantId,
+            walletAccountId: engagement.walletAccount.id,
+            entryNumber: `LE-${Date.now()}-REF`,
+            entryType: 'REFUND',
+            description: 'Devolución al cliente (arrepentimiento)',
+            referenceType: 'Payment',
+            referenceId: payment.id,
+            postedAt: new Date(),
+            lines: {
+              create: [
+                { accountCode: '2100', accountName: 'Pasivo clientes', debit: amount, credit: 0 },
+                { accountCode: '1100', accountName: 'Fondos retenidos', debit: 0, credit: held },
+              ],
+            },
+          },
+        });
+      }
+
+      await tx.engagement.update({
+        where: { id: engagementId },
+        data: { status: EngagementStatus.CANCELLED },
+      });
+
+      await tx.engagementTimelineEvent.create({
+        data: {
+          engagementId,
+          tenantId: engagement.tenantId,
+          eventType: 'PaymentRefunded',
+          actorId: clientId,
+          payload: { amount, mpRefundId, reason: reason ?? null },
+        },
+      });
+
+      this.logger.log(`Devolución procesada: engagement ${engagementId} — $${amount} ARS`);
+      return { status: 'refunded', amount, mpRefundId };
+    });
+  }
+
   async getPaymentStatus(paymentId: string) {
     const payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
