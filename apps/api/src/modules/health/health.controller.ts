@@ -2,6 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Public } from '../../common/decorators/auth.decorators';
 import { PrismaService } from '../../database/prisma.service';
+import { getPlatformIntegrationsStatus } from '../../common/integrations/integration-status';
 
 @ApiTags('Health')
 @Controller('health')
@@ -20,10 +21,13 @@ export class HealthController {
       db = 'down';
     }
 
+    const integrations = getPlatformIntegrationsStatus();
+
     return {
       status: db === 'up' ? 'ok' : 'degraded',
       timestamp: new Date().toISOString(),
       services: { database: db },
+      integrations,
     };
   }
 }

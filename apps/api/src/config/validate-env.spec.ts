@@ -44,6 +44,18 @@ describe('validateProductionEnv', () => {
     expect(() => validateProductionEnv()).not.toThrow();
   });
 
+  it('falla si hay MP_ACCESS_TOKEN sin MP_WEBHOOK_SECRET', () => {
+    validProdEnv();
+    process.env.MP_WEBHOOK_SECRET = undefined;
+    expect(() => validateProductionEnv()).toThrow(/MP_WEBHOOK_SECRET/);
+  });
+
+  it('falla con MP_ACCESS_TOKEN de prueba en producción', () => {
+    validProdEnv();
+    process.env.MP_ACCESS_TOKEN = 'TEST-123456789';
+    expect(() => validateProductionEnv()).toThrow(/TEST-/);
+  });
+
   it('falla con MP_ACCESS_TOKEN placeholder', () => {
     validProdEnv();
     process.env.MP_ACCESS_TOKEN = 'APP_USR-PLACEHOLDER-CONFIGURE';

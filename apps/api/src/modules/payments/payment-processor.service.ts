@@ -4,6 +4,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Logger,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { MercadoPagoService } from './mercadopago.service';
@@ -86,9 +87,11 @@ export class PaymentProcessorService {
     }
 
     if (process.env.NODE_ENV === 'production') {
-      throw new BadRequestException(
-        'Mercado Pago no está configurado. Contacte al administrador de la plataforma.',
-      );
+      throw new ServiceUnavailableException({
+        code: 'PAYMENTS_NOT_CONFIGURED',
+        message:
+          'Los pagos con Mercado Pago se activarán próximamente. Contactá a hola@fixya.com.ar si necesitás asistencia.',
+      });
     }
 
     return {

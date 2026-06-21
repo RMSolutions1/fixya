@@ -31,6 +31,26 @@ Región: `gru1` (São Paulo, más cercana a Argentina)
    - **Eventos**: `payment` (seleccionar todos los sub-eventos)
 3. Al guardar, Mercado Pago genera un **Secret** — copiarlo como `MP_WEBHOOK_SECRET`
 
+### 2.3 Activar en Vercel (cuando tengas las credenciales)
+
+```bash
+# Verificar localmente que las variables están en .env
+npm run mp:check
+
+# Subir MP_ACCESS_TOKEN y MP_WEBHOOK_SECRET a Vercel production
+MP_ACCESS_TOKEN=APP_USR-... MP_WEBHOOK_SECRET=... npm run mp:enable
+
+# Redeploy
+npx vercel --prod
+```
+
+Verificá el estado en producción:
+
+```bash
+curl https://fixya.emprenor.com/api/v1/marketplace/integrations
+# mercadopago.ready debe ser true
+```
+
 ---
 
 ## 3. Configurar variables de entorno en Vercel

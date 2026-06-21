@@ -364,6 +364,26 @@ export function useMarketplaceStats(enabled = true) {
   });
 }
 
+export interface PlatformIntegrations {
+  mercadopago: {
+    accessToken: boolean;
+    webhookSecret: boolean;
+    ready: boolean;
+    webhookUrl: string;
+  };
+  email: { configured: boolean };
+}
+
+/** Estado de Mercado Pago / email — útil para UI de checkout y admin. */
+export function usePlatformIntegrations(enabled = true) {
+  return useQuery({
+    queryKey: ['platform-integrations'],
+    queryFn: () => apiRequest<PlatformIntegrations>('/marketplace/integrations'),
+    enabled,
+    staleTime: 120_000,
+  });
+}
+
 export function useService(id: string, enabled = true) {
   return useQuery({
     queryKey: ['service', id],

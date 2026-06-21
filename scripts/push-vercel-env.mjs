@@ -68,18 +68,22 @@ const vars = {
   SEED_DEMO_DATA: 'false',
 };
 
-const REQUIRED_PROD = ['MP_ACCESS_TOKEN', 'MP_WEBHOOK_SECRET', 'RESEND_API_KEY'];
-for (const key of REQUIRED_PROD) {
+const OPTIONAL_INTEGRATIONS = ['MP_ACCESS_TOKEN', 'MP_WEBHOOK_SECRET', 'RESEND_API_KEY'];
+
+for (const key of OPTIONAL_INTEGRATIONS) {
   if (!vars[key]) {
     console.warn(
-      `⚠ ${key} vacío — configurá el valor real antes del deploy o la API fallará al iniciar en producción.`,
+      `⚠ ${key} no configurado — omitido en Vercel (directorio OK; activar con npm run mp:enable cuando tengas credenciales).`,
     );
   }
 }
 
 for (const [key, value] of Object.entries(vars)) {
   if (value === undefined || value === null) continue;
-  if (!value && key !== 'NEXT_PUBLIC_API_URL' && !key.startsWith('NEXT_PUBLIC_SUPABASE')) continue;
+  if (!value && key !== 'NEXT_PUBLIC_API_URL' && !key.startsWith('NEXT_PUBLIC_SUPABASE')) {
+    if (OPTIONAL_INTEGRATIONS.includes(key)) continue;
+    continue;
+  }
   try {
     execSync(`npx vercel env rm ${key} production --yes`, { cwd: root, stdio: 'pipe' });
   } catch {

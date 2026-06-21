@@ -35,8 +35,12 @@ const keys = [
   'RESEND_API_KEY',
 ];
 
+console.log('FixYa — env keys (local)\n');
+
 for (const k of keys) {
   const v = web[k] || rootEnv[k];
   const ok = v && v.length > 3 && !v.includes('CAMBIAR') && !v.includes('XXXXXXXX');
-  console.log(`${ok ? 'OK' : 'MISSING'} ${k}`);
+  const optional = ['MP_ACCESS_TOKEN', 'MP_WEBHOOK_SECRET', 'RESEND_API_KEY'].includes(k);
+  const label = optional && !ok ? 'PENDING' : ok ? 'OK' : 'MISSING';
+  console.log(`${label.padEnd(8)} ${k}${optional && !ok ? ' (opcional — npm run mp:enable)' : ''}`);
 }

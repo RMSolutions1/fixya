@@ -26,6 +26,7 @@ import {
   useStartEngagement,
   useCompleteEngagement,
   useOpenDispute,
+  usePlatformIntegrations,
 } from '@/hooks/use-marketplace';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -252,6 +253,8 @@ export default function EngagementExpedienteClient({
   const releaseFunds = useReleaseFunds();
   const startWork = useStartEngagement();
   const completeWork = useCompleteEngagement();
+  const { data: integrations } = usePlatformIntegrations();
+  const paymentsReady = SANDBOX_PAYMENTS_ENABLED || integrations?.mercadopago.ready === true;
 
   // Polling post-MP: si el usuario regresa con ?payment=success pero el estado
   // todavía es PAYMENT_PENDING, refresca cada 3 s hasta confirmar o timeout.
@@ -423,11 +426,29 @@ export default function EngagementExpedienteClient({
               Pagar con Mercado Pago
             </CardTitle>
             <CardDescription>
-              El pago queda retenido por FixYa hasta que confirmés la conformidad del servicio.
+              {paymentsReady
+                ? 'El pago queda retenido por FixYa hasta que confirmés la conformidad del servicio.'
+                : 'Los pagos en línea se habilitarán en breve. Mientras tanto, coordiná el pago directamente con el profesional.'}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
-            <Button variant="emprenor" onClick={handleCheckout} disabled={checkout.isPending}>
+            {!paymentsReady && (
+              <div className="mb-2 flex w-full items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <p>
+                  Mercado Pago aún no está activo en la plataforma. Si necesitás ayuda, escribinos a{' '}
+                  <a href="mailto:hola@fixya.com.ar" className="font-medium underline">
+                    hola@fixya.com.ar
+                  </a>
+                  .
+                </p>
+              </div>
+            )}
+            <Button
+              variant="emprenor"
+              onClick={handleCheckout}
+              disabled={checkout.isPending || !paymentsReady}
+            >
               {checkout.isPending ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Preparando checkout...</>
               ) : (

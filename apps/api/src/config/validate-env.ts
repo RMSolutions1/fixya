@@ -36,13 +36,29 @@ export function validateProductionEnv(): void {
     .map(([key]) => key);
   if (missingIntegrations.length > 0) {
     logger.warn(
-      `Integraciones pendientes (directorio/marketplace operativo; pagos/emails limitados): ${missingIntegrations.join(', ')}`,
+      `Integraciones pendientes (directorio operativo; pagos/emails al configurar credenciales): ${missingIntegrations.join(', ')}`,
     );
   }
 
   const mpToken = process.env.MP_ACCESS_TOKEN?.trim();
+  const mpWebhook = process.env.MP_WEBHOOK_SECRET?.trim();
+
   if (mpToken && (mpToken.includes('PLACEHOLDER') || mpToken.includes('CONFIGURE'))) {
     throw new Error('MP_ACCESS_TOKEN tiene un valor placeholder; configurá el token real de Mercado Pago');
+  }
+
+  if (mpToken?.startsWith('TEST-')) {
+    throw new Error('MP_ACCESS_TOKEN de prueba (TEST-) no está permitido en producción');
+  }
+
+  if (mpToken && !mpWebhook) {
+    throw new Error(
+      'MP_WEBHOOK_SECRET es obligatorio en producción cuando MP_ACCESS_TOKEN está configurado',
+    );
+  }
+
+  if (mpToken && mpWebhook) {
+    logger.log('Mercado Pago: credenciales detectadas — checkout y webhooks habilitados');
   }
 
   if (process.env.ENABLE_SANDBOX_PAYMENTS === 'true') {

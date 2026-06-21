@@ -48,6 +48,7 @@ import {
   getRegistriesForCategory,
   getRegistriesForProvince,
 } from '../../common/data/professional-registries';
+import { getPlatformIntegrationsStatus } from '../../common/integrations/integration-status';
 
 @ApiTags('Marketplace')
 @ApiBearerAuth()
@@ -70,6 +71,13 @@ export class MarketplaceController {
   @ApiOperation({ summary: 'Estadísticas públicas del marketplace' })
   getStats() {
     return this.queryBus.execute(new GetMarketplaceStatsQuery());
+  }
+
+  @Get('integrations')
+  @Public()
+  @ApiOperation({ summary: 'Estado de integraciones (Mercado Pago, email)' })
+  getIntegrations() {
+    return getPlatformIntegrationsStatus();
   }
 
   @Get('services/ranking')
