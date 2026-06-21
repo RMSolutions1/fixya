@@ -68,7 +68,7 @@ const vars = {
     process.env.RESEND_FROM_EMAIL ||
     rootEnv.RESEND_FROM_EMAIL ||
     webEnv.RESEND_FROM_EMAIL ||
-    'info@fixya.emprenor.com.ar',
+    'noreply@fixya.emprenor.com',
   RESEND_FROM_NAME:
     process.env.RESEND_FROM_NAME || rootEnv.RESEND_FROM_NAME || webEnv.RESEND_FROM_NAME || 'FixYa',
   API_PREFIX: 'v1',

@@ -15,7 +15,7 @@ export class EmailService {
     const apiKey = this.config.get<string>('app.resendApiKey');
     this.resend = apiKey ? new Resend(apiKey) : null;
     this.appPublicUrl = this.config.get<string>('app.appPublicUrl', 'https://fixya.emprenor.com');
-    const fromEmail = this.config.get<string>('app.resendFromEmail', 'info@fixya.emprenor.com.ar');
+    const fromEmail = this.config.get<string>('app.resendFromEmail', 'noreply@fixya.emprenor.com');
     const fromName = this.config.get<string>('app.resendFromName', APP_NAME);
     this.fromAddress = `${fromName} <${fromEmail}>`;
     if (!apiKey) {
