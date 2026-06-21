@@ -4,12 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { use } from 'react';
-import { ArrowLeft, Star, Shield, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Star, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useProfessional } from '@/hooks/use-marketplace';
 import { useAuthStore } from '@/stores/auth.store';
@@ -18,9 +17,7 @@ import {
   usePublishServiceRequest,
 } from '@/hooks/use-marketplace';
 import { formatCurrency } from '@/lib/utils';
-import { RegistryVerificationPanel } from '@/components/marketing/registry-verification-panel';
-import { RegistryBadge } from '@/components/professionals/registry-badge';
-import { RegistrySourceCard } from '@/components/professionals/registry-source-card';
+import { VerifiedSourceLabel } from '@/components/professionals/verified-source-label';
 import { PresenceIndicator } from '@/components/professionals/presence-indicator';
 import { useMounted } from '@/hooks/use-mounted';
 
@@ -125,18 +122,16 @@ export default function ProfesionalDetailPage({
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-3xl font-bold">{fullName}</h1>
-                {pro.registry && <RegistryBadge registry={pro.registry} size="md" showLink />}
-                {pro.verified && !pro.registry && (
-                  <Badge variant="success">
-                    <Shield className="mr-1 h-3 w-3" />
-                    Verificado FixYa
-                  </Badge>
-                )}
               </div>
               <p className="mt-1 text-lg text-muted-foreground">
                 {primaryService.category.name}
                 {pro.licenseNumber ? ` · Mat. ${pro.licenseNumber}` : ''}
               </p>
+              <VerifiedSourceLabel
+                registry={pro.registry}
+                verified={pro.verified}
+                className="mt-1"
+              />
               <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
                 <span className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-sol text-sol" />
@@ -161,12 +156,6 @@ export default function ProfesionalDetailPage({
               )}
             </div>
           </div>
-
-          {pro.registry && (
-            <div className="mt-6">
-              <RegistrySourceCard registry={pro.registry} licenseNumber={pro.licenseNumber} />
-            </div>
-          )}
 
           <Card className="mt-8">
             <CardHeader>
@@ -261,16 +250,6 @@ export default function ProfesionalDetailPage({
               </Card>
             );
           })()}
-
-          {primaryService?.category?.slug && (
-            <div className="mt-8">
-              <RegistryVerificationPanel
-                categorySlug={primaryService.category.slug}
-                province={pro.province ?? undefined}
-                variant="light"
-              />
-            </div>
-          )}
         </div>
 
         <div>

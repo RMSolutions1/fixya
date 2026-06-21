@@ -14,7 +14,6 @@ import { useLocation } from '@/components/providers/location-provider';
 import { useNearbyProfessionals, useNearbyStats } from '@/hooks/use-marketplace';
 import { getCategoryIcon } from '@/lib/category-icons';
 import { Button } from '@/components/ui/button';
-import { RegistryVerificationPanel } from '@/components/marketing/registry-verification-panel';
 
 export default function CategoryLandingClient({ catalog }: { catalog: CategoryCatalogEntry }) {
   const router = useRouter();
@@ -147,10 +146,6 @@ export default function CategoryLandingClient({ catalog }: { catalog: CategoryCa
           </div>
         )}
 
-        <RegistryVerificationPanel
-          categorySlug={catalog.slug}
-          province={location.label.split(',')[0]?.trim()}
-        />
       </MarketingPageShell>
       <MarketingPageCloser />
     </>

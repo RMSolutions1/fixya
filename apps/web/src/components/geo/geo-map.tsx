@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import type { ProfessionalSummary } from '@/hooks/use-marketplace';
+import { resolveCategorySlug } from '@/lib/category-colors';
 
 export interface MapMarker {
   id: string;
@@ -10,6 +11,8 @@ export interface MapMarker {
   label: string;
   verified?: boolean;
   distanceKm?: number | null;
+  categorySlug?: string;
+  specialty?: string | null;
 }
 
 export interface GeoMapProps {
@@ -36,7 +39,15 @@ export function GeoMap(props: GeoMapProps) {
   return <GeoMapInner {...props} />;
 }
 
-export function professionalsToMarkers(pros: ProfessionalSummary[]): MapMarker[] {
+export function professionalsToMarkers(
+  pros: Array<
+    Pick<ProfessionalSummary, 'id' | 'firstName' | 'lastName' | 'latitude' | 'longitude' | 'specialty'> & {
+      distanceKm?: number | null;
+      verified?: boolean;
+      categorySlug?: string | null;
+    }
+  >,
+): MapMarker[] {
   return pros
     .filter((p) => p.latitude != null && p.longitude != null)
     .map((p) => ({
@@ -45,6 +56,8 @@ export function professionalsToMarkers(pros: ProfessionalSummary[]): MapMarker[]
       longitude: p.longitude!,
       label: `${p.firstName} ${p.lastName}`,
       verified: p.verified,
+      specialty: p.specialty,
+      categorySlug: resolveCategorySlug(p.specialty, p.categorySlug),
       distanceKm: 'distanceKm' in p ? (p as ProfessionalSummary & { distanceKm?: number }).distanceKm : null,
     }));
 }

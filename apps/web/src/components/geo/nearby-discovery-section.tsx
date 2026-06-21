@@ -6,6 +6,7 @@ import { ArrowRight, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LocationBar } from '@/components/geo/location-bar';
 import { GeoMap, professionalsToMarkers } from '@/components/geo/geo-map';
+import { NearbyEmptyHint } from '@/components/geo/nearby-empty-hint';
 import { ProfessionalCard } from '@/components/marketing/marketing-blocks';
 import { SectionHeading } from '@/components/marketing/section-heading';
 import { useLocation } from '@/components/providers/location-provider';
@@ -46,7 +47,12 @@ export function NearbyDiscoverySection() {
           <LocationBar />
         </div>
 
-        {stats && stats.categoriesNearby.length > 0 && (
+        <NearbyEmptyHint
+          professionalsCount={stats ? stats.professionalsCount : null}
+          className="mb-8"
+        />
+
+        {stats && stats.professionalsCount > 0 && stats.categoriesNearby.length > 0 && (
           <div className="mb-8 flex flex-wrap gap-2">
             {stats.categoriesNearby.slice(0, 8).map((cat) => (
               <Link

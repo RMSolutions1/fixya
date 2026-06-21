@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 import { getCategoryIcon } from '@/lib/category-icons';
 import type { ProfessionalSummary } from '@/hooks/use-marketplace';
-import { RegistryBadge } from '@/components/professionals/registry-badge';
+import { VerifiedSourceLabel } from '@/components/professionals/verified-source-label';
 import { PresenceIndicator } from '@/components/professionals/presence-indicator';
 
 interface ProfessionalCardProps {
@@ -32,14 +32,6 @@ export function ProfessionalCard({ professional }: ProfessionalCardProps) {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-semibold group-hover:text-primary">{fullName}</h3>
-                {professional.registry && (
-                  <RegistryBadge registry={professional.registry} size="sm" />
-                )}
-                {professional.verified && !professional.registry && (
-                  <Badge variant="success" className="text-[10px]">
-                    Verificado
-                  </Badge>
-                )}
                 {professional.pendingApproval && !professional.verified && (
                   <Badge variant="secondary" className="text-[10px]">
                     En verificación
@@ -47,6 +39,11 @@ export function ProfessionalCard({ professional }: ProfessionalCardProps) {
                 )}
               </div>
               <p className="text-sm text-muted-foreground">{professional.specialty}</p>
+              <VerifiedSourceLabel
+                registry={professional.registry}
+                verified={professional.verified}
+                className="mt-0.5"
+              />
               {(professional.city || professional.province || professional.distanceKm != null) && (
                 <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                   <MapPin className="h-3 w-3" />

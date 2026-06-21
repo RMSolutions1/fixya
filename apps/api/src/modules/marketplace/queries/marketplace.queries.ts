@@ -736,6 +736,7 @@ export class NearbyProfessionalsHandler
       q,
       page = 1,
       limit = 24,
+      view = 'full',
     } = query.params;
 
     let categoryId: string | undefined;
@@ -893,8 +894,21 @@ export class NearbyProfessionalsHandler
     const skip = (page - 1) * limit;
     items = items.slice(skip, skip + limit);
 
+    const responseItems =
+      view === 'map'
+        ? items.map((p) => ({
+            id: p.id,
+            firstName: p.firstName,
+            lastName: p.lastName,
+            latitude: p.latitude,
+            longitude: p.longitude,
+            distanceKm: p.distanceKm,
+            specialty: p.specialty,
+          }))
+        : items;
+
     return {
-      items,
+      items: responseItems,
       meta: {
         total,
         page,

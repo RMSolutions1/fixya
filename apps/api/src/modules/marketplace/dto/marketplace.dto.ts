@@ -288,6 +288,14 @@ export class NearbyProfessionalsQueryDto {
   @Min(1)
   @Max(5000)
   limit?: number = 24;
+
+  @ApiPropertyOptional({
+    description: 'view=map devuelve solo campos para marcadores (payload liviano)',
+    enum: ['full', 'map'],
+  })
+  @IsOptional()
+  @IsString()
+  view?: 'full' | 'map';
 }
 
 export class NearbyStatsQueryDto {

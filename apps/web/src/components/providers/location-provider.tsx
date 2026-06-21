@@ -55,7 +55,6 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const [isLocating, setIsLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasGps, setHasGps] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const stored = loadStored();
@@ -63,7 +62,6 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       setLocation(stored);
       setHasGps(stored.source === 'gps');
     }
-    setHydrated(true);
   }, []);
 
   const persist = useCallback((loc: UserLocation) => {
@@ -114,12 +112,6 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     },
     [persist],
   );
-
-  useEffect(() => {
-    if (hydrated && !loadStored()) {
-      requestGps();
-    }
-  }, [hydrated, requestGps]);
 
   const value = useMemo(
     () => ({

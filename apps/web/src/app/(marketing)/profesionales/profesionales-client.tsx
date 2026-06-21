@@ -12,6 +12,7 @@ import { MarketingPageCloser } from '@/components/marketing/marketing-page-close
 import { SectionHeading } from '@/components/marketing/section-heading';
 import { LocationBar } from '@/components/geo/location-bar';
 import { GeoMap, professionalsToMarkers } from '@/components/geo/geo-map';
+import { NearbyEmptyHint } from '@/components/geo/nearby-empty-hint';
 import { useLocation } from '@/components/providers/location-provider';
 import {
   useInfiniteNearbyProfessionals,
@@ -20,9 +21,8 @@ import {
   type ProfessionalSummary,
 } from '@/hooks/use-marketplace';
 import { useMounted } from '@/hooks/use-mounted';
-import { RegistryLogo } from '@/components/professionals/registry-logo';
-import { getRegistryById } from '@/lib/professional-registries';
 import { cn } from '@/lib/utils';
+import { getRegistryById } from '@/lib/professional-registries';
 
 /** Padrones ya sincronizados en FixYa (filtro rápido en directorio) */
 const DIRECTORY_REGISTRY_IDS = ['copaipa', 'gasnor', 'aguas-del-norte'] as const;
@@ -79,6 +79,7 @@ export default function ProfesionalesPageClient() {
   );
 
   const total = data?.pages[0]?.meta.total ?? 0;
+  const mapTotal = mapData?.meta.total ?? total;
   const mapMarkers = professionalsToMarkers(mapData?.items ?? []);
 
   const runSearch = () => setSearch(q.trim());
@@ -120,7 +121,7 @@ export default function ProfesionalesPageClient() {
               </Button>
             )}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-medium text-white/80">Fuente habilitante:</span>
+              <span className="text-xs font-medium text-white/80">Padrón:</span>
               <Button
                 type="button"
                 variant={registryId ? 'outlineOnDark' : 'emprenor'}
@@ -140,18 +141,12 @@ export default function ProfesionalesPageClient() {
                     type="button"
                     onClick={() => setRegistryId(active ? undefined : id)}
                     className={cn(
-                      'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
+                      'rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
                       active
                         ? 'border-white bg-white text-primary shadow-sm'
                         : 'border-white/30 bg-white/10 text-white hover:bg-white/20',
                     )}
                   >
-                    <RegistryLogo
-                      acronym={reg.acronym}
-                      brandColor={reg.brandColor ?? '#1e3a5f'}
-                      logoPath={reg.logoPath ?? `/images/registries/${reg.id}.svg`}
-                      size={22}
-                    />
                     {reg.acronym}
                   </button>
                 );
@@ -159,7 +154,7 @@ export default function ProfesionalesPageClient() {
             </div>
             {activeRegistry && (
               <p className="text-xs text-white/75">
-                Mostrando matriculados según padrón oficial de {activeRegistry.name}.
+                Filtrando por {activeRegistry.acronym}.
               </p>
             )}
           </div>
@@ -175,8 +170,15 @@ export default function ProfesionalesPageClient() {
           description={
             mapLoading
               ? 'Cargando marcadores en el mapa…'
-              : `${mapMarkers.length} en el mapa · OpenStreetMap · Click en un marcador para ver el perfil`
+              : mapTotal > 0
+                ? `${mapMarkers.length} de ${mapTotal} en el mapa · OpenStreetMap · Click en un marcador para ver el perfil`
+                : 'OpenStreetMap · Elegí provincia o ampliá el radio para ver profesionales'
           }
+        />
+
+        <NearbyEmptyHint
+          professionalsCount={!isLoading ? total : null}
+          className="mb-6"
         />
 
         <div className="relative mb-10 h-96">

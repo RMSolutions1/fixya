@@ -7,13 +7,16 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import 'leaflet.markercluster';
 import type { GeoMapProps } from './geo-map';
+import { getCategoryMarkerColor } from '@/lib/category-colors';
 
-const FixYaIcon = L.divIcon({
-  className: '',
-  html: `<div style="width:14px;height:14px;border-radius:50%;background:#2E2A6E;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>`,
-  iconSize: [14, 14],
-  iconAnchor: [7, 7],
-});
+function createTradeIcon(color: string) {
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>`,
+    iconSize: [14, 14],
+    iconAnchor: [7, 7],
+  });
+}
 
 const UserIcon = L.divIcon({
   className: '',
@@ -35,6 +38,10 @@ export function GeoMapInner({
 }: GeoMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  const radiusCircleRef = useRef<L.Circle | null>(null);
+  const clusterGroupRef = useRef<MarkerClusterGroup | null>(null);
+  const plainMarkersRef = useRef<L.Marker[]>([]);
   const onMarkerClickRef = useRef(onMarkerClick);
   onMarkerClickRef.current = onMarkerClick;
 
@@ -58,6 +65,10 @@ export function GeoMapInner({
     return () => {
       map.remove();
       mapRef.current = null;
+      userMarkerRef.current = null;
+      radiusCircleRef.current = null;
+      clusterGroupRef.current = null;
+      plainMarkersRef.current = [];
     };
   }, [center.lat, center.lng, zoom]);
 
@@ -65,55 +76,71 @@ export function GeoMapInner({
     const map = mapRef.current;
     if (!map) return;
 
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker || layer instanceof L.Circle) {
-        map.removeLayer(layer);
-      } else if ('getLayers' in layer && typeof (layer as L.LayerGroup).getLayers === 'function') {
-        map.removeLayer(layer);
-      }
-    });
-
-    L.marker([center.lat, center.lng], { icon: UserIcon })
-      .addTo(map)
-      .bindPopup('<strong>Vos</strong><br/>Centro de búsqueda');
-
-    L.circle([center.lat, center.lng], {
-      radius: radiusKm * 1000,
-      color: '#2E2A6E',
-      fillColor: '#75AADB',
-      fillOpacity: 0.08,
-      weight: 2,
-      dashArray: '6 4',
-    }).addTo(map);
-
-    const useClusters = clusterMarkers && markers.length > 40;
-    let clusterGroup: MarkerClusterGroup | null = null;
-
-    if (useClusters) {
-      clusterGroup = L.markerClusterGroup({
-        maxClusterRadius: 50,
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false,
-        disableClusteringAtZoom: 16,
-      });
+    if (userMarkerRef.current) {
+      userMarkerRef.current.setLatLng([center.lat, center.lng]);
+    } else {
+      userMarkerRef.current = L.marker([center.lat, center.lng], { icon: UserIcon })
+        .addTo(map)
+        .bindPopup('<strong>Vos</strong><br/>Centro de búsqueda');
     }
 
+    if (radiusCircleRef.current) {
+      radiusCircleRef.current.setLatLng([center.lat, center.lng]);
+      radiusCircleRef.current.setRadius(radiusKm * 1000);
+    } else {
+      radiusCircleRef.current = L.circle([center.lat, center.lng], {
+        radius: radiusKm * 1000,
+        color: '#2E2A6E',
+        fillColor: '#75AADB',
+        fillOpacity: 0.08,
+        weight: 2,
+        dashArray: '6 4',
+      }).addTo(map);
+    }
+  }, [center.lat, center.lng, radiusKm]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (clusterGroupRef.current) {
+      clusterGroupRef.current.clearLayers();
+      map.removeLayer(clusterGroupRef.current);
+      clusterGroupRef.current = null;
+    }
+    plainMarkersRef.current.forEach((m) => map.removeLayer(m));
+    plainMarkersRef.current = [];
+
+    const useClusters = clusterMarkers && markers.length > 40;
+    const clusterGroup = useClusters
+      ? L.markerClusterGroup({
+          maxClusterRadius: 50,
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          disableClusteringAtZoom: 16,
+        })
+      : null;
+
     markers.forEach((m) => {
-      const marker = L.marker([m.latitude, m.longitude], { icon: FixYaIcon });
+      const color = getCategoryMarkerColor(m.categorySlug, m.specialty);
+      const marker = L.marker([m.latitude, m.longitude], { icon: createTradeIcon(color) });
+      const trade = m.specialty ? `<br/><small>${m.specialty}</small>` : '';
       const dist =
         m.distanceKm != null ? `<br/><small>${m.distanceKm} km</small>` : '';
-      marker.bindPopup(`<strong>${m.label}</strong>${dist}`);
+      marker.bindPopup(`<strong>${m.label}</strong>${trade}${dist}`);
       marker.on('click', () => onMarkerClickRef.current?.(m.id));
 
       if (clusterGroup) {
         clusterGroup.addLayer(marker);
       } else {
         marker.addTo(map);
+        plainMarkersRef.current.push(marker);
       }
     });
 
     if (clusterGroup) {
       clusterGroup.addTo(map);
+      clusterGroupRef.current = clusterGroup;
     }
 
     if (markers.length > 0) {
@@ -125,7 +152,7 @@ export function GeoMapInner({
     } else {
       map.setView([center.lat, center.lng], zoom);
     }
-  }, [center, markers, radiusKm, zoom, clusterMarkers]);
+  }, [center.lat, center.lng, markers, zoom, clusterMarkers]);
 
   return (
     <div

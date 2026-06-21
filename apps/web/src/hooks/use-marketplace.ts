@@ -395,8 +395,8 @@ export function useService(id: string, enabled = true) {
 }
 
 export const NEARBY_PAGE_SIZE = 24;
-/** Límite alto para pintar todos los marcadores en el mapa (con clustering). */
-export const NEARBY_MAP_LIMIT = 5000;
+/** Límite para marcadores en mapa (clustering en cliente). */
+export const NEARBY_MAP_LIMIT = 2000;
 
 export interface NearbyProfessionalsMeta {
   total: number;
@@ -415,6 +415,7 @@ export interface NearbyProfessionalsParams {
   q?: string;
   page?: number;
   limit?: number;
+  view?: 'full' | 'map';
 }
 
 export interface NearbyProfessionalsResponse {
@@ -432,6 +433,7 @@ function buildNearbyProfessionalsUrl(params: NearbyProfessionalsParams): string 
   if (params.q) search.set('q', params.q);
   if (params.page) search.set('page', String(params.page));
   if (params.limit) search.set('limit', String(params.limit));
+  if (params.view) search.set('view', params.view);
   return `/marketplace/nearby/professionals?${search.toString()}`;
 }
 
@@ -490,9 +492,9 @@ export function useInfiniteNearbyProfessionals(
   });
 }
 
-/** Todos los profesionales del radio para el mapa (payload mínimo vía clustering en cliente). */
+/** Marcadores del mapa — payload liviano (view=map) con clustering en cliente. */
 export function useNearbyMapMarkers(
-  params: Omit<NearbyProfessionalsParams, 'page' | 'limit'> | null,
+  params: Omit<NearbyProfessionalsParams, 'page' | 'limit' | 'view'> | null,
   enabled = true,
 ) {
   return useQuery({
@@ -508,10 +510,12 @@ export function useNearbyMapMarkers(
         ...params,
         page: 1,
         limit: NEARBY_MAP_LIMIT,
+        view: 'map',
       });
     },
     enabled: enabled && !!params?.latitude && !!params?.longitude,
     staleTime: 60_000,
+    retry: 2,
   });
 }
 
