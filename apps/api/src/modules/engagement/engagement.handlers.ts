@@ -11,6 +11,7 @@ import {
   ServiceRequestStatus,
 } from '@fixya/database';
 import { PrismaService } from '../../database/prisma.service';
+import { EmailService } from '../../common/email/email.service';
 import { Prisma } from '@fixya/database';
 
 export class AcceptQuotationCommand {
@@ -24,7 +25,10 @@ export class AcceptQuotationCommand {
 export class AcceptQuotationHandler
   implements ICommandHandler<AcceptQuotationCommand>
 {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly email: EmailService,
+  ) {}
 
   async execute(command: AcceptQuotationCommand) {
     const { quotationId, clientId } = command;
@@ -45,7 +49,7 @@ export class AcceptQuotationHandler
       throw new BadRequestException('Presupuesto vencido');
     }
 
-    return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const engagement = await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       await tx.quotation.update({
         where: { id: quotationId },
         data: { status: QuotationStatus.ACCEPTED },
@@ -100,6 +104,37 @@ export class AcceptQuotationHandler
 
       return engagement;
     });
+
+    const parties = await this.prisma.engagement.findUnique({
+      where: { id: engagement.id },
+      select: {
+        id: true,
+        totalAmount: true,
+        client: { select: { email: true, firstName: true } },
+        professional: { select: { email: true, firstName: true } },
+        serviceRequest: { select: { title: true } },
+      },
+    });
+
+    if (parties) {
+      const amount = Number(parties.totalAmount);
+      const title = parties.serviceRequest.title;
+      this.email
+        .sendEngagementCreated(parties.client.email, parties.client.firstName, 'client', parties.id, title, amount)
+        .catch(() => undefined);
+      this.email
+        .sendEngagementCreated(
+          parties.professional.email,
+          parties.professional.firstName,
+          'professional',
+          parties.id,
+          title,
+          amount,
+        )
+        .catch(() => undefined);
+    }
+
+    return engagement;
   }
 }
 

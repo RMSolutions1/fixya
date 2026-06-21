@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { MercadoPagoService } from './mercadopago.service';
+import { EmailService } from '../../common/email/email.service';
 import { EngagementStatus, PaymentStatus } from '@fixya/database';
 import { Prisma } from '@fixya/database';
 
@@ -18,6 +19,7 @@ export class PaymentProcessorService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mp: MercadoPagoService,
+    private readonly email: EmailService,
   ) {}
 
   async createCheckout(engagementId: string, clientId: string) {
@@ -121,7 +123,7 @@ export class PaymentProcessorService {
     const commission = Math.round(amount * rate * 100) / 100;
     const netHeld = Math.round((amount - commission) * 100) / 100;
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       await tx.payment.update({
         where: { id: paymentId },
         data: {
@@ -207,8 +209,20 @@ export class PaymentProcessorService {
       });
 
       this.logger.log(`Pago confirmado: ${paymentId} — $${amount} ARS`);
-      return { status: 'approved', paymentId, walletAccountId: wallet.id };
+      return { status: 'approved', paymentId, walletAccountId: wallet.id, engagementId: payment.engagementId, amount };
     });
+
+    const client = await this.prisma.user.findUnique({
+      where: { id: payment.engagement.clientId },
+      select: { email: true, firstName: true },
+    });
+    if (client) {
+      this.email
+        .sendPaymentConfirmed(client.email, client.firstName, payment.engagementId, amount)
+        .catch(() => undefined);
+    }
+
+    return result;
   }
 
   async releaseFunds(engagementId: string, clientId: string) {
@@ -224,8 +238,9 @@ export class PaymentProcessorService {
     if (!engagement.walletAccount) throw new BadRequestException('Wallet no encontrada');
 
     const held = Number(engagement.walletAccount.heldAmount);
+    const professionalId = engagement.professionalId;
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       await tx.walletAccount.update({
         where: { id: engagement.walletAccount!.id },
         data: {
@@ -280,6 +295,18 @@ export class PaymentProcessorService {
 
       return { status: 'released', amount: held };
     });
+
+    const pro = await this.prisma.user.findUnique({
+      where: { id: professionalId },
+      select: { email: true, firstName: true },
+    });
+    if (pro) {
+      this.email
+        .sendFundsReleased(pro.email, pro.firstName, engagementId, held)
+        .catch(() => undefined);
+    }
+
+    return result;
   }
 
   /**

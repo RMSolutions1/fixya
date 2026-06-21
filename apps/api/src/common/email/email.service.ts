@@ -113,6 +113,80 @@ export class EmailService {
     await this.send(to, subject, html);
   }
 
+  async sendEngagementCreated(
+    to: string,
+    firstName: string,
+    role: 'client' | 'professional',
+    engagementId: string,
+    title: string,
+    amount: number,
+  ): Promise<void> {
+    const expedienteUrl = `${this.appPublicUrl}/engagements/${engagementId}`;
+    const isClient = role === 'client';
+    const formatted = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amount);
+    const subject = isClient
+      ? `Contratación confirmada · ${APP_NAME}`
+      : `Nueva contratación · ${APP_NAME}`;
+    const html = `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1c1917">
+        <h1 style="color:#2E2A6E">${isClient ? 'Contratación confirmada' : 'Nueva contratación'}</h1>
+        <p>Hola, ${firstName}.</p>
+        <p><strong>${title}</strong> — ${formatted}</p>
+        <p>${isClient ? 'Iniciá el pago desde el expediente para retener los fondos con garantía FixYa.' : 'El cliente debe confirmar el pago. Te avisamos cuando los fondos queden retenidos.'}</p>
+        <a href="${expedienteUrl}"
+           style="display:inline-block;background:#16a34a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:16px 0">
+          Ver expediente →
+        </a>
+        <p style="font-size:12px;color:#78716c;margin-top:32px">${APP_NAME} · Grupo Emprenor</p>
+      </div>`;
+    await this.send(to, subject, html);
+  }
+
+  async sendPaymentConfirmed(
+    to: string,
+    firstName: string,
+    engagementId: string,
+    amount: number,
+  ): Promise<void> {
+    const url = `${this.appPublicUrl}/engagements/${engagementId}`;
+    const formatted = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amount);
+    const subject = `Pago confirmado · ${APP_NAME}`;
+    const html = `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1c1917">
+        <h1 style="color:#2E2A6E">Pago recibido</h1>
+        <p>Hola, ${firstName}. Confirmamos el pago de <strong>${formatted}</strong>.</p>
+        <p>Los fondos quedan retenidos con garantía FixYa hasta que confirmes la conformidad del trabajo.</p>
+        <a href="${url}"
+           style="display:inline-block;background:#16a34a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:16px 0">
+          Ver expediente →
+        </a>
+        <p style="font-size:12px;color:#78716c;margin-top:32px">${APP_NAME} · Grupo Emprenor</p>
+      </div>`;
+    await this.send(to, subject, html);
+  }
+
+  async sendFundsReleased(
+    to: string,
+    firstName: string,
+    engagementId: string,
+    amount: number,
+  ): Promise<void> {
+    const url = `${this.appPublicUrl}/engagements/${engagementId}`;
+    const formatted = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(amount);
+    const subject = `Fondos liberados · ${APP_NAME}`;
+    const html = `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1c1917">
+        <h1 style="color:#2E2A6E">Fondos liberados</h1>
+        <p>Hola, ${firstName}. Se liberaron <strong>${formatted}</strong> a tu favor tras la conformidad del cliente.</p>
+        <a href="${url}"
+           style="display:inline-block;background:#16a34a;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:16px 0">
+          Ver expediente →
+        </a>
+        <p style="font-size:12px;color:#78716c;margin-top:32px">${APP_NAME} · Grupo Emprenor</p>
+      </div>`;
+    await this.send(to, subject, html);
+  }
+
   async sendProfessionalRejected(to: string, firstName: string, note?: string): Promise<void> {
     const subject = `Revisión de documentación pendiente · ${APP_NAME}`;
     const html = `

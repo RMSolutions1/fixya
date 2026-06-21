@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { EngagementController } from './engagement.controller';
+import { EmailModule } from '../../common/email/email.module';
 import {
   AcceptQuotationHandler,
   GetEngagementExpedienteHandler,
@@ -11,7 +12,7 @@ import {
 } from './engagement.handlers';
 
 @Module({
-  imports: [CqrsModule],
+  imports: [CqrsModule, EmailModule],
   controllers: [EngagementController],
   providers: [
     AcceptQuotationHandler,
