@@ -87,7 +87,7 @@ const faqGroups: { title: string; description: string; items: FaqItem[] }[] = [
       {
         question: '¿Dónde consulto términos y privacidad?',
         answer:
-          'En /terminos y /privacidad encontrás la información legal completa. Para consultas: legal@fixya.com.ar.',
+          `En /terminos y /privacidad encontrás la información legal completa. Para consultas: ${COMPANY.emails.legal}.`,
       },
     ],
   },

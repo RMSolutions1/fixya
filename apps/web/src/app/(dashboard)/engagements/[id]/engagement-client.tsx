@@ -16,6 +16,7 @@ import {
   Shield,
 } from 'lucide-react';
 import Link from 'next/link';
+import { COMPANY } from '@/lib/company-info';
 import { SANDBOX_PAYMENTS_ENABLED } from '@/lib/env';
 import {
   useEngagementExpediente,
@@ -437,8 +438,8 @@ export default function EngagementExpedienteClient({
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                 <p>
                   Mercado Pago aún no está activo en la plataforma. Si necesitás ayuda, escribinos a{' '}
-                  <a href="mailto:hola@fixya.com.ar" className="font-medium underline">
-                    hola@fixya.com.ar
+                  <a href={`mailto:${COMPANY.emails.general}`} className="font-medium underline">
+                    {COMPANY.emails.general}
                   </a>
                   .
                 </p>

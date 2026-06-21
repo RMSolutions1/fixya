@@ -99,9 +99,9 @@ export const COMPANY = {
   phone: '+54 9 387 352-2920',
   phoneHref: 'tel:+5493873522920',
   emails: {
-    general: 'hola@fixya.com.ar',
-    legal: 'legal@fixya.com.ar',
-    press: 'prensa@fixya.com.ar',
+    general: 'info@fixya.emprenor.com.ar',
+    legal: 'info@fixya.emprenor.com.ar',
+    press: 'info@fixya.emprenor.com.ar',
   },
   address: {
     street: 'Av. Casiano Casas 3080, Barrio Policial',

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/layout/logo';
+import { COMPANY } from '@/lib/company-info';
 import { AlertCircle } from 'lucide-react';
 
 export default function GlobalError({
@@ -28,8 +29,11 @@ export default function GlobalError({
           <h1 className="text-2xl font-bold text-foreground">Algo salió mal</h1>
           <p className="max-w-sm text-muted-foreground">
             Ocurrió un error inesperado. Si el problema persiste, contactanos en{' '}
-            <a href="mailto:hola@fixya.com.ar" className="font-medium text-primary hover:underline">
-              hola@fixya.com.ar
+            <a
+              href={`mailto:${COMPANY.emails.general}`}
+              className="font-medium text-primary hover:underline"
+            >
+              {COMPANY.emails.general}
             </a>
             .
           </p>

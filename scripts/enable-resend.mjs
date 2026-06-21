@@ -6,8 +6,7 @@
  *   RESEND_API_KEY=re_... npm run resend:enable
  *   npm run resend:enable -- --check
  *
- * Requisito previo: dominio fixya.emprenor.com verificado en Resend
- * (DNS: SPF TXT en fixya.emprenor.com).
+ * Requisito previo: dominio fixya.emprenor.com.ar verificado en Resend
  */
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
@@ -16,7 +15,6 @@ import { execSync } from 'child_process';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const checkOnly = process.argv.includes('--check');
-const FROM_ADDRESS = 'FixYa <noreply@fixya.emprenor.com>';
 
 function parseEnv(content) {
   const vars = {};
@@ -47,6 +45,10 @@ function loadEnvFiles() {
 const fileEnv = loadEnvFiles();
 const apiKey = (process.env.RESEND_API_KEY || fileEnv.RESEND_API_KEY || '').trim();
 const testTo = (process.env.RESEND_TEST_TO || fileEnv.RESEND_TEST_TO || process.env.ADMIN_EMAIL || '').trim();
+const FROM_EMAIL =
+  process.env.RESEND_FROM_EMAIL || fileEnv.RESEND_FROM_EMAIL || 'info@fixya.emprenor.com.ar';
+const FROM_NAME = process.env.RESEND_FROM_NAME || fileEnv.RESEND_FROM_NAME || 'FixYa';
+const FROM_ADDRESS = `${FROM_NAME} <${FROM_EMAIL}>`;
 
 function validate() {
   const errors = [];
@@ -66,7 +68,7 @@ const { errors, warnings } = validate();
 
 console.log('FixYa — Resend (emails transaccionales)\n');
 console.log(`Remitente: ${FROM_ADDRESS}`);
-console.log('Dominio requerido: fixya.emprenor.com (verificado en resend.com/domains)\n');
+console.log('Dominio requerido: fixya.emprenor.com.ar (verificado en resend.com/domains)\n');
 
 if (warnings.length) {
   console.log('Advertencias:');
@@ -78,7 +80,7 @@ if (errors.length) {
   console.log('Errores:');
   for (const e of errors) console.log(`  ✗ ${e}`);
   console.log('\n1. Creá cuenta en https://resend.com');
-  console.log('2. Verificá el dominio fixya.emprenor.com (registros DNS)');
+  console.log('2. Verificá el dominio fixya.emprenor.com.ar (registros DNS en Vercel)');
   console.log('3. Copiá la API Key y ejecutá:');
   console.log('   RESEND_API_KEY=re_... npm run resend:enable');
   process.exit(1);
@@ -135,7 +137,13 @@ function pushEnv(key, value) {
   console.log(`✓ ${key} subido a Vercel (production)`);
 }
 
-pushEnv('RESEND_API_KEY', apiKey);
+for (const [key, value] of [
+  ['RESEND_API_KEY', apiKey],
+  ['RESEND_FROM_EMAIL', FROM_EMAIL],
+  ['RESEND_FROM_NAME', FROM_NAME],
+]) {
+  pushEnv(key, value);
+}
 
 console.log('\n✓ Resend configurado en Vercel.');
 console.log('Próximos pasos:');

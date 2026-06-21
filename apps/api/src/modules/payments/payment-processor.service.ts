@@ -92,7 +92,7 @@ export class PaymentProcessorService {
       throw new ServiceUnavailableException({
         code: 'PAYMENTS_NOT_CONFIGURED',
         message:
-          'Los pagos con Mercado Pago se activarán próximamente. Contactá a hola@fixya.com.ar si necesitás asistencia.',
+          'Los pagos con Mercado Pago se activarán próximamente. Contactá a info@fixya.emprenor.com.ar si necesitás asistencia.',
       });
     }
 

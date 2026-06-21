@@ -3,18 +3,21 @@ import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 
 const APP_NAME = 'FixYa';
-const FROM_ADDRESS = 'FixYa <noreply@fixya.emprenor.com>';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly resend: Resend | null;
   private readonly appPublicUrl: string;
+  private readonly fromAddress: string;
 
   constructor(private readonly config: ConfigService) {
     const apiKey = this.config.get<string>('app.resendApiKey');
     this.resend = apiKey ? new Resend(apiKey) : null;
     this.appPublicUrl = this.config.get<string>('app.appPublicUrl', 'https://fixya.emprenor.com');
+    const fromEmail = this.config.get<string>('app.resendFromEmail', 'info@fixya.emprenor.com.ar');
+    const fromName = this.config.get<string>('app.resendFromName', APP_NAME);
+    this.fromAddress = `${fromName} <${fromEmail}>`;
     if (!apiKey) {
       this.logger.warn('RESEND_API_KEY no configurada — emails desactivados');
     }
@@ -26,7 +29,7 @@ export class EmailService {
       return;
     }
     try {
-      const { error } = await this.resend.emails.send({ from: FROM_ADDRESS, to, subject, html });
+      const { error } = await this.resend.emails.send({ from: this.fromAddress, to, subject, html });
       if (error) this.logger.error(`Error Resend: ${JSON.stringify(error)}`);
     } catch (err) {
       this.logger.error(`Excepción al enviar email a ${to}: ${err}`);

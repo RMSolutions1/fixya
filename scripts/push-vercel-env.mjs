@@ -64,6 +64,13 @@ const vars = {
     process.env.MP_WEBHOOK_SECRET || rootEnv.MP_WEBHOOK_SECRET || webEnv.MP_WEBHOOK_SECRET || '',
   RESEND_API_KEY:
     process.env.RESEND_API_KEY || rootEnv.RESEND_API_KEY || webEnv.RESEND_API_KEY || '',
+  RESEND_FROM_EMAIL:
+    process.env.RESEND_FROM_EMAIL ||
+    rootEnv.RESEND_FROM_EMAIL ||
+    webEnv.RESEND_FROM_EMAIL ||
+    'info@fixya.emprenor.com.ar',
+  RESEND_FROM_NAME:
+    process.env.RESEND_FROM_NAME || rootEnv.RESEND_FROM_NAME || webEnv.RESEND_FROM_NAME || 'FixYa',
   API_PREFIX: 'v1',
   SEED_DEMO_DATA: 'false',
 };
