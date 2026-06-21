@@ -132,11 +132,12 @@ export const PROFESSIONAL_REGISTRIES: ProfessionalRegistry[] = [
     categorySlugs: ['electricidad'],
     provinces: ['Salta'],
     regulates: 'Electricistas habilitados para trabajos en la red de EDESA.',
-    verificationUrl: 'https://www.edesa.com.ar/',
-    directoryUrl: 'https://www.edesa.com.ar/',
-    notes: 'Consulta de habilitados en portal EDESA. Importación de padrón en roadmap FixYa.',
+    verificationUrl: 'https://www.edesa.com.ar/seguridad-electrica/',
+    directoryUrl: 'https://municipalidadsalta.gob.ar/tramites/solicitud-de-constancia-de-inspeccion-electrica/',
+    notes:
+      'EDESA no publica padrón descargable; la habilitación es municipal (ej. Municipalidad de Salta). COPAIPA cubre electricistas matriculados provinciales.',
     automatedLookup: false,
-    shortTagline: 'Electricista habilitado ante la distribuidora EDESA (Salta).',
+    shortTagline: 'Electricista con habilitación municipal ante EDESA (Salta).',
   },
   {
     id: 'aguas-del-norte',

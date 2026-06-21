@@ -103,7 +103,18 @@ function padronEmail(adnId: string) {
   return `adn-${adnId}@padron.fixya.local`;
 }
 
-function resolveEmail(raw: string | undefined, adnId: string, used: Set<string>): string {
+function resolveEmail(
+  raw: string | undefined,
+  adnId: string,
+  used: Set<string>,
+  directoryMode: boolean,
+): string {
+  if (directoryMode) {
+    let email = padronEmail(adnId);
+    if (used.has(email)) email = `adn-${adnId}-${used.size}@padron.fixya.local`;
+    used.add(email);
+    return email;
+  }
   let email = (raw ?? '').trim().toLowerCase();
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     email = padronEmail(adnId);
@@ -270,7 +281,7 @@ async function main() {
       continue;
     }
 
-    const email = resolveEmail(row.email, adnId, usedEmails);
+    const email = resolveEmail(row.email, adnId, usedEmails, ACTIVATE);
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       skipped++;

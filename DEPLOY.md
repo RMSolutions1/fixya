@@ -226,8 +226,22 @@ Fuente ADN: [consulta_matriculados.php](https://www.aguasdelnortesalta.com.ar/co
 (API pública `GET /api/v1/web/matriculados`). Los re-import actualizan teléfono,
 domicilio y metadata sin duplicar registros.
 
-**Cron recomendado (servidor o GitHub Actions):** ejecutar `npm run sync:padrones`
-semanalmente para mantener directorios al día.
+**Cron automático (GitHub Actions):** el workflow `.github/workflows/sync-padrones.yml`
+ejecuta `npm run sync:padrones` cada lunes 06:00 UTC. Configurar en el repo:
+
+| Secret | Uso |
+|--------|-----|
+| `DATABASE_URL` | DB producción (Supabase) |
+| `DIRECT_URL` | URL directa para Prisma |
+| `SEED_DEMO_PASSWORD` | Hash de cuentas padrón (opcional, default FixYa2026!) |
+
+También podés lanzarlo manualmente desde **Actions → Sync padrones oficiales → Run workflow**.
+
+**Validar env antes del deploy:**
+
+```bash
+npm run check:production-env
+```
 
 ---
 
