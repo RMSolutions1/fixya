@@ -209,6 +209,26 @@ npm run db:approve:copaipa            # usar -- --dry para simular
 > figuren en el mapa. Las cuentas sin email real usan `@padron.fixya.local` y no
 > pueden iniciar sesión hasta reclamar su perfil.
 
+### Padrones adicionales (Gasnor, Aguas del Norte)
+
+```bash
+# Gasistas Gasnor / Naturgy NOA (~1.062 en origen)
+npm run sync:gasnor
+
+# Plomeros Aguas del Norte COSAySA Salta (~307 matriculados)
+npm run sync:adn
+
+# Sincronizar todos los padrones configurados
+npm run sync:padrones
+```
+
+Fuente ADN: [consulta_matriculados.php](https://www.aguasdelnortesalta.com.ar/consulta_matriculados.php)
+(API pública `GET /api/v1/web/matriculados`). Los re-import actualizan teléfono,
+domicilio y metadata sin duplicar registros.
+
+**Cron recomendado (servidor o GitHub Actions):** ejecutar `npm run sync:padrones`
+semanalmente para mantener directorios al día.
+
 ---
 
 ## Seguridad de cuentas

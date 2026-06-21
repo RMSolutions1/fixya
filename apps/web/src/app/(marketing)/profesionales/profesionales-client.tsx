@@ -20,7 +20,7 @@ import { getRegistryById } from '@/lib/professional-registries';
 import { cn } from '@/lib/utils';
 
 /** Padrones ya sincronizados en FixYa (filtro rápido en directorio) */
-const DIRECTORY_REGISTRY_IDS = ['copaipa', 'gasnor'] as const;
+const DIRECTORY_REGISTRY_IDS = ['copaipa', 'gasnor', 'aguas-del-norte'] as const;
 
 export default function ProfesionalesPageClient() {
   const mounted = useMounted();

@@ -146,10 +146,11 @@ export const PROFESSIONAL_REGISTRIES: ProfessionalRegistry[] = [
     categorySlugs: ['plomeria'],
     provinces: ['Salta', 'Jujuy', 'Catamarca', 'Santiago del Estero', 'Tucumán'],
     regulates: 'Plomeros y sanitaristas habilitados en la red de agua potable del NOA.',
-    verificationUrl: 'https://www.aguasdelnorte.com.ar/',
-    directoryUrl: 'https://www.aguasdelnorte.com.ar/',
-    notes: 'Padrón de instaladores habilitados en portal Aguas del Norte. Importación en roadmap.',
-    automatedLookup: false,
+    verificationUrl: 'https://www.aguasdelnortesalta.com.ar/consulta_matriculados.php',
+    directoryUrl: 'https://www.aguasdelnortesalta.com.ar/consulta_matriculados.php',
+    notes:
+      'Padrón público vía API /api/v1/web/matriculados. FixYa sincroniza con npm run sync:adn.',
+    automatedLookup: true,
     shortTagline: 'Plomero habilitado ante Aguas del Norte (NOA).',
   },
   {
