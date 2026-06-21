@@ -1,16 +1,34 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useWalletBalance, useWalletLedger } from '@/hooks/use-marketplace';
+import { useAuthStore } from '@/stores/auth.store';
 import { formatCurrency } from '@/lib/utils';
 import { DashboardPageHeader } from '@/components/layout/dashboard-page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { canAccessAdminFinance, resolveDashboardRole } from '@/lib/dashboard-nav';
 
 export default function WalletPage() {
-  const { data, isLoading } = useWalletBalance();
-  const { data: ledger, isLoading: ledgerLoading } = useWalletLedger();
+  const router = useRouter();
+  const role = resolveDashboardRole(useAuthStore((s) => s.user?.memberships?.[0]?.role));
+
+  useEffect(() => {
+    if (canAccessAdminFinance(role)) {
+      router.replace('/dashboard/finanzas');
+    }
+  }, [role, router]);
+
+  const financeRedirect = canAccessAdminFinance(role);
+  const { data, isLoading } = useWalletBalance(!financeRedirect);
+  const { data: ledger, isLoading: ledgerLoading } = useWalletLedger(1, 20, !financeRedirect);
+
+  if (financeRedirect) {
+    return <p className="text-muted-foreground">Redirigiendo al panel financiero...</p>;
+  }
 
   if (isLoading) return <p className="text-muted-foreground">Cargando wallet...</p>;
 

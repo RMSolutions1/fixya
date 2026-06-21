@@ -24,6 +24,7 @@ import {
   canCreateRequest,
   canSubmitQuotation,
   canApproveProfessionals,
+  canAccessAdminFinance,
 } from '@/lib/dashboard-nav';
 
 export default function DashboardPage() {
@@ -204,12 +205,16 @@ export default function DashboardPage() {
             <Card>
               <CardHeader>
                 <Wallet className="mb-2 h-6 w-6 text-primary" />
-                <CardTitle className="text-lg">Wallet contable</CardTitle>
+                <CardTitle className="text-lg">
+                  {canAccessAdminFinance(role) ? 'Finanzas plataforma' : 'Wallet contable'}
+                </CardTitle>
                 <CardDescription>Ledger, comisiones y garantías</CardDescription>
               </CardHeader>
               <CardContent>
                 <Button asChild variant="outline" className="w-full">
-                  <Link href="/wallet">Ver wallet</Link>
+                  <Link href={canAccessAdminFinance(role) ? '/dashboard/finanzas' : '/wallet'}>
+                    {canAccessAdminFinance(role) ? 'Panel financiero' : 'Ver wallet'}
+                  </Link>
                 </Button>
               </CardContent>
             </Card>

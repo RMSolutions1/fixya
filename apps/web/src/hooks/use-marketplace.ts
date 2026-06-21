@@ -331,7 +331,7 @@ export function useWalletBalance(enabled = true) {
   });
 }
 
-export function useWalletLedger(page = 1, limit = 20) {
+export function useWalletLedger(page = 1, limit = 20, enabled = true) {
   const { token, tenantId } = useApiAuth();
   return useQuery({
     queryKey: ['wallet-ledger', page, limit],
@@ -351,7 +351,7 @@ export function useWalletLedger(page = 1, limit = 20) {
         }>;
         meta: { total: number; page: number; limit: number };
       }>(`/wallet/ledger?page=${page}&limit=${limit}`, { token, tenantId }),
-    enabled: !!token,
+    enabled: !!token && enabled,
   });
 }
 

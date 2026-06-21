@@ -65,6 +65,15 @@ const empresaNav: DashboardNavItem[] = [
 const adminNav: DashboardNavItem[] = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/aprobaciones', label: 'Aprobaciones', icon: ShieldCheck },
+  { href: '/dashboard/finanzas', label: 'Finanzas', icon: Wallet },
+  { href: '/marketplace', label: 'Mercado', icon: Store },
+  { href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardList },
+  profileNavItem,
+];
+
+const operatorNav: DashboardNavItem[] = [
+  { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard/aprobaciones', label: 'Aprobaciones', icon: ShieldCheck },
   { href: '/marketplace', label: 'Mercado', icon: Store },
   { href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardList },
   { href: '/wallet', label: 'Wallet', icon: Wallet },
@@ -117,6 +126,14 @@ const mobileProEmpresa: MobileNavItem[] = [
 
 const mobileAdmin: MobileNavItem[] = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard/finanzas', label: 'Finanzas', icon: Wallet },
+  { href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardList },
+  { href: '/marketplace', label: 'Mercado', icon: Store },
+  { label: 'Más', icon: Menu, action: 'menu' },
+];
+
+const mobileOperator: MobileNavItem[] = [
+  { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/solicitudes', label: 'Solicitudes', icon: ClipboardList },
   { href: '/marketplace', label: 'Mercado', icon: Store },
   { href: '/wallet', label: 'Wallet', icon: Wallet },
@@ -147,6 +164,7 @@ export function getDashboardNav(role?: string): DashboardNavItem[] {
   if (r === 'EMPRESA') return empresaNav;
   if (r === 'AUDITOR') return auditorNav;
   if (r === 'GESTOR_DOCUMENTAL') return gestorNav;
+  if (r === 'OPERADOR') return operatorNav;
   if (ADMIN_ROLES.includes(r)) return adminNav;
   return clientNav;
 }
@@ -155,6 +173,7 @@ export function getMobileBottomNav(role?: string): MobileNavItem[] {
   const r = resolveDashboardRole(role);
   if (r === 'CLIENTE') return mobileClient;
   if (r === 'PROFESIONAL' || r === 'EMPRESA') return mobileProEmpresa;
+  if (r === 'OPERADOR') return mobileOperator;
   if (r === 'AUDITOR' || r === 'GESTOR_DOCUMENTAL') {
     return mobileAdmin.filter((item) => item.action !== 'menu' || r === 'AUDITOR');
   }
@@ -198,6 +217,10 @@ export function canSubmitQuotation(role: DashboardRole): boolean {
 
 export function canApproveProfessionals(role: DashboardRole): boolean {
   return role === 'SUPER_ADMIN' || role === 'SUPERVISOR' || role === 'OPERADOR';
+}
+
+export function canAccessAdminFinance(role: DashboardRole): boolean {
+  return role === 'SUPER_ADMIN' || role === 'CONTADOR' || role === 'SUPERVISOR';
 }
 
 /** Rutas del dashboard a verificar en E2E por rol */
