@@ -19,6 +19,9 @@ import {
 } from '@/hooks/use-marketplace';
 import { formatCurrency } from '@/lib/utils';
 import { RegistryVerificationPanel } from '@/components/marketing/registry-verification-panel';
+import { RegistryBadge } from '@/components/professionals/registry-badge';
+import { RegistrySourceCard } from '@/components/professionals/registry-source-card';
+import { PresenceIndicator } from '@/components/professionals/presence-indicator';
 import { useMounted } from '@/hooks/use-mounted';
 
 export default function ProfesionalDetailPage({
@@ -122,27 +125,32 @@ export default function ProfesionalDetailPage({
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-3xl font-bold">{fullName}</h1>
-                {pro.verified && (
+                {pro.registry && <RegistryBadge registry={pro.registry} size="md" showLink />}
+                {pro.verified && !pro.registry && (
                   <Badge variant="success">
                     <Shield className="mr-1 h-3 w-3" />
-                    Verificado
+                    Verificado FixYa
                   </Badge>
                 )}
               </div>
               <p className="mt-1 text-lg text-muted-foreground">
                 {primaryService.category.name}
-                {pro.licenseNumber ? ` · ${pro.licenseNumber}` : ''}
+                {pro.licenseNumber ? ` · Mat. ${pro.licenseNumber}` : ''}
               </p>
-              <div className="mt-3 flex items-center gap-4 text-sm">
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
                 <span className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-sol text-sol" />
                   {Number(pro.ratingAvg).toFixed(1)} ({pro.ratingCount} reseñas)
                 </span>
-                {pro.available && (
-                  <span className="flex items-center gap-1 text-pampa">
-                    <CheckCircle2 className="h-4 w-4" />
-                    Disponible
-                  </span>
+                {pro.presence ? (
+                  <PresenceIndicator presence={pro.presence} />
+                ) : (
+                  pro.available && (
+                    <span className="flex items-center gap-1 text-pampa">
+                      <CheckCircle2 className="h-4 w-4" />
+                      Disponible
+                    </span>
+                  )
                 )}
               </div>
               {pro.minPrice !== null && (
@@ -153,6 +161,12 @@ export default function ProfesionalDetailPage({
               )}
             </div>
           </div>
+
+          {pro.registry && (
+            <div className="mt-6">
+              <RegistrySourceCard registry={pro.registry} licenseNumber={pro.licenseNumber} />
+            </div>
+          )}
 
           <Card className="mt-8">
             <CardHeader>
@@ -166,8 +180,12 @@ export default function ProfesionalDetailPage({
                 </div>
               )}
               <div>
-                <p className="text-sm text-muted-foreground">Disponibilidad</p>
-                <p className="font-medium text-emerald-600">Disponible</p>
+                <p className="text-sm text-muted-foreground">Estado</p>
+                {pro.presence ? (
+                  <PresenceIndicator presence={pro.presence} className="mt-0.5" />
+                ) : (
+                  <p className="font-medium text-emerald-600">Disponible para contratar</p>
+                )}
               </div>
             </CardContent>
           </Card>

@@ -2,6 +2,7 @@ export {
   PROFESSIONAL_REGISTRIES,
   CATEGORY_REGISTRY_MAP,
   getRegistryById,
+  getAllRegistries,
   getRegistriesForCategory,
   getRegistriesForProvince,
   type ProfessionalRegistry,

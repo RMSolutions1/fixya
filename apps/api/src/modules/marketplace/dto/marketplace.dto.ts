@@ -271,6 +271,11 @@ export class NearbyProfessionalsQueryDto {
   @IsString()
   q?: string;
 
+  @ApiPropertyOptional({ description: 'Filtrar por organismo habilitante (registryId)' })
+  @IsOptional()
+  @IsString()
+  registryId?: string;
+
   @ApiPropertyOptional({ default: 1 })
   @IsOptional()
   @Type(() => Number)

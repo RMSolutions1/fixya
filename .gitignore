@@ -48,3 +48,8 @@ fixya_pgdata/
 
 # Intermediarios de scraping (se regeneran con los scripts)
 data/imports/*.html
+data/imports/.gasnor-cookies.txt
+data/imports/gasnor-cookies.txt
+data/imports/gasnor-controller.js
+data/imports/gasnor-instaladores-full.json
+data/imports/gasnor-instaladores-full.csv

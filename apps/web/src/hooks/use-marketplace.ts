@@ -41,6 +41,9 @@ export interface Service {
   } | null;
 }
 
+import type { RegistrySourceInfo } from '@/components/professionals/registry-badge';
+import type { PresenceInfo } from '@/components/professionals/presence-indicator';
+
 export interface ProfessionalSummary {
   id: string;
   firstName: string;
@@ -48,6 +51,7 @@ export interface ProfessionalSummary {
   phone?: string | null;
   avatarUrl?: string | null;
   verified: boolean;
+  registryVerified?: boolean;
   pendingApproval?: boolean;
   city?: string | null;
   province?: string | null;
@@ -62,6 +66,10 @@ export interface ProfessionalSummary {
   primaryServiceId: string;
   available: boolean;
   distanceKm?: number | null;
+  registry?: RegistrySourceInfo | null;
+  presence?: PresenceInfo;
+  licenseNumber?: string | null;
+  directoryListing?: boolean;
 }
 
 export interface ProfessionalProfile extends ProfessionalSummary {
@@ -389,6 +397,7 @@ export function useNearbyProfessionals(
     longitude: number;
     radiusKm?: number;
     categorySlug?: string;
+    registryId?: string;
     q?: string;
     page?: number;
   } | null,
@@ -403,6 +412,7 @@ export function useNearbyProfessionals(
       search.set('longitude', String(params.longitude));
       if (params.radiusKm) search.set('radiusKm', String(params.radiusKm));
       if (params.categorySlug) search.set('categorySlug', params.categorySlug);
+      if (params.registryId) search.set('registryId', params.registryId);
       if (params.q) search.set('q', params.q);
       if (params.page) search.set('page', String(params.page));
       return apiRequest<{

@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { RegisterRegistryHint } from '@/components/marketing/register-registry-hint';
+import { getRegistriesForCategory } from '@/lib/professional-registries';
 import { Logo } from '@/components/layout/logo';
 import { cn } from '@/lib/utils';
 import {
@@ -152,6 +153,10 @@ export default function RegisterPageClient() {
 
   const flatCategories =
     categories?.flatMap((c) => [c, ...(c.children ?? [])]) ?? [];
+  const selectedCategory = flatCategories.find((c) => c.id === selectedCategoryId);
+  const registryOptions = selectedCategory
+    ? getRegistriesForCategory(selectedCategory.slug)
+    : [];
 
   const onSubmit = async (data: RegisterForm) => {
     setError('');
@@ -344,6 +349,26 @@ export default function RegisterPageClient() {
                     <Label htmlFor="licenseNumber">Matrícula (opcional)</Label>
                     <Input id="licenseNumber" placeholder="Ej. COPIME / Gasnor / CARC" {...register('licenseNumber')} />
                   </div>
+                  {registryOptions.length > 0 && (
+                    <div className="space-y-2">
+                      <Label htmlFor="registryId">Organismo habilitante</Label>
+                      <select
+                        id="registryId"
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        {...register('registryId')}
+                      >
+                        <option value="">Seleccioná el organismo que te matriculó</option>
+                        {registryOptions.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {r.acronym} — {r.name}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-muted-foreground">
+                        Aparecerás en FixYa con el logo y la fuente oficial del organismo seleccionado.
+                      </p>
+                    </div>
+                  )}
                   <RegisterRegistryHint categoryId={selectedCategoryId} />
                   <p className="rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
                     Tu perfil aparecerá en el mapa de profesionales al registrarte. La

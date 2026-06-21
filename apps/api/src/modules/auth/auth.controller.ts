@@ -112,6 +112,14 @@ export class AuthController {
     return this.authService.getProfile(user.sub);
   }
 
+  @Post('presence')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Actualizar presencia (en línea) del usuario' })
+  touchPresence(@CurrentUser() user: JwtPayload) {
+    return this.authService.touchPresence(user.sub);
+  }
+
   @Patch('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar perfil del usuario' })

@@ -24,6 +24,7 @@ export const registerSchema = z
     categoryId: z.string().uuid().optional(),
     documentNumber: z.string().optional(),
     licenseNumber: z.string().optional(),
+    registryId: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.role === 'PROFESIONAL') {

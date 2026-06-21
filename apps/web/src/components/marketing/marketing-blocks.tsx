@@ -10,6 +10,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 import { getCategoryIcon } from '@/lib/category-icons';
 import type { ProfessionalSummary } from '@/hooks/use-marketplace';
+import { RegistryBadge } from '@/components/professionals/registry-badge';
+import { PresenceIndicator } from '@/components/professionals/presence-indicator';
 
 interface ProfessionalCardProps {
   professional: ProfessionalSummary;
@@ -30,7 +32,10 @@ export function ProfessionalCard({ professional }: ProfessionalCardProps) {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-semibold group-hover:text-primary">{fullName}</h3>
-                {professional.verified && (
+                {professional.registry && (
+                  <RegistryBadge registry={professional.registry} size="sm" />
+                )}
+                {professional.verified && !professional.registry && (
                   <Badge variant="success" className="text-[10px]">
                     Verificado
                   </Badge>
@@ -51,13 +56,17 @@ export function ProfessionalCard({ professional }: ProfessionalCardProps) {
                   {[professional.city, professional.province].filter(Boolean).join(', ')}
                 </p>
               )}
-              <div className="mt-2 flex items-center gap-3 text-sm">
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
                 <span className="flex items-center gap-1">
                   <Star className="h-3.5 w-3.5 fill-sol text-sol" />
                   {Number(professional.ratingAvg).toFixed(1)} ({professional.ratingCount})
                 </span>
-                {professional.available && (
-                  <span className="text-pampa">● Disponible</span>
+                {professional.presence ? (
+                  <PresenceIndicator presence={professional.presence} />
+                ) : (
+                  professional.available && (
+                    <span className="text-pampa">● Disponible</span>
+                  )
                 )}
               </div>
             </div>

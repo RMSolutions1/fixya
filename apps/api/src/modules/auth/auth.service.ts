@@ -22,6 +22,7 @@ import {
   verifyTotp,
   buildOtpauthUrl,
 } from '../../common/utils/totp';
+import { getRegistryById } from '../../common/data/professional-registries';
 
 @Injectable()
 export class AuthService {
@@ -123,6 +124,7 @@ export class AuthService {
             coverageRadiusKm: 25,
             metadata: {
               licenseNumber: dto.licenseNumber ?? null,
+              registryId: dto.registryId ?? null,
               pendingApproval: true,
             },
           },
@@ -140,6 +142,7 @@ export class AuthService {
         });
 
         if (dto.licenseNumber) {
+          const reg = dto.registryId ? getRegistryById(dto.registryId) : undefined;
           await tx.complianceDocument.create({
             data: {
               tenantId: tenant.id,
@@ -147,6 +150,7 @@ export class AuthService {
               docType: ComplianceDocType.MATRICULA,
               status: ComplianceStatus.PENDING_REVIEW,
               documentNumber: dto.licenseNumber,
+              issuer: reg?.acronym ?? 'REGISTRO',
               fileUrl: 'pending://registration',
             },
           });
@@ -551,6 +555,15 @@ export class AuthService {
       refreshToken,
       expiresIn: 900,
     };
+  }
+
+  async touchPresence(userId: string): Promise<{ lastSeenAt: string }> {
+    const now = new Date();
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { lastLoginAt: now },
+    });
+    return { lastSeenAt: now.toISOString() };
   }
 
   private hashToken(token: string): string {

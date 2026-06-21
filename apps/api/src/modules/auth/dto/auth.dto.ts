@@ -72,6 +72,12 @@ export class RegisterDto {
   @IsString()
   @MaxLength(100)
   licenseNumber?: string;
+
+  @ApiPropertyOptional({ description: 'Organismo habilitante (ej. gasnor, copaipa)' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  registryId?: string;
 }
 
 export class LoginDto {

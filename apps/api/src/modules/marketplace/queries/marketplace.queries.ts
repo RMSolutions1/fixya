@@ -3,6 +3,7 @@ import { Prisma } from '@fixya/database';
 import { PrismaService } from '../../../database/prisma.service';
 import { SearchServicesQueryDto } from '../dto/marketplace.dto';
 import { geoBoundingBox, haversineKm, geoServiceWhere } from '../../../common/utils/geo.utils';
+import { enrichProfessionalPublicFields } from '../../../common/utils/professional-enrichment';
 
 export class SearchServicesQuery {
   constructor(public readonly params: SearchServicesQueryDto) {}
@@ -339,6 +340,7 @@ export class ListProfessionalsHandler implements IQueryHandler<ListProfessionals
         basePrice: true,
         ratingAvg: true,
         ratingCount: true,
+        metadata: true,
         category: { select: { id: true, name: true, slug: true } },
       },
     });
@@ -403,20 +405,29 @@ export class ListProfessionalsHandler implements IQueryHandler<ListProfessionals
         status: true,
         city: true,
         province: true,
+        lastLoginAt: true,
       },
     });
 
     let items = users.map((u) => {
       const agg = byProfessional.get(u.id)!;
       const primary = agg.services[0];
+      const enriched = enrichProfessionalPublicFields(primary.metadata, u.lastLoginAt, {
+        emailVerified: u.emailVerified,
+        userStatus: u.status,
+        serviceStatus: primary.status,
+      });
       return {
         id: u.id,
         firstName: u.firstName,
         lastName: u.lastName,
         phone: u.phone,
         avatarUrl: u.avatarUrl,
-        verified: u.emailVerified && u.status === 'ACTIVE',
-        pendingApproval: u.status === 'PENDING_VERIFICATION' || primary.status === 'DRAFT',
+        verified: enriched.verified,
+        registryVerified: enriched.registryVerified,
+        pendingApproval:
+          !enriched.directoryListing &&
+          (u.status === 'PENDING_VERIFICATION' || primary.status === 'DRAFT'),
         city: u.city,
         province: u.province,
         latitude: primary.latitude ? Number(primary.latitude) : null,
@@ -428,7 +439,11 @@ export class ListProfessionalsHandler implements IQueryHandler<ListProfessionals
         ratingAvg: agg.maxRating,
         ratingCount: agg.totalReviews,
         primaryServiceId: primary.id,
-        available: u.status === 'ACTIVE' && primary.status === 'ACTIVE',
+        available: enriched.available,
+        registry: enriched.registry,
+        presence: enriched.presence,
+        licenseNumber: enriched.licenseNumber,
+        directoryListing: enriched.directoryListing,
       };
     });
 
@@ -473,6 +488,7 @@ export class GetProfessionalByIdHandler
         avatarUrl: true,
         emailVerified: true,
         createdAt: true,
+        lastLoginAt: true,
         memberships: {
           where: { isActive: true, role: 'PROFESIONAL' },
           select: { tenant: { select: { id: true, name: true, slug: true } } },
@@ -508,19 +524,28 @@ export class GetProfessionalByIdHandler
     }, null);
 
     const metadata = (services[0]?.metadata ?? {}) as Record<string, unknown>;
+    const enriched = enrichProfessionalPublicFields(metadata, user.lastLoginAt, {
+      emailVerified: user.emailVerified,
+      userStatus: 'ACTIVE',
+      serviceStatus: services[0]?.status ?? 'ACTIVE',
+    });
 
     return {
       ...user,
-      verified: user.emailVerified,
+      verified: enriched.verified,
+      registryVerified: enriched.registryVerified,
       tenant: user.memberships[0]?.tenant ?? null,
       bio: (metadata.bio as string) ?? services[0].description.slice(0, 200),
       experienceYears: (metadata.experienceYears as number) ?? null,
-      licenseNumber: (metadata.licenseNumber as string) ?? null,
+      licenseNumber: enriched.licenseNumber,
+      registry: enriched.registry,
+      presence: enriched.presence,
+      directoryListing: enriched.directoryListing,
       services,
       ratingAvg: Math.round(ratingAvg * 100) / 100,
       ratingCount,
       minPrice,
-      available: true,
+      available: enriched.available,
     };
   }
 }
@@ -656,6 +681,7 @@ export class NearbyProfessionalsHandler
       longitude,
       radiusKm = 50,
       categorySlug,
+      registryId,
       q,
       page = 1,
       limit = 24,
@@ -675,6 +701,9 @@ export class NearbyProfessionalsHandler
         deletedAt: null,
         professionalId: { not: null },
         ...(categoryId && { categoryId }),
+        ...(registryId && {
+          metadata: { path: ['registryId'], equals: registryId },
+        }),
         ...geoServiceWhere(latitude, longitude, radiusKm),
       },
       select: {
@@ -685,6 +714,7 @@ export class NearbyProfessionalsHandler
         basePrice: true,
         ratingAvg: true,
         ratingCount: true,
+        metadata: true,
         category: { select: { id: true, name: true, slug: true } },
       },
     });
@@ -761,19 +791,28 @@ export class NearbyProfessionalsHandler
         status: true,
         city: true,
         province: true,
+        lastLoginAt: true,
       },
     });
 
     let items = users.map((u) => {
       const agg = byProfessional.get(u.id)!;
-      const primary = agg.services.sort((a, b) => Number(a.basePrice ?? 0) - Number(b.basePrice ?? 0))[0];
+      const primary = agg.services.sort(
+        (a, b) => Number(a.basePrice ?? 0) - Number(b.basePrice ?? 0),
+      )[0];
+      const enriched = enrichProfessionalPublicFields(primary.metadata, u.lastLoginAt, {
+        emailVerified: u.emailVerified,
+        userStatus: u.status,
+        serviceStatus: 'ACTIVE',
+      });
       return {
         id: u.id,
         firstName: u.firstName,
         lastName: u.lastName,
         phone: u.phone,
         avatarUrl: u.avatarUrl,
-        verified: u.emailVerified && u.status === 'ACTIVE',
+        verified: enriched.verified,
+        registryVerified: enriched.registryVerified,
         pendingApproval: false,
         city: u.city,
         province: u.province,
@@ -787,7 +826,11 @@ export class NearbyProfessionalsHandler
         ratingAvg: agg.maxRating,
         ratingCount: agg.totalReviews,
         primaryServiceId: primary.id,
-        available: true,
+        available: enriched.available,
+        registry: enriched.registry,
+        presence: enriched.presence,
+        licenseNumber: enriched.licenseNumber,
+        directoryListing: enriched.directoryListing,
       };
     });
 

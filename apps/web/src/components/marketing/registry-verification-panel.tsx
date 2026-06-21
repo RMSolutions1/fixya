@@ -4,6 +4,7 @@ import {
   getRegistriesForProvince,
   type ProfessionalRegistry,
 } from '@/lib/professional-registries';
+import { RegistryLogo } from '@/components/professionals/registry-logo';
 
 interface RegistryVerificationPanelProps {
   categorySlug: string;
@@ -14,40 +15,50 @@ interface RegistryVerificationPanelProps {
 function RegistryCard({ registry }: { registry: ProfessionalRegistry }) {
   return (
     <div className="rounded-xl border bg-card p-4">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-            {registry.acronym}
-          </p>
-          <h3 className="font-semibold">{registry.name}</h3>
+      <div className="flex flex-wrap items-start gap-3">
+        <RegistryLogo
+          acronym={registry.acronym}
+          brandColor={registry.brandColor ?? '#1e3a5f'}
+          logoPath={registry.logoPath ?? `/images/registries/${registry.id}.svg`}
+          size={40}
+        />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                {registry.acronym}
+              </p>
+              <h3 className="font-semibold">{registry.name}</h3>
+            </div>
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
+              {registry.scope}
+            </span>
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">{registry.regulates}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{registry.notes}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              href={registry.verificationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              Verificar en {registry.acronym}
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+            {registry.directoryUrl && registry.directoryUrl !== registry.verificationUrl && (
+              <Link
+                href={registry.directoryUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary hover:underline"
+              >
+                Padrón / listado
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
+            )}
+          </div>
         </div>
-        <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
-          {registry.scope}
-        </span>
-      </div>
-      <p className="mt-2 text-sm text-muted-foreground">{registry.regulates}</p>
-      <p className="mt-2 text-xs text-muted-foreground">{registry.notes}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        <Link
-          href={registry.verificationUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-        >
-          Verificar en {registry.acronym}
-          <ExternalLink className="h-3.5 w-3.5" />
-        </Link>
-        {registry.directoryUrl && registry.directoryUrl !== registry.verificationUrl && (
-          <Link
-            href={registry.directoryUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary hover:underline"
-          >
-            Padrón / listado
-            <ExternalLink className="h-3.5 w-3.5" />
-          </Link>
-        )}
       </div>
     </div>
   );

@@ -22,6 +22,46 @@ export interface ProfessionalRegistry {
   notes: string;
   /** Si FixYa puede verificar automáticamente hoy */
   automatedLookup: boolean;
+  /** Color institucional para badge / logo */
+  brandColor?: string;
+  /** Ruta pública del logo (SVG en /public) */
+  logoPath?: string;
+  /** Texto corto de confianza en UI */
+  shortTagline?: string;
+}
+
+/** Colores institucionales aproximados para badges */
+const REGISTRY_BRAND_COLORS: Record<string, string> = {
+  copime: '#003366',
+  copaipa: '#0054A6',
+  enargas: '#00843D',
+  gasnor: '#E87722',
+  metrogas: '#00A651',
+  'naturgy-ban': '#E87722',
+  camuzzi: '#0066CC',
+  ecogas: '#FF6600',
+  edesa: '#0066B3',
+  'aguas-del-norte': '#0099CC',
+  aafrio: '#006699',
+  carc: '#004B87',
+  carhaa: '#1A5276',
+  'ca-frigoristas': '#2874A6',
+  'senasa-vet': '#2E7D32',
+  cmv: '#1565C0',
+  cacaaav: '#0277BD',
+  'afip-habilitacion': '#003DA5',
+  'municipal-habilitacion': '#546E7A',
+};
+
+function withRegistryDefaults(r: ProfessionalRegistry): ProfessionalRegistry {
+  return {
+    ...r,
+    brandColor: r.brandColor ?? REGISTRY_BRAND_COLORS[r.id] ?? '#1e3a5f',
+    logoPath: r.logoPath ?? `/images/registries/${r.id}.svg`,
+    shortTagline:
+      r.shortTagline ??
+      `Matrícula habilitante verificada contra fuente oficial ${r.acronym}.`,
+  };
 }
 
 export const PROFESSIONAL_REGISTRIES: ProfessionalRegistry[] = [
@@ -52,8 +92,9 @@ export const PROFESSIONAL_REGISTRIES: ProfessionalRegistry[] = [
     directoryUrl: 'https://padrones.copaipa.org.ar/profesionesmatriculadas',
     email: 'info@copaipa.org.ar',
     notes:
-      'Padrón público en padrones.copaipa.org.ar (~3.900 matriculados). FixYa puede sincronizar con npm run scrape:copaipa && npm run db:import:copaipa.',
-    automatedLookup: false,
+      'Padrón público en padrones.copaipa.org.ar (~3.900 matriculados). FixYa sincroniza con npm run scrape:copaipa && npm run db:import:copaipa:directory.',
+    automatedLookup: true,
+    shortTagline: 'Profesional matriculado en el padrón oficial COPAIPA (Salta).',
   },
   {
     id: 'enargas',
@@ -76,10 +117,40 @@ export const PROFESSIONAL_REGISTRIES: ProfessionalRegistry[] = [
     categorySlugs: ['gas'],
     provinces: ['Salta', 'Jujuy', 'Tucumán', 'Santiago del Estero', 'Catamarca'],
     regulates: 'Instaladores matriculados 1ra, 2da y 3ra categoría en el NOA.',
-    verificationUrl: 'https://www.gasnor.com/instaladores',
-    directoryUrl: 'https://www.gasnor.com/instaladores',
-    notes: 'Requiere usuario en el portal para consultar nómina. Carnet de instalador matriculado obligatorio.',
+    verificationUrl: 'https://gasnor.idearit.com.ar/instaladores',
+    directoryUrl: 'https://gasnor.idearit.com.ar/instaladores',
+    notes:
+      'Padrón público NOA (Jujuy, Salta, Santiago del Estero, Tucumán). FixYa sincroniza con npm run scrape:gasnor && npm run db:import:gasnor:directory.',
+    automatedLookup: true,
+    shortTagline: 'Instalador de gas matriculado en el padrón oficial Gasnor / Naturgy NOA.',
+  },
+  {
+    id: 'edesa',
+    name: 'EDESA — Empresa Distribuidora de Electricidad de Salta',
+    acronym: 'EDESA',
+    scope: 'distribuidora',
+    categorySlugs: ['electricidad'],
+    provinces: ['Salta'],
+    regulates: 'Electricistas habilitados para trabajos en la red de EDESA.',
+    verificationUrl: 'https://www.edesa.com.ar/',
+    directoryUrl: 'https://www.edesa.com.ar/',
+    notes: 'Consulta de habilitados en portal EDESA. Importación de padrón en roadmap FixYa.',
     automatedLookup: false,
+    shortTagline: 'Electricista habilitado ante la distribuidora EDESA (Salta).',
+  },
+  {
+    id: 'aguas-del-norte',
+    name: 'Aguas del Norte S.A.',
+    acronym: 'ADN',
+    scope: 'distribuidora',
+    categorySlugs: ['plomeria'],
+    provinces: ['Salta', 'Jujuy', 'Catamarca', 'Santiago del Estero', 'Tucumán'],
+    regulates: 'Plomeros y sanitaristas habilitados en la red de agua potable del NOA.',
+    verificationUrl: 'https://www.aguasdelnorte.com.ar/',
+    directoryUrl: 'https://www.aguasdelnorte.com.ar/',
+    notes: 'Padrón de instaladores habilitados en portal Aguas del Norte. Importación en roadmap.',
+    automatedLookup: false,
+    shortTagline: 'Plomero habilitado ante Aguas del Norte (NOA).',
   },
   {
     id: 'metrogas',
@@ -249,8 +320,8 @@ export const PROFESSIONAL_REGISTRIES: ProfessionalRegistry[] = [
 
 /** Rubro → organismos recomendados para verificación */
 export const CATEGORY_REGISTRY_MAP: Record<string, string[]> = {
-  electricidad: ['copime', 'copaipa', 'afip-habilitacion'],
-  plomeria: ['municipal-habilitacion', 'afip-habilitacion'],
+  electricidad: ['copime', 'copaipa', 'edesa', 'afip-habilitacion'],
+  plomeria: ['aguas-del-norte', 'municipal-habilitacion', 'afip-habilitacion'],
   gas: ['enargas', 'gasnor', 'metrogas', 'naturgy-ban', 'camuzzi', 'ecogas'],
   'aire-acondicionado': ['carc', 'aafrio', 'carhaa', 'ca-frigoristas', 'cacaaav', 'copime'],
   seguridad: ['afip-habilitacion', 'municipal-habilitacion'],
@@ -272,11 +343,16 @@ export const CATEGORY_REGISTRY_MAP: Record<string, string[]> = {
 };
 
 export function getRegistryById(id: string): ProfessionalRegistry | undefined {
-  return PROFESSIONAL_REGISTRIES.find((r) => r.id === id);
+  const found = PROFESSIONAL_REGISTRIES.find((r) => r.id === id);
+  return found ? withRegistryDefaults(found) : undefined;
+}
+
+export function getAllRegistries(): ProfessionalRegistry[] {
+  return PROFESSIONAL_REGISTRIES.map(withRegistryDefaults);
 }
 
 export function getRegistriesForCategory(categorySlug?: string): ProfessionalRegistry[] {
-  if (!categorySlug) return PROFESSIONAL_REGISTRIES;
+  if (!categorySlug) return getAllRegistries();
   const ids = CATEGORY_REGISTRY_MAP[categorySlug] ?? [];
   return ids.map((id) => getRegistryById(id)).filter(Boolean) as ProfessionalRegistry[];
 }
